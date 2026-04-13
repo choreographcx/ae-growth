@@ -1,7 +1,25 @@
 import { KPIGroupData } from '@/types/dashboard';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+const iconMap: Record<string, LucideIcon> = {
+  DollarSign,
+  Eye,
+  MousePointerClick,
+  Target,
+  Users,
+  FileText,
+};
+
+const iconColorMap: Record<string, string> = {
+  DollarSign: 'text-emerald-600 bg-emerald-50',
+  Eye: 'text-blue-600 bg-blue-50',
+  MousePointerClick: 'text-violet-600 bg-violet-50',
+  Target: 'text-orange-600 bg-orange-50',
+  Users: 'text-cyan-600 bg-cyan-50',
+  FileText: 'text-rose-600 bg-rose-50',
+};
 
 interface KPIGroupCardProps {
   data: KPIGroupData;
@@ -17,15 +35,22 @@ export function KPIGroupCard({ data, className }: KPIGroupCardProps) {
 
 /* ─── Desktop Card ─── */
 function DesktopKPICard({ data, className }: KPIGroupCardProps) {
-  const { primary, supporting } = data;
+  const { primary, supporting, icon } = data;
+  const IconComp = icon ? iconMap[icon] : null;
+  const colorClass = icon ? iconColorMap[icon] : '';
 
   return (
     <div className={cn(
       "bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col",
       className
     )}>
-      <div className="mb-1">
+      <div className="flex items-start justify-between mb-1">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{data.title}</p>
+        {IconComp && (
+          <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg", colorClass)}>
+            <IconComp size={16} />
+          </div>
+        )}
       </div>
 
       <p className="text-[26px] font-bold text-card-foreground tracking-tight leading-none">{primary.formattedValue}</p>
@@ -55,14 +80,21 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
 
 /* ─── Mobile Card — compact, dense, scannable ─── */
 function MobileKPICard({ data, className }: KPIGroupCardProps) {
-  const { primary, supporting } = data;
+  const { primary, supporting, icon } = data;
+  const IconComp = icon ? iconMap[icon] : null;
+  const colorClass = icon ? iconColorMap[icon] : '';
 
   return (
     <div className={cn(
       "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm",
       className
     )}>
-      <div className="flex items-baseline gap-1.5 min-w-0">
+      <div className="flex items-center gap-1.5 min-w-0">
+        {IconComp && (
+          <div className={cn("flex items-center justify-center w-5 h-5 rounded", colorClass)}>
+            <IconComp size={11} />
+          </div>
+        )}
         <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{data.title}</p>
         <MobileChange value={primary.change} />
       </div>
