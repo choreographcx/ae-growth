@@ -1,4 +1,5 @@
 import React from 'react';
+import sarIcon from '@/assets/currency/sar.svg';
 import aedIcon from '@/assets/currency/aed.svg';
 import { DirhamSymbol } from 'dirham/react';
 import { SaudiRiyal } from 'saudi-riyal/react';
