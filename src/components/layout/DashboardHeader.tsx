@@ -197,48 +197,34 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
       if (captures.length === 0) return;
 
-      // Use the first capture to determine PDF page dimensions based on content width
-      const firstCanvas = captures[0].canvas;
-      const contentWidthMM = 290; // leave 10mm margin
-      const scale = contentWidthMM / firstCanvas.width;
-      const marginX = 5;
-      const marginY = 5;
+      const margin = 5; // mm margin on each side
 
       let pdf: jsPDF | null = null;
 
       for (let c = 0; c < captures.length; c++) {
         const { canvas } = captures[c];
         const imgData = canvas.toDataURL('image/jpeg', 0.92);
-        const pageWidthMM = canvas.width * scale + marginX * 2;
-        const totalHeightMM = canvas.height * scale;
-        const pageHeightMM = pageWidthMM * (210 / 297); // A4 aspect ratio
+
+        // Scale the entire capture to fit on one page
+        const aspectRatio = canvas.height / canvas.width;
+        const pageWidthMM = 300;
+        const pageHeightMM = pageWidthMM * aspectRatio;
+        const imgW = pageWidthMM - margin * 2;
+        const imgH = pageHeightMM - margin * 2;
 
         if (c === 0) {
           pdf = new jsPDF({
-            orientation: 'landscape',
+            orientation: imgW > imgH ? 'landscape' : 'portrait',
             unit: 'mm',
             format: [pageWidthMM, pageHeightMM],
           });
+        } else if (pdf) {
+          pdf.addPage([pageWidthMM, pageHeightMM], imgW > imgH ? 'landscape' : 'portrait');
         }
 
         if (!pdf) continue;
 
-        // Split this section into pages
-        const usableHeight = pageHeightMM - marginY * 2;
-        const numPages = Math.ceil(totalHeightMM / usableHeight);
-
-        for (let p = 0; p < numPages; p++) {
-          if (c > 0 || p > 0) {
-            pdf.addPage([pageWidthMM, pageHeightMM], 'landscape');
-          }
-          pdf.addImage(
-            imgData, 'JPEG',
-            marginX,
-            marginY - (p * usableHeight),
-            canvas.width * scale,
-            totalHeightMM
-          );
-        }
+        pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
       }
 
       if (pdf) {
