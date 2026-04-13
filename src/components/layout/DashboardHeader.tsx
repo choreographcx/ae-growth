@@ -59,7 +59,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     : `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d')}`;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
