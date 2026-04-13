@@ -7,27 +7,22 @@ import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsTimeSeries, cpaTimeSeries, clicksTimeSeries, platformSummaries, alerts } from '@/data/mockData';
 
+const allKPICards = [...overviewKPIGroups, ...overviewKPIGroupsRow2];
+
 export default function OverviewPage() {
   return (
     <div className="space-y-6 md:space-y-10">
       <SectionHeader title="Overview" subtitle="Cross-platform performance summary" />
 
-      {/* Primary KPI Cards */}
+      {/* KPI Cards – 3 across, 2 rows */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
-        {overviewKPIGroups.map((group, i) => (
+        {allKPICards.map((group, i) => (
           <KPIGroupCard key={i} data={group} />
         ))}
       </div>
 
-      {/* Secondary KPI Row + Funnel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
-        <div>
-          {overviewKPIGroupsRow2.map((group, i) => (
-            <KPIGroupCard key={i} data={group} />
-          ))}
-        </div>
-        <FunnelCard />
-      </div>
+      {/* Conversion Funnel */}
+      <FunnelCard />
 
       {/* Trend Charts */}
       <div className="space-y-3 md:space-y-4">
