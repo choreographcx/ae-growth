@@ -153,6 +153,38 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
+  const handleExportPDF = useCallback(async () => {
+    const el = document.getElementById('dashboard-main-content');
+    if (!el) return;
+    try {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        scrollY: -window.scrollY,
+        windowHeight: el.scrollHeight,
+        height: el.scrollHeight,
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const pdfWidth = 297; // A4 landscape width in mm
+      const pdfHeight = 210; // A4 landscape height in mm
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const pages = Math.ceil(imgHeight * ratio / pdfHeight);
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      for (let i = 0; i < pages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -(i * pdfHeight), imgWidth * ratio, imgHeight * ratio);
+      }
+
+      pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed', err);
+    }
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
       <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
