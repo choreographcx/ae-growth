@@ -13,15 +13,16 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const isMobile = useIsMobile();
 
   return (
-    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-4 md:px-6">
-      <div className="flex items-center justify-between h-16 gap-3">
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-6">
+      {/* Main row */}
+      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-16'}`}>
+        <div className="flex items-center gap-2 min-w-0">
           {isMobile && (
-            <button onClick={onMenuClick} className="p-2 rounded-lg hover:bg-muted transition-colors">
-              <Menu size={20} />
+            <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
+              <Menu size={18} />
             </button>
           )}
-          <h1 className="text-lg font-semibold text-foreground truncate">{client.name}</h1>
+          <h1 className={`font-semibold text-foreground truncate ${isMobile ? 'text-sm' : 'text-lg'}`}>{client.name}</h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {!isMobile && (
@@ -51,14 +52,15 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           )}
         </div>
       </div>
+      {/* Mobile filter row — tighter */}
       {isMobile && (
-        <div className="flex items-center gap-2 pb-3 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center gap-1.5 pb-2">
           <Select value={client.id} onValueChange={v => { const c = clients.find(cl => cl.id === v); if (c) setClient(c); }}>
-            <SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-7 text-[11px] px-2 flex-1 min-w-0"><SelectValue /></SelectTrigger>
             <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
           </Select>
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[120px] h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-7 text-[11px] px-2 flex-1 min-w-0"><SelectValue /></SelectTrigger>
             <SelectContent>
               {['Last 7 Days', 'Last 14 Days', 'Last 30 Days', 'This Month'].map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
             </SelectContent>

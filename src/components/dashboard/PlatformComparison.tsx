@@ -77,9 +77,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
 function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; className?: string }) {
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Platform Comparison</h3>
+    <div className={cn("space-y-2", className)}>
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-[13px] font-semibold text-foreground">Platform Comparison</h3>
         <span className="text-[10px] text-muted-foreground">{data.length} platforms</span>
       </div>
       {data.map(p => <MobilePlatformCard key={p.platform} platform={p} />)}
@@ -90,63 +90,63 @@ function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; cla
 function MobilePlatformCard({ platform: p }: { platform: PlatformSummary }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[13px] font-semibold text-card-foreground">{p.label}</p>
-          <p className="text-[13px] font-bold text-card-foreground">${p.spend.toLocaleString()}</p>
+    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[12px] font-semibold text-card-foreground">{p.label}</p>
+          <p className="text-[12px] font-bold text-card-foreground">${p.spend.toLocaleString()}</p>
         </div>
-        <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden">
-          <div className="bg-card px-3 py-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">Conv.</p>
-            <p className="text-[13px] font-semibold text-card-foreground leading-none">{p.conversions.toLocaleString()}</p>
+        <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
+          <div className="bg-card px-2 py-2 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Conv.</p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.conversions.toLocaleString()}</p>
           </div>
-          <div className="bg-card px-3 py-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">CPA</p>
-            <p className="text-[13px] font-semibold text-card-foreground leading-none">${p.cpa.toFixed(2)}</p>
+          <div className="bg-card px-2 py-2 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">CPA</p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">${p.cpa.toFixed(2)}</p>
           </div>
-          <div className="bg-card px-3 py-2.5 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">CTR</p>
-            <p className="text-[13px] font-semibold text-card-foreground leading-none">{p.ctr}%</p>
+          <div className="bg-card px-2 py-2 text-center">
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">CTR</p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.ctr}%</p>
           </div>
         </div>
       </div>
       {expanded && (
-        <div className="px-4 pb-3 pt-1 border-t border-border/50">
-          <div className="grid grid-cols-2 gap-3 py-2">
+        <div className="px-3 pb-2 pt-1.5 border-t border-border/40">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">CPC</span>
-              <span className="text-[12px] font-semibold text-card-foreground">${p.cpc.toFixed(2)}</span>
+              <span className="text-[10px] text-muted-foreground">CPC</span>
+              <span className="text-[11px] font-semibold text-card-foreground">${p.cpc.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">Clicks</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{p.clicks.toLocaleString()}</span>
+              <span className="text-[10px] text-muted-foreground">Clicks</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{p.clicks.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">Conv. Rate</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{p.conversionRate}%</span>
+              <span className="text-[10px] text-muted-foreground">Conv. Rate</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{p.conversionRate}%</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">% of Spend</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{p.shareOfSpend}%</span>
+              <span className="text-[10px] text-muted-foreground">% Spend</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{p.shareOfSpend}%</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">Impressions</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{p.impressions >= 1e6 ? `${(p.impressions / 1e6).toFixed(1)}M` : p.impressions.toLocaleString()}</span>
+              <span className="text-[10px] text-muted-foreground">Impr.</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{p.impressions >= 1e6 ? `${(p.impressions / 1e6).toFixed(1)}M` : p.impressions.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">% of Conv.</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{p.shareOfConversions}%</span>
+              <span className="text-[10px] text-muted-foreground">% Conv.</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{p.shareOfConversions}%</span>
             </div>
           </div>
         </div>
       )}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-primary border-t border-border/40 bg-muted/20 hover:bg-muted/40 transition-colors"
+        className="w-full flex items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-muted-foreground hover:text-primary border-t border-border/30 bg-muted/15 transition-colors"
       >
-        {expanded ? 'Less' : 'More details'}
-        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        {expanded ? 'Less' : 'More'}
+        {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
       </button>
     </div>
   );
