@@ -77,9 +77,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
 function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; className?: string }) {
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Platform Comparison</h3>
+    <div className={cn("space-y-2", className)}>
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-[13px] font-semibold text-foreground">Platform Comparison</h3>
         <span className="text-[10px] text-muted-foreground">{data.length} platforms</span>
       </div>
       {data.map(p => <MobilePlatformCard key={p.platform} platform={p} />)}
@@ -90,13 +90,13 @@ function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; cla
 function MobilePlatformCard({ platform: p }: { platform: PlatformSummary }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[13px] font-semibold text-card-foreground">{p.label}</p>
-          <p className="text-[13px] font-bold text-card-foreground">${p.spend.toLocaleString()}</p>
+    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[12px] font-semibold text-card-foreground">{p.label}</p>
+          <p className="text-[12px] font-bold text-card-foreground">${p.spend.toLocaleString()}</p>
         </div>
-        <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
           <div className="bg-card px-3 py-2.5 text-center">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">Conv.</p>
             <p className="text-[13px] font-semibold text-card-foreground leading-none">{p.conversions.toLocaleString()}</p>
