@@ -1,5 +1,6 @@
 import React from 'react';
 import sarIcon from '@/assets/currency/sar.svg';
+import aedIcon from '@/assets/currency/aed.svg';
 import { DirhamSymbol } from 'dirham/react';
 
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
