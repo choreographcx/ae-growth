@@ -63,7 +63,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
           variant="outline"
           className={cn(
             "justify-start text-left font-normal gap-1.5",
-            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[180px]"
+            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[240px]"
           )}
         >
           <CalendarIcon size={compact ? 12 : 12} className="shrink-0 text-muted-foreground" />
