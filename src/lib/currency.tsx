@@ -11,3 +11,19 @@ export function formatCurrency(amount: number, currency: string): string {
   // For rendering with the icon component, we just format the number
   return amount.toLocaleString();
 }
+
+/**
+ * Replace leading "$" in a string formattedValue with a CurrencySymbol component.
+ * Returns a ReactNode (either the original string or a span with the icon).
+ */
+export function replaceDollarWithSymbol(formattedValue: React.ReactNode, currency: string, size = 11): React.ReactNode {
+  if (typeof formattedValue !== 'string') return formattedValue;
+  if (!formattedValue.startsWith('$')) return formattedValue;
+  const rest = formattedValue.slice(1);
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <CurrencySymbol currency={currency} size={size} />
+      {rest}
+    </span>
+  );
+}
