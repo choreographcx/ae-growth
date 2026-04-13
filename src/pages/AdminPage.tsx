@@ -29,15 +29,7 @@ const standardMetrics = [
 ];
 
 export default function AdminPage() {
-  const { client, updateClient, togglePlatform, clients, setClient } = useDashboard();
-
-  const handleLoadProfile = (id: string) => {
-    const found = clients.find(c => c.id === id);
-    if (found) {
-      setClient(found);
-      toast.success(`Switched to ${found.name}`);
-    }
-  };
+  const { client, updateClient, togglePlatform } = useDashboard();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
   const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
