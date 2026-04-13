@@ -1,4 +1,20 @@
-import { PlatformKey, ClientProfile, KPIPair, CampaignRow, PlatformSummary, BudgetPacing, AlertItem, TimeSeriesPoint, DataSourceStatus } from '@/types/dashboard';
+import { PlatformKey, ClientProfile, KPIGroupData, CampaignRow, PlatformSummary, BudgetPacing, AlertItem, TimeSeriesPoint, DataSourceStatus, NamingNormalization, MetricMapping } from '@/types/dashboard';
+
+const defaultNaming: NamingNormalization = {
+  campaign: 'Campaign',
+  adSetOrAdGroup: 'Ad Set',
+  adOrCreative: 'Ad',
+  placement: 'Placement',
+  audience: 'Audience',
+  objective: 'Objective',
+};
+
+const defaultMetricMappings: MetricMapping[] = [
+  { standardLabel: 'Primary Conversion', platformMetric: 'form_submit', platform: 'meta' },
+  { standardLabel: 'Primary Conversion', platformMetric: 'conversions', platform: 'google' },
+  { standardLabel: 'Landing Page View', platformMetric: 'landing_page_view', platform: 'meta' },
+  { standardLabel: 'Lead Form Submission', platformMetric: 'lead_gen_form_submit', platform: 'linkedin' },
+];
 
 export const defaultClient: ClientProfile = {
   id: '1',
@@ -26,6 +42,8 @@ export const defaultClient: ClientProfile = {
     programmatic: { key: 'programmatic', label: 'Programmatic', enabled: true, color: 'hsl(262, 80%, 65%)', accountIds: ['prog_567890'] },
   },
   alertThresholds: { cpaSpike: 25, ctrDrop: 20, frequencyThreshold: 4, zeroConversionSpend: 500, viewabilityThreshold: 50 },
+  metricMappings: defaultMetricMappings,
+  namingNormalization: defaultNaming,
 };
 
 export const savedClients: ClientProfile[] = [
@@ -47,14 +65,69 @@ function generateTimeSeries(days: number, base: number, variance: number): TimeS
   });
 }
 
-export const overviewKPIs: KPIPair[] = [
-  { primary: { label: 'Total Spend', value: 142580, formattedValue: '$142,580', change: 8.2, trend: generateTrend(142000, 10000) }, secondary: { label: 'Budget Pacing', value: 87, formattedValue: '87%', change: 3.1, trend: generateTrend(85, 10) } },
-  { primary: { label: 'Impressions', value: 12450000, formattedValue: '12.45M', change: 12.4, trend: generateTrend(12000000, 2000000) }, secondary: { label: 'CPM', value: 11.45, formattedValue: '$11.45', change: -3.8, trend: generateTrend(12, 3) } },
-  { primary: { label: 'Clicks', value: 186750, formattedValue: '186,750', change: 9.1, trend: generateTrend(180000, 20000) }, secondary: { label: 'CPC', value: 0.76, formattedValue: '$0.76', change: -1.2, trend: generateTrend(0.8, 0.2) } },
-  { primary: { label: 'Conversions', value: 3842, formattedValue: '3,842', change: 15.3, trend: generateTrend(3500, 500) }, secondary: { label: 'CPA', value: 37.10, formattedValue: '$37.10', change: -5.8, trend: generateTrend(38, 5) } },
-  { primary: { label: 'CTR', value: 1.50, formattedValue: '1.50%', change: -2.3, trend: generateTrend(1.5, 0.3) }, secondary: { label: 'Conv. Rate', value: 2.06, formattedValue: '2.06%', change: 5.7, trend: generateTrend(2, 0.4) } },
-  { primary: { label: 'Reach', value: 8920000, formattedValue: '8.92M', change: 10.1, trend: generateTrend(8500000, 1000000) }, secondary: { label: 'Frequency', value: 1.40, formattedValue: '1.40', change: 2.1, trend: generateTrend(1.4, 0.3) } },
+// New grouped KPI data for Overview
+export const overviewKPIGroups: KPIGroupData[] = [
+  {
+    title: 'Spend',
+    primary: { label: 'Total Spend', value: 142580, formattedValue: '$142,580', change: 8.2, trend: generateTrend(142000, 10000) },
+    supporting: [
+      { label: 'Budget', formattedValue: '$165,000' },
+      { label: 'Pacing', formattedValue: '87%', change: 3.1 },
+    ],
+  },
+  {
+    title: 'Impressions',
+    primary: { label: 'Impressions', value: 12450000, formattedValue: '12.45M', change: 12.4, trend: generateTrend(12000000, 2000000) },
+    supporting: [
+      { label: 'CPM', formattedValue: '$11.45', change: -3.8 },
+    ],
+  },
+  {
+    title: 'Clicks',
+    primary: { label: 'Clicks', value: 186750, formattedValue: '186,750', change: 9.1, trend: generateTrend(180000, 20000) },
+    supporting: [
+      { label: 'CTR', formattedValue: '1.50%', change: -2.3 },
+      { label: 'CPC', formattedValue: '$0.76', change: -1.2 },
+    ],
+  },
+  {
+    title: 'Conversions',
+    primary: { label: 'Conversions', value: 3842, formattedValue: '3,842', change: 15.3, trend: generateTrend(3500, 500) },
+    supporting: [
+      { label: 'CPA', formattedValue: '$37.10', change: -5.8 },
+      { label: 'Conv. Rate', formattedValue: '2.06%', change: 5.7 },
+    ],
+  },
+  {
+    title: 'Reach',
+    primary: { label: 'Reach', value: 8920000, formattedValue: '8.92M', change: 10.1, trend: generateTrend(8500000, 1000000) },
+    supporting: [
+      { label: 'Frequency', formattedValue: '1.40', change: 2.1 },
+    ],
+  },
 ];
+
+export const overviewKPIGroupsRow2: KPIGroupData[] = [
+  {
+    title: 'Landing Page Views',
+    primary: { label: 'LPV', value: 142300, formattedValue: '142,300', change: 7.5, trend: generateTrend(140000, 15000) },
+    supporting: [
+      { label: 'Cost / LPV', formattedValue: '$1.00', change: -2.1 },
+    ],
+  },
+  {
+    title: 'Budget & Pacing',
+    primary: { label: 'Budget', value: 165000, formattedValue: '$165,000', change: 0, trend: generateTrend(165000, 5000) },
+    supporting: [
+      { label: 'Spent', formattedValue: '$142,580' },
+      { label: 'Pacing', formattedValue: '87%', change: 3.1 },
+      { label: 'Projected', formattedValue: '$161,200' },
+    ],
+  },
+];
+
+// Legacy KPIPair export for backward compat
+export const overviewKPIs = overviewKPIGroups;
 
 export const spendTimeSeries = generateTimeSeries(30, 4800, 1200);
 export const conversionsTimeSeries = generateTimeSeries(30, 130, 40);
@@ -126,17 +199,65 @@ export function generateCampaigns(platform: PlatformKey, count = 8): CampaignRow
   });
 }
 
-export function getPlatformKPIs(platform: PlatformKey): KPIPair[] {
+export function getPlatformKPIGroups(platform: PlatformKey): KPIGroupData[] {
   const summary = platformSummaries.find(p => p.platform === platform);
   if (!summary) return [];
-  const base: KPIPair[] = [
-    { primary: { label: 'Spend', value: summary.spend, formattedValue: `$${summary.spend.toLocaleString()}`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.spend, summary.spend * 0.1) }, secondary: { label: 'Budget Pacing', value: budgetPacing.platformPacing.find(p => p.platform === summary.label)?.pacing || 0, formattedValue: `${budgetPacing.platformPacing.find(p => p.platform === summary.label)?.pacing || 0}%`, change: +(Math.random() * 10 - 3).toFixed(1), trend: generateTrend(85, 10) } },
-    { primary: { label: 'Impressions', value: summary.impressions, formattedValue: `${(summary.impressions / 1e6).toFixed(2)}M`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.impressions, summary.impressions * 0.15) }, secondary: { label: 'CPM', value: +(summary.spend / summary.impressions * 1000).toFixed(2), formattedValue: `$${(summary.spend / summary.impressions * 1000).toFixed(2)}`, change: +(Math.random() * 10 - 5).toFixed(1), trend: generateTrend(10, 3) } },
-    { primary: { label: 'Clicks', value: summary.clicks, formattedValue: summary.clicks.toLocaleString(), change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.clicks, summary.clicks * 0.1) }, secondary: { label: 'CPC', value: summary.cpc, formattedValue: `$${summary.cpc.toFixed(2)}`, change: +(Math.random() * 10 - 5).toFixed(1), trend: generateTrend(summary.cpc, 0.2) } },
-    { primary: { label: 'Conversions', value: summary.conversions, formattedValue: summary.conversions.toLocaleString(), change: +(Math.random() * 20 - 3).toFixed(1), trend: generateTrend(summary.conversions, summary.conversions * 0.15) }, secondary: { label: 'CPA', value: summary.cpa, formattedValue: `$${summary.cpa.toFixed(2)}`, change: +(Math.random() * 15 - 8).toFixed(1), trend: generateTrend(summary.cpa, 8) } },
-    { primary: { label: 'CTR', value: summary.ctr, formattedValue: `${summary.ctr.toFixed(2)}%`, change: +(Math.random() * 10 - 5).toFixed(1), trend: generateTrend(summary.ctr, 0.3) }, secondary: { label: 'Conv. Rate', value: summary.conversionRate, formattedValue: `${summary.conversionRate.toFixed(2)}%`, change: +(Math.random() * 10 - 3).toFixed(1), trend: generateTrend(summary.conversionRate, 0.5) } },
+
+  const base: KPIGroupData[] = [
+    {
+      title: 'Spend',
+      primary: { label: 'Spend', value: summary.spend, formattedValue: `$${summary.spend.toLocaleString()}`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.spend, summary.spend * 0.1) },
+      supporting: [],
+    },
+    {
+      title: 'Impressions',
+      primary: { label: 'Impressions', value: summary.impressions, formattedValue: `${(summary.impressions / 1e6).toFixed(2)}M`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.impressions, summary.impressions * 0.15) },
+      supporting: [{ label: 'CPM', formattedValue: `$${(summary.spend / summary.impressions * 1000).toFixed(2)}`, change: +(Math.random() * 10 - 5).toFixed(1) }],
+    },
+    {
+      title: 'Clicks',
+      primary: { label: 'Clicks', value: summary.clicks, formattedValue: summary.clicks.toLocaleString(), change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.clicks, summary.clicks * 0.1) },
+      supporting: [
+        { label: 'CTR', formattedValue: `${summary.ctr.toFixed(2)}%`, change: +(Math.random() * 10 - 5).toFixed(1) },
+        { label: 'CPC', formattedValue: `$${summary.cpc.toFixed(2)}`, change: +(Math.random() * 10 - 5).toFixed(1) },
+      ],
+    },
+    {
+      title: 'Conversions',
+      primary: { label: 'Conversions', value: summary.conversions, formattedValue: summary.conversions.toLocaleString(), change: +(Math.random() * 20 - 3).toFixed(1), trend: generateTrend(summary.conversions, summary.conversions * 0.15) },
+      supporting: [
+        { label: 'CPA', formattedValue: `$${summary.cpa.toFixed(2)}`, change: +(Math.random() * 15 - 8).toFixed(1) },
+        { label: 'Conv. Rate', formattedValue: `${summary.conversionRate.toFixed(2)}%`, change: +(Math.random() * 10 - 3).toFixed(1) },
+      ],
+    },
   ];
+
+  // Platform-specific additions
+  if (platform === 'tiktok' || platform === 'snapchat') {
+    base.push({
+      title: 'Video',
+      primary: { label: 'Video Views', value: Math.round(summary.impressions * 0.3), formattedValue: `${(summary.impressions * 0.3 / 1e6).toFixed(2)}M`, change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.impressions * 0.3, summary.impressions * 0.05) },
+      supporting: [{ label: 'Completion', formattedValue: `${(30 + Math.random() * 25).toFixed(1)}%` }],
+    });
+  }
+
+  if (platform === 'linkedin') {
+    base.push({
+      title: 'Leads',
+      primary: { label: 'Leads', value: summary.conversions, formattedValue: summary.conversions.toLocaleString(), change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.conversions, summary.conversions * 0.1) },
+      supporting: [
+        { label: 'CPL', formattedValue: `$${summary.cpa.toFixed(2)}` },
+        { label: 'Form Rate', formattedValue: `${(12 + Math.random() * 8).toFixed(1)}%` },
+      ],
+    });
+  }
+
   return base;
+}
+
+// Keep legacy export for backward compat
+export function getPlatformKPIs(platform: PlatformKey) {
+  return getPlatformKPIGroups(platform);
 }
 
 export const dataSourceStatuses: DataSourceStatus[] = [
