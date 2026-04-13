@@ -42,15 +42,15 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
       <div className="px-5 py-4 border-b border-border">
         <h3 className="text-sm font-semibold text-card-foreground">Platform Comparison</h3>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
               {cols.map(c => (
-                <th key={c.key} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground select-none" onClick={() => c.key !== 'label' && handleSort(c.key)}>
+                <th key={c.key} className="px-4 py-3 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground select-none transition-colors" onClick={() => c.key !== 'label' && handleSort(c.key)}>
                   <div className="flex items-center gap-1">
                     {c.label}
-                    {sortKey === c.key && (sortDir === 'desc' ? <ChevronDown size={12} /> : <ChevronUp size={12} />)}
+                    {sortKey === c.key && (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />)}
                   </div>
                 </th>
               ))}
@@ -58,9 +58,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
           </thead>
           <tbody>
             {sorted.map(row => (
-              <tr key={row.platform} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+              <tr key={row.platform} className="border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors">
                 {cols.map(c => (
-                  <td key={c.key} className={cn("px-4 py-3 whitespace-nowrap", c.key === 'label' ? 'font-medium text-card-foreground' : 'text-card-foreground')}>
+                  <td key={c.key} className={cn("px-4 py-3 whitespace-nowrap text-xs", c.key === 'label' ? 'font-semibold text-card-foreground' : 'text-card-foreground')}>
                     {c.format(row[c.key])}
                   </td>
                 ))}
@@ -73,13 +73,16 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
   );
 }
 
+/* ─── Mobile Platform Cards ─── */
+
 function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; className?: string }) {
   return (
     <div className={cn("space-y-3", className)}>
-      <h3 className="text-sm font-semibold text-foreground">Platform Comparison</h3>
-      {data.map(p => (
-        <MobilePlatformCard key={p.platform} platform={p} />
-      ))}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">Platform Comparison</h3>
+        <span className="text-[10px] text-muted-foreground">{data.length} platforms</span>
+      </div>
+      {data.map(p => <MobilePlatformCard key={p.platform} platform={p} />)}
     </div>
   );
 }
@@ -87,22 +90,63 @@ function MobilePlatformCards({ data, className }: { data: PlatformSummary[]; cla
 function MobilePlatformCard({ platform: p }: { platform: PlatformSummary }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-      <p className="text-sm font-semibold text-card-foreground mb-2">{p.label}</p>
-      <div className="grid grid-cols-3 gap-3 text-center">
-        <div><p className="text-xs text-muted-foreground">Spend</p><p className="text-sm font-bold text-card-foreground">${p.spend.toLocaleString()}</p></div>
-        <div><p className="text-xs text-muted-foreground">Conv.</p><p className="text-sm font-bold text-card-foreground">{p.conversions.toLocaleString()}</p></div>
-        <div><p className="text-xs text-muted-foreground">CPA</p><p className="text-sm font-bold text-card-foreground">${p.cpa.toFixed(2)}</p></div>
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[13px] font-semibold text-card-foreground">{p.label}</p>
+          <p className="text-[13px] font-bold text-card-foreground">${p.spend.toLocaleString()}</p>
+        </div>
+        <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden">
+          <div className="bg-card px-3 py-2.5 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">Conv.</p>
+            <p className="text-[13px] font-semibold text-card-foreground leading-none">{p.conversions.toLocaleString()}</p>
+          </div>
+          <div className="bg-card px-3 py-2.5 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">CPA</p>
+            <p className="text-[13px] font-semibold text-card-foreground leading-none">${p.cpa.toFixed(2)}</p>
+          </div>
+          <div className="bg-card px-3 py-2.5 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">CTR</p>
+            <p className="text-[13px] font-semibold text-card-foreground leading-none">{p.ctr}%</p>
+          </div>
+        </div>
       </div>
       {expanded && (
-        <div className="grid grid-cols-3 gap-3 text-center mt-2 pt-2 border-t border-border">
-          <div><p className="text-xs text-muted-foreground">CTR</p><p className="text-sm font-semibold text-card-foreground">{p.ctr}%</p></div>
-          <div><p className="text-xs text-muted-foreground">CPC</p><p className="text-sm font-semibold text-card-foreground">${p.cpc.toFixed(2)}</p></div>
-          <div><p className="text-xs text-muted-foreground">% Spend</p><p className="text-sm font-semibold text-card-foreground">{p.shareOfSpend}%</p></div>
+        <div className="px-4 pb-3 pt-1 border-t border-border/50">
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">CPC</span>
+              <span className="text-[12px] font-semibold text-card-foreground">${p.cpc.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Clicks</span>
+              <span className="text-[12px] font-semibold text-card-foreground">{p.clicks.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Conv. Rate</span>
+              <span className="text-[12px] font-semibold text-card-foreground">{p.conversionRate}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">% of Spend</span>
+              <span className="text-[12px] font-semibold text-card-foreground">{p.shareOfSpend}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Impressions</span>
+              <span className="text-[12px] font-semibold text-card-foreground">{p.impressions >= 1e6 ? `${(p.impressions / 1e6).toFixed(1)}M` : p.impressions.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">% of Conv.</span>
+              <span className="text-[12px] font-semibold text-card-foreground">{p.shareOfConversions}%</span>
+            </div>
+          </div>
         </div>
       )}
-      <button onClick={() => setExpanded(!expanded)} className="mt-2 text-xs font-medium text-primary flex items-center gap-1 mx-auto">
-        {expanded ? 'Less' : 'More'} {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-primary border-t border-border/40 bg-muted/20 hover:bg-muted/40 transition-colors"
+      >
+        {expanded ? 'Less' : 'More details'}
+        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
       </button>
     </div>
   );
