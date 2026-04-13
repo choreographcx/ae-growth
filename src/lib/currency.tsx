@@ -2,14 +2,16 @@ import React from 'react';
 import sarIcon from '@/assets/currency/sar.svg';
 import aedIcon from '@/assets/currency/aed.svg';
 
-export function CurrencySymbol({ currency, size = 12, className = '' }: { currency: string; size?: number; className?: string }) {
+export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
   const needsGreenFilter = className.includes('text-emerald') || className.includes('text-green');
-  const imgStyle = needsGreenFilter
-    ? { filter: 'invert(39%) sepia(80%) saturate(600%) hue-rotate(120deg) brightness(90%) contrast(90%)' }
-    : undefined;
+  const imgStyle: React.CSSProperties = {
+    height: size ? `${size}px` : '1em',
+    width: 'auto',
+    ...(needsGreenFilter ? { filter: 'invert(39%) sepia(80%) saturate(600%) hue-rotate(120deg) brightness(90%) contrast(90%)' } : {}),
+  };
 
-  if (currency === 'SAR') return <img src={sarIcon} alt="SAR" width={size} height={size} className={`inline-block align-baseline ${className}`} style={imgStyle} />;
-  if (currency === 'AED') return <img src={aedIcon} alt="AED" width={size} height={size} className={`inline-block align-baseline ${className}`} style={imgStyle} />;
+  if (currency === 'SAR') return <img src={sarIcon} alt="" width={size} height={size} className={`inline-block align-baseline ${className}`} style={imgStyle} />;
+  if (currency === 'AED') return <img src={aedIcon} alt="" width={size} height={size} className={`inline-block align-baseline ${className}`} style={imgStyle} />;
   return <span className={className}>$</span>;
 }
 
@@ -39,7 +41,7 @@ export function replaceDollarWithSymbol(formattedValue: React.ReactNode, currenc
   if (!formattedValue.startsWith('$')) return formattedValue;
   const rest = formattedValue.slice(1);
   return (
-    <span className="inline-flex items-baseline gap-0.5">
+    <span className="inline-flex items-baseline">
       <CurrencySymbol currency={currency} size={size} />
       {rest}
     </span>

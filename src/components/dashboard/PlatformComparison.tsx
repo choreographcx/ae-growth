@@ -14,8 +14,8 @@ interface PlatformComparisonProps {
 function CurrencyValue({ amount, decimals = 0, currency }: { amount: number; decimals?: number; currency: string }) {
   const formatted = decimals > 0 ? amount.toFixed(decimals) : amount.toLocaleString();
   return (
-    <span className="inline-flex items-baseline gap-0.5">
-      <CurrencySymbol currency={currency} size={10} />
+    <span className="inline-flex items-baseline">
+      <CurrencySymbol currency={currency} />
       {formatted}
     </span>
   );
