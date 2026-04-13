@@ -135,8 +135,8 @@ export const platformSummaries: PlatformSummary[] = [
   { platform: 'meta', label: 'Meta', spend: 52400, impressions: 4800000, clicks: 72000, ctr: 1.5, cpc: 0.73, conversions: 1520, cpa: 34.47, conversionRate: 2.11, shareOfSpend: 36.8, shareOfConversions: 39.6 },
   { platform: 'google', label: 'Google Ads', spend: 41200, impressions: 3200000, clicks: 54000, ctr: 1.69, cpc: 0.76, conversions: 1180, cpa: 34.92, conversionRate: 2.19, shareOfSpend: 28.9, shareOfConversions: 30.7 },
   { platform: 'tiktok', label: 'TikTok', spend: 18500, impressions: 2100000, clicks: 28000, ctr: 1.33, cpc: 0.66, conversions: 420, cpa: 44.05, conversionRate: 1.5, shareOfSpend: 13.0, shareOfConversions: 10.9 },
-  { platform: 'linkedin', label: 'LinkedIn', spend: 15800, impressions: 890000, clicks: 12400, ctr: 1.39, cpc: 1.27, conversions: 310, cpa: 50.97, conversionRate: 2.5, shareOfSpend: 11.1, shareOfConversions: 8.1 },
   { platform: 'snapchat', label: 'Snapchat', spend: 8200, impressions: 950000, clicks: 11200, ctr: 1.18, cpc: 0.73, conversions: 215, cpa: 38.14, conversionRate: 1.92, shareOfSpend: 5.8, shareOfConversions: 5.6 },
+  { platform: 'linkedin', label: 'LinkedIn', spend: 15800, impressions: 890000, clicks: 12400, ctr: 1.39, cpc: 1.27, conversions: 310, cpa: 50.97, conversionRate: 2.5, shareOfSpend: 11.1, shareOfConversions: 8.1 },
   { platform: 'programmatic', label: 'Programmatic', spend: 6480, impressions: 510000, clicks: 9150, ctr: 1.79, cpc: 0.71, conversions: 197, cpa: 32.89, conversionRate: 2.15, shareOfSpend: 4.5, shareOfConversions: 5.1 },
 ];
 
