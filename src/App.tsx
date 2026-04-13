@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardProvider } from "@/context/DashboardContext";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import OverviewPage from "./pages/OverviewPage";
 import MetaPage from "./pages/MetaPage";
@@ -15,9 +16,73 @@ import XPage from "./pages/XPage";
 import ProgrammaticPage from "./pages/ProgrammaticPage";
 import AdminPage from "./pages/AdminPage";
 import TrackingHealthPage from "./pages/TrackingHealthPage";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function ProtectedRoutes() {
+  const { user, loading, isApproved } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isApproved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-card rounded-2xl border border-border shadow-lg p-8 max-w-md text-center">
+          <h2 className="text-xl font-bold text-card-foreground mb-2">Account Pending Approval</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Your account is awaiting approval from an administrator. You'll be able to access the dashboard once approved.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-primary hover:underline"
+          >
+            Refresh to check status
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <DashboardProvider>
+      <AppShell>
+        <Routes>
+          <Route path="/" element={<OverviewPage />} />
+          <Route path="/meta" element={<MetaPage />} />
+          <Route path="/google" element={<GoogleAdsPage />} />
+          <Route path="/tiktok" element={<TikTokPage />} />
+          <Route path="/snapchat" element={<SnapchatPage />} />
+          <Route path="/linkedin" element={<LinkedInPage />} />
+          <Route path="/x" element={<XPage />} />
+          <Route path="/programmatic" element={<ProgrammaticPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/tracking-health" element={<TrackingHealthPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AppShell>
+    </DashboardProvider>
+  );
+}
+
+function AuthGuard() {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+  if (user) return <Navigate to="/" replace />;
+  return <AuthPage />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,23 +90,12 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <DashboardProvider>
-          <AppShell>
-            <Routes>
-              <Route path="/" element={<OverviewPage />} />
-              <Route path="/meta" element={<MetaPage />} />
-              <Route path="/google" element={<GoogleAdsPage />} />
-              <Route path="/tiktok" element={<TikTokPage />} />
-              <Route path="/snapchat" element={<SnapchatPage />} />
-              <Route path="/linkedin" element={<LinkedInPage />} />
-              <Route path="/x" element={<XPage />} />
-              <Route path="/programmatic" element={<ProgrammaticPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/tracking-health" element={<TrackingHealthPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppShell>
-        </DashboardProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<AuthGuard />} />
+            <Route path="/*" element={<ProtectedRoutes />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
