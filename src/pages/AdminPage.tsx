@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CurrencySymbol } from '@/lib/currency';
 import { useDashboard } from '@/context/DashboardContext';
+import { supabase } from '@/integrations/supabase/client';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { PlatformKey, ClientProfile } from '@/types/dashboard';
 import { Input } from '@/components/ui/input';
@@ -363,17 +364,28 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
   };
 
   const handleChange = (val: string) => {
-    // Allow digits and commas only
     const clean = val.replace(/[^0-9,]/g, '');
-    // Re-format with commas
     const num = Number(clean.replace(/,/g, ''));
     setDraft(isNaN(num) || num === 0 ? clean : num.toLocaleString());
   };
 
-  const saveBudget = () => {
+  const saveBudget = async () => {
     const num = parseBudgetString(draft);
-    updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: num } } });
+    const updatedPlatforms = { ...client.platforms, [p.key]: { ...cfg, budget: num } };
+    const updatedClient = { ...client, platforms: updatedPlatforms };
+    updateClient({ platforms: updatedPlatforms });
     setEditing(false);
+    // Save directly to Supabase with the updated data
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('client_configs').upsert(
+          { user_id: user.id, config: updatedClient as any },
+          { onConflict: 'user_id' }
+        );
+        toast.success(`${p.label} budget saved`);
+      }
+    } catch { /* silent */ }
   };
 
   const clearBudget = () => {
