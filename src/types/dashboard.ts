@@ -62,7 +62,7 @@ export interface NamingNormalization {
 export interface KPIMetric {
   label: string;
   value: number;
-  formattedValue: string;
+  formattedValue: React.ReactNode;
   change: number;
   trend: number[];
 }

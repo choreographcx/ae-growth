@@ -38,9 +38,7 @@ export function applyCurrencyToKPIGroups(groups: import('@/types/dashboard').KPI
     ...g,
     primary: {
       ...g.primary,
-      formattedValue: typeof g.primary.formattedValue === 'string' && g.primary.formattedValue.startsWith('$')
-        ? g.primary.formattedValue // primary formattedValue stays string for now (it's the big number)
-        : g.primary.formattedValue,
+      formattedValue: replaceDollarWithSymbol(g.primary.formattedValue, currency, 18),
     },
     supporting: g.supporting.map(s => ({
       ...s,
