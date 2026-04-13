@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { TimeSeriesPoint } from '@/types/dashboard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
@@ -41,7 +42,7 @@ function CurrencyTick({ x = 0, y = 0, payload, currency, valueSuffix = '' }: Cur
 
   return (
     <g transform={`translate(${x},${y})`}>
-      <foreignObject x={-56} y={-8} width={56} height={16} style={{ overflow: 'visible' }}>
+      <foreignObject x={-44} y={-8} width={44} height={16} style={{ overflow: 'visible' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', fontSize: 10, color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap', lineHeight: 1 }}>
           <CurrencySymbol currency={currency} size={10} />
           <span>{formattedValue}</span>
@@ -71,13 +72,27 @@ function TrendTooltip({ active, payload, label, title, currency, valuePrefix = '
 }
 
 export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', valuePrefix = '', valueSuffix = '', currency, className }: TrendChartCardProps) {
+  // Compute weekly tick values from the data
+  const weeklyTicks = useMemo(() => {
+    if (!data.length) return [];
+    const ticks: string[] = [];
+    const startDate = new Date(data[0].date);
+    for (let i = 0; i < data.length; i++) {
+      const d = new Date(data[i].date);
+      const daysDiff = Math.round((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff % 7 === 0) {
+        ticks.push(data[i].date);
+      }
+    }
+    return ticks;
+  }, [data]);
 
   return (
     <div className={cn("bg-card rounded-xl border border-border p-5 shadow-sm", className)}>
       <h3 className="text-sm font-semibold text-card-foreground mb-4">{title}</h3>
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+          <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
             <defs>
               <linearGradient id={`grad-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={color} stopOpacity={0.2} />
@@ -85,11 +100,21 @@ export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', val
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} tickFormatter={(v: string) => { const d = new Date(v); return `${d.getMonth() + 1}/${d.getDate()}`; }} />
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              tickLine={false}
+              axisLine={false}
+              ticks={weeklyTicks}
+              tickFormatter={(v: string) => {
+                const d = new Date(v);
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              }}
+            />
             <YAxis
               tickLine={false}
               axisLine={false}
-              width={currency ? 60 : 44}
+              width={currency ? 48 : 36}
               tick={currency ? <CurrencyTick currency={currency} valueSuffix={valueSuffix} /> : { fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               tickFormatter={currency ? undefined : (v: number) => `${valuePrefix}${formatCompactValue(v)}${valueSuffix}`}
             />
