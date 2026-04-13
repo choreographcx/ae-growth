@@ -8,8 +8,7 @@ import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsT
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
-import { CurrencySymbol, replaceDollarWithSymbol } from '@/lib/currency';
-import { applyCurrencyToKPIGroups } from '@/lib/currency';
+import { CurrencySymbol, replaceDollarWithSymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 
 // CTR time series derived from clicks/impressions mock pattern
 function generateCTRTimeSeries() {

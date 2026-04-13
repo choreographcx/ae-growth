@@ -28,3 +28,23 @@ export function replaceDollarWithSymbol(formattedValue: React.ReactNode, currenc
     </span>
   );
 }
+
+/**
+ * Process an array of KPIGroupData, replacing all "$" prefixed formattedValues
+ * (in both primary and supporting) with the correct CurrencySymbol.
+ */
+export function applyCurrencyToKPIGroups(groups: import('@/types/dashboard').KPIGroupData[], currency: string): import('@/types/dashboard').KPIGroupData[] {
+  return groups.map(g => ({
+    ...g,
+    primary: {
+      ...g.primary,
+      formattedValue: typeof g.primary.formattedValue === 'string' && g.primary.formattedValue.startsWith('$')
+        ? g.primary.formattedValue // primary formattedValue stays string for now (it's the big number)
+        : g.primary.formattedValue,
+    },
+    supporting: g.supporting.map(s => ({
+      ...s,
+      formattedValue: replaceDollarWithSymbol(s.formattedValue, currency),
+    })),
+  }));
+}
