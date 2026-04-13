@@ -1,7 +1,6 @@
 import { KPIGroupData } from '@/types/dashboard';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface KPIGroupCardProps {
@@ -19,30 +18,14 @@ export function KPIGroupCard({ data, className }: KPIGroupCardProps) {
 /* ─── Desktop Card ─── */
 function DesktopKPICard({ data, className }: KPIGroupCardProps) {
   const { primary, supporting } = data;
-  const chartData = primary.trend.map((v, i) => ({ x: i, y: v }));
-  const isPositive = primary.change >= 0;
-  const gradientId = `spark-${data.title.replace(/\s/g, '')}-${Math.random().toString(36).slice(2, 6)}`;
 
   return (
     <div className={cn(
       "bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col",
       className
     )}>
-      <div className="flex items-start justify-between gap-2 mb-1">
+      <div className="mb-1">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{data.title}</p>
-        <div className="w-16 h-8 opacity-60 shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0.2} />
-                  <stop offset="100%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="y" stroke={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} strokeWidth={1.5} fill={`url(#${gradientId})`} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
       </div>
 
       <p className="text-[26px] font-bold text-card-foreground tracking-tight leading-none">{primary.formattedValue}</p>
@@ -73,33 +56,15 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
 /* ─── Mobile Card — compact, dense, scannable ─── */
 function MobileKPICard({ data, className }: KPIGroupCardProps) {
   const { primary, supporting } = data;
-  const chartData = primary.trend.map((v, i) => ({ x: i, y: v }));
-  const isPositive = primary.change >= 0;
-  const gradientId = `m-spark-${data.title.replace(/\s/g, '')}-${Math.random().toString(36).slice(2, 6)}`;
 
   return (
     <div className={cn(
       "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm",
       className
     )}>
-      <div className="flex items-center justify-between gap-1">
-        <div className="flex items-baseline gap-1.5 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{data.title}</p>
-          <MobileChange value={primary.change} />
-        </div>
-        <div className="w-10 h-3.5 opacity-30 shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0.12} />
-                  <stop offset="100%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="y" stroke={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} strokeWidth={1} fill={`url(#${gradientId})`} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="flex items-baseline gap-1.5 min-w-0">
+        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{data.title}</p>
+        <MobileChange value={primary.change} />
       </div>
       <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5">{primary.formattedValue}</p>
       {supporting.length > 0 && (
