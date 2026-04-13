@@ -175,7 +175,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-4 w-px bg-border mx-0.5" />
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export</Button>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export PDF</Button>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock size={11} />
                 <span>{lastRefresh}</span>
