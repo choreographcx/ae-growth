@@ -74,7 +74,7 @@ export interface KPIGroupData {
   title: string;
   icon?: string;
   primary: KPIMetric;
-  supporting: { label: string; formattedValue: string; change?: number }[];
+  supporting: { label: string; formattedValue: React.ReactNode; change?: number }[];
 }
 
 export interface CampaignRow {
