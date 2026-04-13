@@ -175,6 +175,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-4 w-px bg-border mx-0.5" />
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export PDF</Button>
+              <div className="h-4 w-px bg-border mx-0.5" />
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Sign out">
                 <LogOut size={13} />
               </Button>
