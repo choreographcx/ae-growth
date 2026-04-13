@@ -79,18 +79,20 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
 
   return (
     <div className={cn(
-      "bg-card rounded-lg border border-border px-3.5 py-3 shadow-sm",
+      "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm",
       className
     )}>
-      {/* Row 1: label + sparkline */}
-      <div className="flex items-center justify-between gap-2 mb-0.5">
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest leading-none">{data.title}</p>
-        <div className="w-12 h-5 opacity-40 shrink-0">
+      <div className="flex items-center justify-between gap-1">
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{data.title}</p>
+          <MobileChange value={primary.change} />
+        </div>
+        <div className="w-10 h-3.5 opacity-30 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0.15} />
+                  <stop offset="0%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0.12} />
                   <stop offset="100%" stopColor={isPositive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))'} stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -99,20 +101,13 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Row 2: primary value + delta inline */}
-      <div className="flex items-baseline gap-2">
-        <p className="text-xl font-bold text-card-foreground tracking-tight leading-none">{primary.formattedValue}</p>
-        <MobileChange value={primary.change} />
-      </div>
-
-      {/* Row 3: supporting metrics — compact inline */}
+      <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5">{primary.formattedValue}</p>
       {supporting.length > 0 && (
-        <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/40">
+        <div className="flex items-baseline gap-3 mt-1 pt-1 border-t border-border/30">
           {supporting.map((s, i) => (
-            <div key={i} className="flex items-baseline gap-1">
-              <span className="text-[10px] text-muted-foreground">{s.label}</span>
-              <span className="text-[12px] font-semibold text-card-foreground">{s.formattedValue}</span>
+            <div key={i} className="flex items-baseline gap-0.5">
+              <span className="text-[9px] text-muted-foreground">{s.label}</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{s.formattedValue}</span>
             </div>
           ))}
         </div>
