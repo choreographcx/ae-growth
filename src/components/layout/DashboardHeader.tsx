@@ -35,10 +35,22 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const [range, setRange] = useState<{ from: Date; to: Date }>(
     activePreset ? { from: activePreset.from, to: activePreset.to } : { from: subDays(new Date(), 30), to: new Date() }
   );
+  const [draftRange, setDraftRange] = useState(range);
+
+  const handleOpen = (isOpen: boolean) => {
+    if (isOpen) setDraftRange(range);
+    setOpen(isOpen);
+  };
 
   const handlePreset = (preset: typeof presets[0]) => {
     setRange({ from: preset.from, to: preset.to });
     setDateRange(preset.label);
+    setOpen(false);
+  };
+
+  const handleApply = () => {
+    setRange(draftRange);
+    setDateRange(`${format(draftRange.from, 'MMM d')} – ${format(draftRange.to, 'MMM d, yyyy')}`);
     setOpen(false);
   };
 
