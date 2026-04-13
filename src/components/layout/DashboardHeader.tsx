@@ -172,12 +172,27 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     ];
 
     try {
+      // Force light mode for PDF capture
+      const root = document.documentElement;
+      const originalClass = root.className;
+      root.classList.remove('dark');
+      root.classList.add('light');
+      // Force all backgrounds to be fully opaque for capture
+      const style = document.createElement('style');
+      style.id = 'pdf-export-overrides';
+      style.textContent = `
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .bg-muted\\/30, .bg-muted\\/20, .bg-muted\\/15, .bg-muted\\/\\[0\\.04\\] { background-color: hsl(var(--muted)) !important; }
+      `;
+      document.head.appendChild(style);
+
+      // Small delay for style application
+      await new Promise(r => setTimeout(r, 100));
+
       const captures: { canvas: HTMLCanvasElement; label: string }[] = [];
 
       for (const route of routes) {
-        // Navigate to route
         navigate(route.path);
-        // Wait for render
         await new Promise(r => setTimeout(r, 800));
 
         const el = document.getElementById('dashboard-main-content');
@@ -195,6 +210,10 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         captures.push({ canvas, label: route.label });
       }
 
+      // Remove overrides
+      style.remove();
+      root.className = originalClass;
+
       if (captures.length === 0) return;
 
       const margin = 5; // mm margin on each side
@@ -203,7 +222,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
       for (let c = 0; c < captures.length; c++) {
         const { canvas } = captures[c];
-        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const imgData = canvas.toDataURL('image/png');
 
         // Scale the entire capture to fit on one page
         const aspectRatio = canvas.height / canvas.width;
@@ -224,7 +243,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
         if (!pdf) continue;
 
-        pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', margin, margin, imgW, imgH);
       }
 
       if (pdf) {
