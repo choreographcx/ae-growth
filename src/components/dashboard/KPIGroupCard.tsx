@@ -90,7 +90,9 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
 /* ─── Mobile Card — compact, dense, scannable ─── */
 function MobileKPICard({ data, className }: KPIGroupCardProps) {
   const { primary, supporting, icon } = data;
-  const IconComp = icon ? iconMap[icon] : null;
+  const { client } = useDashboard();
+  const isCurrencyIcon = icon === 'DollarSign';
+  const IconComp = icon && !isCurrencyIcon ? iconMap[icon] : null;
   const colorClass = icon ? iconColorMap[icon] : '';
 
   return (
@@ -99,6 +101,11 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
       className
     )}>
       <div className="flex items-center gap-1.5 min-w-0">
+        {isCurrencyIcon && (
+          <div className={cn("flex items-center justify-center w-5 h-5 rounded", colorClass)}>
+            <CurrencySymbol currency={client.currency} size={11} className="text-emerald-600" />
+          </div>
+        )}
         {IconComp && (
           <div className={cn("flex items-center justify-center w-5 h-5 rounded", colorClass)}>
             <IconComp size={11} />
