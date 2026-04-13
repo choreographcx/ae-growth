@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { CurrencySymbol } from '@/lib/currency';
+import { useDashboard } from '@/context/DashboardContext';
 
 interface PerformanceTableProps {
   data: CampaignRow[];
@@ -17,6 +19,16 @@ const statusColors = {
   completed: 'bg-muted text-muted-foreground border-border',
 };
 
+function CurrencyValue({ amount, decimals = 0, currency }: { amount: number; decimals?: number; currency: string }) {
+  const formatted = decimals > 0 ? amount.toFixed(decimals) : amount.toLocaleString();
+  return (
+    <span className="inline-flex items-baseline">
+      <CurrencySymbol currency={currency} />
+      {formatted}
+    </span>
+  );
+}
+
 function InCellBar({ value, max, color = 'bg-primary/15' }: { value: number; max: number; color?: string }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   return (
@@ -28,6 +40,8 @@ function InCellBar({ value, max, color = 'bg-primary/15' }: { value: number; max
 
 export function PerformanceTable({ data, title, className }: PerformanceTableProps) {
   const isMobile = useIsMobile();
+  const { client } = useDashboard();
+  const currency = client.currency;
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -49,20 +63,20 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
     else { setSortKey(key); setSortDir('desc'); }
   };
 
-  if (isMobile) return <MobileCards data={sorted} title={title} className={className} />;
+  if (isMobile) return <MobileCards data={sorted} title={title} currency={currency} className={className} />;
 
   const barColumns = new Set(['spend', 'impressions', 'clicks', 'conversions']);
 
-  const columns: { key: keyof CampaignRow; label: string; format: (v: any) => string; align?: 'right' }[] = [
+  const columns: { key: keyof CampaignRow; label: string; format: (v: any) => React.ReactNode; align?: 'right' }[] = [
     { key: 'name', label: 'Campaign', format: v => v },
     { key: 'status', label: 'Status', format: v => v },
-    { key: 'spend', label: 'Spend', format: v => `$${v.toLocaleString()}`, align: 'right' },
+    { key: 'spend', label: 'Spend', format: v => <CurrencyValue amount={v} currency={currency} />, align: 'right' },
     { key: 'impressions', label: 'Impr.', format: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v.toLocaleString(), align: 'right' },
     { key: 'clicks', label: 'Clicks', format: v => v.toLocaleString(), align: 'right' },
     { key: 'ctr', label: 'CTR', format: v => `${v}%`, align: 'right' },
-    { key: 'cpc', label: 'CPC', format: v => `$${v.toFixed(2)}`, align: 'right' },
+    { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} />, align: 'right' },
     { key: 'conversions', label: 'Conv.', format: v => v.toLocaleString(), align: 'right' },
-    { key: 'cpa', label: 'CPA', format: v => v > 0 ? `$${v.toFixed(2)}` : '—', align: 'right' },
+    { key: 'cpa', label: 'CPA', format: v => v > 0 ? <CurrencyValue amount={v} decimals={2} currency={currency} /> : '—', align: 'right' },
     { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%`, align: 'right' },
   ];
 
@@ -133,7 +147,7 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
 
 /* ─── Mobile Card Layout ─── */
 
-function MobileCards({ data, title, className }: { data: CampaignRow[]; title?: string; className?: string }) {
+function MobileCards({ data, title, currency, className }: { data: CampaignRow[]; title?: string; currency: string; className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
       {title && (
@@ -142,12 +156,12 @@ function MobileCards({ data, title, className }: { data: CampaignRow[]; title?: 
           <span className="text-[10px] text-muted-foreground">{data.length} items</span>
         </div>
       )}
-      {data.map(row => <MobileRowCard key={row.id} row={row} />)}
+      {data.map(row => <MobileRowCard key={row.id} row={row} currency={currency} />)}
     </div>
   );
 }
 
-function MobileRowCard({ row }: { row: CampaignRow }) {
+function MobileRowCard({ row, currency }: { row: CampaignRow; currency: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
@@ -160,14 +174,14 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
       </div>
       <div className="px-3 pb-2">
         <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
-          <MCell label="Spend" value={`$${row.spend.toLocaleString()}`} bold />
+          <MCell label="Spend" value={<CurrencyValue amount={row.spend} currency={currency} />} bold />
           <MCell label="Clicks" value={row.clicks.toLocaleString()} />
           <MCell label="Conv." value={row.conversions.toLocaleString()} />
         </div>
         <div className="grid grid-cols-3 gap-px bg-border/30 overflow-hidden mt-px">
           <MCell label="CTR" value={`${row.ctr}%`} />
-          <MCell label="CPC" value={`$${row.cpc.toFixed(2)}`} />
-          <MCell label="CPA" value={row.cpa > 0 ? `$${row.cpa.toFixed(2)}` : '—'} />
+          <MCell label="CPC" value={<CurrencyValue amount={row.cpc} decimals={2} currency={currency} />} />
+          <MCell label="CPA" value={row.cpa > 0 ? <CurrencyValue amount={row.cpa} decimals={2} currency={currency} /> : '—'} />
         </div>
       </div>
       {expanded && (
@@ -193,7 +207,7 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
   );
 }
 
-function MCell({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function MCell({ label, value, bold }: { label: string; value: React.ReactNode; bold?: boolean }) {
   return (
     <div className="bg-card px-2 py-2 text-center">
       <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
