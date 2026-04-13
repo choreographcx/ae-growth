@@ -222,7 +222,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
       for (let c = 0; c < captures.length; c++) {
         const { canvas } = captures[c];
-        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const imgData = canvas.toDataURL('image/png');
 
         // Scale the entire capture to fit on one page
         const aspectRatio = canvas.height / canvas.width;
