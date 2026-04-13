@@ -33,6 +33,7 @@ const standardMetrics = [
 
 export default function AdminPage() {
   const { client, updateClient, togglePlatform } = useDashboard();
+  const { isAdmin } = useAuth();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
   const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
@@ -40,6 +41,20 @@ export default function AdminPage() {
   return (
     <div className="space-y-8">
       <SectionHeader title="Admin / Settings" subtitle="Configure client profile, platforms, and tracking" />
+
+      <Tabs defaultValue="configuration" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="configuration" className="gap-1.5"><Building2 size={14} /> Configuration</TabsTrigger>
+          {isAdmin && <TabsTrigger value="users" className="gap-1.5"><Users size={14} /> User Management</TabsTrigger>}
+        </TabsList>
+
+        <TabsContent value="users">
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <UserManagement />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="configuration">
 
       {/* Action bar */}
       <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
@@ -286,6 +301,8 @@ export default function AdminPage() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
