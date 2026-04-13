@@ -97,7 +97,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
-  const { client, clients, setClient, comparePeriod, setComparePeriod, lastRefresh } = useDashboard();
+  const { comparePeriod, setComparePeriod, lastRefresh } = useDashboard();
   const isMobile = useIsMobile();
 
   return (
@@ -109,15 +109,10 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <Menu size={18} />
             </button>
           )}
-          <h1 className={`font-semibold text-foreground truncate ${isMobile ? 'text-sm' : 'text-lg'}`}>{client.name}</h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {!isMobile && (
             <>
-              <Select value={client.id} onValueChange={v => { const c = clients.find(cl => cl.id === v); if (c) setClient(c); }}>
-                <SelectTrigger className="w-[160px] h-9 text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-              </Select>
               <DateRangePicker />
               <Select value={comparePeriod} onValueChange={setComparePeriod}>
                 <SelectTrigger className="w-[150px] h-9 text-sm"><SelectValue /></SelectTrigger>
@@ -136,10 +131,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       </div>
       {isMobile && (
         <div className="flex items-center gap-1.5 pb-2">
-          <Select value={client.id} onValueChange={v => { const c = clients.find(cl => cl.id === v); if (c) setClient(c); }}>
-            <SelectTrigger className="h-7 text-[11px] px-2 flex-1 min-w-0"><SelectValue /></SelectTrigger>
-            <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-          </Select>
           <DateRangePicker compact />
         </div>
       )}
