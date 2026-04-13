@@ -1,5 +1,7 @@
 import { KPIGroupData } from '@/types/dashboard';
 import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, type LucideIcon } from 'lucide-react';
+import { useDashboard } from '@/context/DashboardContext';
+import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -36,7 +38,9 @@ export function KPIGroupCard({ data, className }: KPIGroupCardProps) {
 /* ─── Desktop Card ─── */
 function DesktopKPICard({ data, className }: KPIGroupCardProps) {
   const { primary, supporting, icon } = data;
-  const IconComp = icon ? iconMap[icon] : null;
+  const { client } = useDashboard();
+  const isCurrencyIcon = icon === 'DollarSign';
+  const IconComp = icon && !isCurrencyIcon ? iconMap[icon] : null;
   const colorClass = icon ? iconColorMap[icon] : '';
 
   return (
@@ -46,6 +50,11 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
     )}>
       <div className="flex items-start justify-between mb-1">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{data.title}</p>
+        {isCurrencyIcon && (
+          <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg", colorClass)}>
+            <CurrencySymbol currency={client.currency} size={16} className="text-emerald-600" />
+          </div>
+        )}
         {IconComp && (
           <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg", colorClass)}>
             <IconComp size={16} />
