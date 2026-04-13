@@ -89,32 +89,53 @@ export default function AdminPage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Platform Toggles */}
+        {/* Ad Platforms */}
         <AccordionItem value="platforms" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center gap-2">Platform Toggles <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
+            <div className="flex items-center justify-between w-full pr-2">
+              <div className="flex items-center gap-2">Ad Platforms <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
+              <span className="text-xs font-semibold text-card-foreground tabular-nums">Total Budget: ${Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
+            </div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-4">Enable platforms to show them in the sidebar. Disabled platforms are hidden from navigation.</p>
+            <p className="text-xs text-muted-foreground mb-4">Enable platforms and set monthly budgets for pacing calculations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {allPlatforms.map(p => {
                 const cfg = client.platforms[p.key];
                 const hasIds = cfg.accountIds.filter(Boolean).length > 0;
                 return (
                   <div key={p.key} className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-200",
+                    "flex flex-col p-4 rounded-xl border-2 transition-all duration-200",
                     cfg.enabled ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"
                   )}>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-card-foreground">{p.label}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] text-muted-foreground">{cfg.accountIds.filter(Boolean).length} account(s)</span>
-                        {cfg.enabled && !hasIds && (
-                          <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 text-warning bg-warning/5">No IDs</Badge>
-                        )}
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-card-foreground">{p.label}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] text-muted-foreground">{cfg.accountIds.filter(Boolean).length} account(s)</span>
+                          {cfg.enabled && !hasIds && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 text-warning bg-warning/5">No IDs</Badge>
+                          )}
+                        </div>
                       </div>
+                      <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
                     </div>
-                    <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
+                    {cfg.enabled && (
+                      <div className="mt-3 pt-3 border-t border-border/40">
+                        <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Monthly Budget</Label>
+                        <div className="relative mt-1">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={cfg.budget || ''}
+                            onChange={e => updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: Number(e.target.value) || 0 } } })}
+                            className="h-8 text-xs pl-6 tabular-nums"
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
