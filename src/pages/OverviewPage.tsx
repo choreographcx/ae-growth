@@ -48,7 +48,7 @@ export default function OverviewPage() {
       ],
     } : undefined;
     const merged = [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
-    return applyCurrencyToKPIGroups(merged, currency, 20);
+    return applyCurrencyToKPIGroups(merged, currency, 26);
   }, [totalBudget, currency]);
 
   return (
