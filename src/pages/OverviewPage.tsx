@@ -28,7 +28,7 @@ export default function OverviewPage() {
     []
   );
 
-  const currencySymbol = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'AED ' : client.currency === 'SAR' ? 'SAR ' : client.currency + ' ';
+  const currencyPrefix = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'د.إ' : client.currency === 'SAR' ? '﷼' : client.currency + ' ';
 
   // Derive total budget from platform configs
   const totalBudget = useMemo(() =>
@@ -42,12 +42,12 @@ export default function OverviewPage() {
     const updatedSpend: KPIGroupData | undefined = spendCard ? {
       ...spendCard,
       supporting: [
-        { label: 'Budget', formattedValue: `${currencySymbol}${totalBudget.toLocaleString()}` },
+        { label: 'Budget', formattedValue: `${currencyPrefix}${totalBudget.toLocaleString()}` },
         { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
       ],
     } : undefined;
     return [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
-  }, [totalBudget, currencySymbol]);
+  }, [totalBudget, currencyPrefix]);
 
   return (
     <div className="space-y-5 md:space-y-7">
