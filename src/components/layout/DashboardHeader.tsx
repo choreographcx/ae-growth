@@ -178,8 +178,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]"><Download size={11} /> Export PDF</Button>
               <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Sign out">
-                <LogOut size={12} />
+              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
+                <LogOut size={12} /> Sign out
               </Button>
             </>
           )}
