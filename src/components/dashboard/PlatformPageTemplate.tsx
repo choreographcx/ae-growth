@@ -41,7 +41,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 md:space-y-10">
       <SectionHeader title={title} subtitle={`${client.name} · ${client.platforms[platformKey].accountIds.join(', ')}`} />
 
       {tabs && tabs.length > 1 && (
@@ -53,14 +53,14 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
         {kpiGroups.map((group, i) => <KPIGroupCard key={i} data={group} />)}
       </div>
 
       {/* Trends */}
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <SectionHeader title="Trends" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <TrendChartCard title="Spend" data={spendData} valuePrefix="$" color="hsl(var(--chart-1))" />
           <TrendChartCard title="Conversions" data={convData} color="hsl(var(--chart-3))" />
         </div>
@@ -76,9 +76,9 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
 
       {/* Diagnostics */}
       {platformAlerts.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Diagnostics" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
             {platformAlerts.map(a => <AlertCard key={a.id} alert={a} />)}
           </div>
         </div>
