@@ -107,7 +107,7 @@ export default function AdminPage() {
             <p className="text-xs text-muted-foreground mb-4">Enable platforms and set budgets for pacing calculations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {allPlatforms.map(p => (
-                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
+                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} saveConfig={saveConfig} />
               ))}
             </div>
           </AccordionContent>
@@ -343,7 +343,7 @@ function AccountIdRepeater({ label, idLabel, placeholder, values, onChange }: { 
 }
 
 /* ─── Platform Card with budget inline edit ─── */
-function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currency, formatBudgetNumber, parseBudgetString }: {
+function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currency, formatBudgetNumber, parseBudgetString, saveConfig }: {
   platform: typeof allPlatforms[0];
   cfg: ClientProfile['platforms'][PlatformKey];
   togglePlatform: (k: PlatformKey) => void;
@@ -352,6 +352,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
   currency: string;
   formatBudgetNumber: (n: number) => string;
   parseBudgetString: (s: string) => number;
+  saveConfig: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -363,9 +364,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
   };
 
   const handleChange = (val: string) => {
-    // Allow digits and commas only
     const clean = val.replace(/[^0-9,]/g, '');
-    // Re-format with commas
     const num = Number(clean.replace(/,/g, ''));
     setDraft(isNaN(num) || num === 0 ? clean : num.toLocaleString());
   };
@@ -374,6 +373,8 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
     const num = parseBudgetString(draft);
     updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: num } } });
     setEditing(false);
+    // Save to Supabase after state update
+    setTimeout(() => saveConfig(), 0);
   };
 
   const clearBudget = () => {
