@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown, X } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Check, ChevronDown, X, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,6 +14,23 @@ interface MultiSelectFilterProps {
 
 export function MultiSelectFilter({ label, options, selected, onChange }: MultiSelectFilterProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return options;
+    const q = search.toLowerCase();
+    return options.filter(o => o.toLowerCase().includes(q));
+  }, [options, search]);
+
+  // Focus search when popover opens, clear on close
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => searchRef.current?.focus(), 50);
+    } else {
+      setSearch('');
+    }
+  }, [open]);
 
   const toggle = (value: string) => {
     onChange(
@@ -54,8 +71,24 @@ export function MultiSelectFilter({ label, options, selected, onChange }: MultiS
             </button>
           </div>
         )}
+        <div className="px-2 pt-2 pb-1">
+          <div className="relative">
+            <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder={`Search ${label.toLowerCase()}...`}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full h-7 pl-7 pr-2 text-xs rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+            />
+          </div>
+        </div>
         <div className="max-h-[240px] overflow-y-auto p-1">
-          {options.map(option => {
+          {filteredOptions.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-3">No results</p>
+          )}
+          {filteredOptions.map(option => {
             const isSelected = selected.includes(option);
             return (
               <button
