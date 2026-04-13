@@ -8,7 +8,7 @@ import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsT
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
-import { CurrencySymbol, replaceDollarWithSymbol, applyCurrencyToKPIGroups, getCurrencyPrefix } from '@/lib/currency';
+import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 
 // CTR time series derived from clicks/impressions mock pattern
 function generateCTRTimeSeries() {
@@ -66,9 +66,9 @@ export default function OverviewPage() {
       <div className="space-y-2.5 md:space-y-3">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
-          <TrendChartCard title="Spend Over Time" data={spendTimeSeries} valuePrefix={getCurrencyPrefix(currency)} color="hsl(var(--chart-1))" />
+          <TrendChartCard title="Spend Over Time" data={spendTimeSeries} currency={currency} color="hsl(var(--chart-1))" />
           <TrendChartCard title="Conversions Over Time" data={conversionsTimeSeries} color="hsl(var(--chart-3))" />
-          <TrendChartCard title="CPA Over Time" data={cpaTimeSeries} valuePrefix={getCurrencyPrefix(currency)} color="hsl(var(--chart-4))" />
+          <TrendChartCard title="CPA Over Time" data={cpaTimeSeries} currency={currency} color="hsl(var(--chart-4))" />
           <TrendChartCard title="CTR Over Time" data={ctrTimeSeries} valueSuffix="%" color="hsl(var(--chart-2))" />
         </div>
       </div>
