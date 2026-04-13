@@ -237,6 +237,7 @@ export function getPlatformKPIGroups(platform: PlatformKey): KPIGroupData[] {
   if (platform === 'tiktok' || platform === 'snapchat') {
     base.push({
       title: 'Video',
+      icon: 'Play',
       primary: { label: 'Video Views', value: Math.round(summary.impressions * 0.3), formattedValue: `${(summary.impressions * 0.3 / 1e6).toFixed(2)}M`, change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.impressions * 0.3, summary.impressions * 0.05) },
       supporting: [{ label: 'Completion', formattedValue: `${(30 + Math.random() * 25).toFixed(1)}%` }],
     });
@@ -245,6 +246,7 @@ export function getPlatformKPIGroups(platform: PlatformKey): KPIGroupData[] {
   if (platform === 'linkedin') {
     base.push({
       title: 'Leads',
+      icon: 'UserCheck',
       primary: { label: 'Leads', value: summary.conversions, formattedValue: summary.conversions.toLocaleString(), change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.conversions, summary.conversions * 0.1) },
       supporting: [
         { label: 'CPL', formattedValue: `$${summary.cpa.toFixed(2)}` },
