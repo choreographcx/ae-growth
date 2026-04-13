@@ -1,11 +1,11 @@
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PlatformComparison } from '@/components/dashboard/PlatformComparison';
-import { BudgetPacingCard } from '@/components/dashboard/BudgetPacingCard';
+
 import { FunnelCard } from '@/components/dashboard/FunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsTimeSeries, cpaTimeSeries, clicksTimeSeries, platformSummaries, budgetPacing, alerts } from '@/data/mockData';
+import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsTimeSeries, cpaTimeSeries, clicksTimeSeries, platformSummaries, alerts } from '@/data/mockData';
 
 export default function OverviewPage() {
   return (
@@ -41,12 +41,6 @@ export default function OverviewPage() {
       <div className="space-y-3 md:space-y-4">
         <SectionHeader title="Platform Performance" />
         <PlatformComparison data={platformSummaries} />
-      </div>
-
-      {/* Budget Pacing */}
-      <div className="space-y-3 md:space-y-4">
-        <SectionHeader title="Budget & Pacing" />
-        <BudgetPacingCard data={budgetPacing} />
       </div>
 
       {/* Funnel */}
