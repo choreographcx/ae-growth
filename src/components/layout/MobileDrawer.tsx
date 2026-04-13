@@ -31,7 +31,7 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
       <div className="fixed inset-0 z-40 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-y-0 left-0 z-50 w-72 bg-sidebar animate-slide-in-left shadow-2xl flex flex-col">
         <div className="flex items-center justify-between px-4 h-16 border-b border-sidebar-border">
-          <span className="text-lg font-bold text-sidebar-foreground tracking-tight">MediaPulse</span>
+          <span className="text-lg font-bold text-sidebar-foreground tracking-tight"></span>
           <button onClick={onClose} className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-muted">
             <X size={20} />
           </button>
