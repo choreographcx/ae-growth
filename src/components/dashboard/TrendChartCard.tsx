@@ -55,16 +55,14 @@ function TrendTooltip({ active, payload, label, title, currency, valuePrefix = '
   if (!active || !payload?.length) return null;
 
   const value = Number(payload[0]?.value ?? 0);
-  const iconSrc = currency ? getCurrencyIconSrc(currency) : null;
-  const prefix = currency ? getCurrencyPrefix(currency) : valuePrefix;
 
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-sm">
       <p className="text-muted-foreground">{label ? new Date(label).toLocaleDateString() : ''}</p>
       <div className="mt-1 flex items-center justify-between gap-4">
         <span className="text-card-foreground">{title}</span>
-        <span className="inline-flex items-center gap-1 font-medium text-card-foreground">
-          {iconSrc ? <img src={iconSrc} alt={currency ?? 'Currency'} width={11} height={11} className="inline-block align-baseline" /> : prefix ? <span>{prefix}</span> : null}
+        <span className="inline-flex items-baseline font-medium text-card-foreground">
+          {currency ? <CurrencySymbol currency={currency} size={11} /> : valuePrefix ? <span>{valuePrefix}</span> : null}
           <span>{value.toLocaleString()}{valueSuffix}</span>
         </span>
       </div>
@@ -73,7 +71,6 @@ function TrendTooltip({ active, payload, label, title, currency, valuePrefix = '
 }
 
 export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', valuePrefix = '', valueSuffix = '', currency, className }: TrendChartCardProps) {
-  const currencyIcon = currency ? getCurrencyIconSrc(currency) : null;
 
   return (
     <div className={cn("bg-card rounded-xl border border-border p-5 shadow-sm", className)}>
