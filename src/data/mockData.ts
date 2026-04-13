@@ -115,15 +115,6 @@ export const overviewKPIGroupsRow2: KPIGroupData[] = [
       { label: 'Cost / LPV', formattedValue: '$1.00', change: -2.1 },
     ],
   },
-  {
-    title: 'Budget & Pacing',
-    primary: { label: 'Budget', value: 165000, formattedValue: '$165,000', change: 0, trend: generateTrend(165000, 5000) },
-    supporting: [
-      { label: 'Spent', formattedValue: '$142,580' },
-      { label: 'Pacing', formattedValue: '87%', change: 3.1 },
-      { label: 'Projected', formattedValue: '$161,200' },
-    ],
-  },
 ];
 
 // Legacy KPIPair export for backward compat
