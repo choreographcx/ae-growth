@@ -57,29 +57,21 @@ export default function AdminPage() {
         <TabsContent value="configuration">
 
       {/* Action bar */}
-      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <Building2 size={16} className="text-primary" />
-            <h3 className="text-sm font-semibold text-card-foreground">Configuration</h3>
-          </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
+        <Button size="sm" variant="outline" onClick={() => {
+          if (!client.name || !client.code) {
+            toast.error('Missing required fields: Client Name, Code');
+          } else {
+            toast.success('All required fields valid');
+          }
+        }} className="gap-1.5 h-8 text-xs"><CheckCircle size={12} /> Validate</Button>
+        <div className="hidden sm:flex items-center gap-2 ml-auto">
+          <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
+          <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground ml-2">
             <Clock size={10} />
             <span>Last saved: {lastSavedAt ?? 'Never'}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
-          <Button size="sm" variant="outline" onClick={() => {
-            if (!client.name || !client.code) {
-              toast.error('Missing required fields: Client Name, Code');
-            } else {
-              toast.success('All required fields valid');
-            }
-          }} className="gap-1.5 h-8 text-xs"><CheckCircle size={12} /> Validate</Button>
-          <div className="hidden sm:flex items-center gap-2 ml-auto">
-            <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
-            <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
           </div>
         </div>
       </div>
