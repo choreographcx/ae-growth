@@ -27,7 +27,7 @@ export default function OverviewPage() {
       </div>
 
       {/* Trend Charts */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TrendChartCard title="Spend Over Time" data={spendTimeSeries} valuePrefix="$" color="hsl(var(--chart-1))" />
@@ -38,25 +38,25 @@ export default function OverviewPage() {
       </div>
 
       {/* Platform Comparison */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Platform Performance" />
         <PlatformComparison data={platformSummaries} />
       </div>
 
       {/* Budget Pacing */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Budget & Pacing" />
         <BudgetPacingCard data={budgetPacing} />
       </div>
 
       {/* Funnel */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Funnel" />
         <FunnelCard />
       </div>
 
       {/* Alerts */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Diagnostics & Alerts" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {alerts.map(alert => (
