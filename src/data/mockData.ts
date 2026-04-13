@@ -138,6 +138,7 @@ export const platformSummaries: PlatformSummary[] = [
   { platform: 'snapchat', label: 'Snapchat', spend: 8200, impressions: 950000, clicks: 11200, ctr: 1.18, cpc: 0.73, conversions: 215, cpa: 38.14, conversionRate: 1.92, shareOfSpend: 5.8, shareOfConversions: 5.6 },
   { platform: 'linkedin', label: 'LinkedIn', spend: 15800, impressions: 890000, clicks: 12400, ctr: 1.39, cpc: 1.27, conversions: 310, cpa: 50.97, conversionRate: 2.5, shareOfSpend: 11.1, shareOfConversions: 8.1 },
   { platform: 'programmatic', label: 'Programmatic', spend: 6480, impressions: 510000, clicks: 9150, ctr: 1.79, cpc: 0.71, conversions: 197, cpa: 32.89, conversionRate: 2.15, shareOfSpend: 4.5, shareOfConversions: 5.1 },
+  { platform: 'x', label: 'X', spend: 9800, impressions: 1200000, clicks: 15600, ctr: 1.30, cpc: 0.63, conversions: 280, cpa: 35.00, conversionRate: 1.79, shareOfSpend: 6.9, shareOfConversions: 7.3 },
 ];
 
 export const budgetPacing: BudgetPacing = {
