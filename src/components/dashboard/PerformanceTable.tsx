@@ -92,10 +92,10 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
 
 function MobileCards({ data, title, className }: { data: CampaignRow[]; title?: string; className?: string }) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2", className)}>
       {title && (
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
           <span className="text-[10px] text-muted-foreground">{data.length} items</span>
         </div>
       )}
@@ -107,70 +107,70 @@ function MobileCards({ data, title, className }: { data: CampaignRow[]; title?: 
 function MobileRowCard({ row }: { row: CampaignRow }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[13px] font-semibold text-card-foreground leading-tight flex-1 min-w-0">{row.name}</p>
-          <Badge variant="outline" className={cn("text-[10px] capitalize shrink-0 px-1.5 py-0", statusColors[row.status])}>{row.status}</Badge>
+    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+      {/* Header — name + status */}
+      <div className="px-3 pt-3 pb-2 flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-semibold text-card-foreground leading-snug truncate">{row.name}</p>
+          <p className="text-[9px] text-muted-foreground mt-0.5 uppercase tracking-wider">{row.objective}</p>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{row.objective}</p>
+        <Badge variant="outline" className={cn("text-[9px] capitalize shrink-0 px-1.5 py-0", statusColors[row.status])}>{row.status}</Badge>
       </div>
 
-      {/* Primary metrics grid */}
-      <div className="px-4 pb-3">
-        <div className="grid grid-cols-3 gap-px bg-border/40 rounded-lg overflow-hidden">
-          <MetricCell label="Spend" value={`$${row.spend.toLocaleString()}`} emphasis />
-          <MetricCell label="Clicks" value={row.clicks.toLocaleString()} />
-          <MetricCell label="Conv." value={row.conversions.toLocaleString()} />
+      {/* Metrics grid — compact 3-col */}
+      <div className="px-3 pb-2">
+        <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
+          <MCell label="Spend" value={`$${row.spend.toLocaleString()}`} bold />
+          <MCell label="Clicks" value={row.clicks.toLocaleString()} />
+          <MCell label="Conv." value={row.conversions.toLocaleString()} />
         </div>
-        <div className="grid grid-cols-3 gap-px bg-border/40 overflow-hidden mt-px rounded-b-lg">
-          <MetricCell label="CTR" value={`${row.ctr}%`} />
-          <MetricCell label="CPC" value={`$${row.cpc.toFixed(2)}`} />
-          <MetricCell label="CPA" value={row.cpa > 0 ? `$${row.cpa.toFixed(2)}` : '—'} />
+        <div className="grid grid-cols-3 gap-px bg-border/30 overflow-hidden mt-px">
+          <MCell label="CTR" value={`${row.ctr}%`} />
+          <MCell label="CPC" value={`$${row.cpc.toFixed(2)}`} />
+          <MCell label="CPA" value={row.cpa > 0 ? `$${row.cpa.toFixed(2)}` : '—'} />
         </div>
       </div>
 
       {/* Expandable details */}
       {expanded && (
-        <div className="px-4 pb-3 pt-1 border-t border-border/50">
-          <div className="grid grid-cols-2 gap-3 py-2">
-            <DetailRow label="Impressions" value={row.impressions >= 1e6 ? `${(row.impressions / 1e6).toFixed(1)}M` : row.impressions.toLocaleString()} />
-            <DetailRow label="Conv. Rate" value={`${row.conversionRate}%`} />
-            {row.reach != null && <DetailRow label="Reach" value={row.reach >= 1e6 ? `${(row.reach / 1e6).toFixed(1)}M` : row.reach.toLocaleString()} />}
-            {row.frequency != null && <DetailRow label="Frequency" value={`${row.frequency}`} />}
-            {row.videoViews != null && <DetailRow label="Video Views" value={row.videoViews.toLocaleString()} />}
-            {row.completionRate != null && <DetailRow label="Completion" value={`${row.completionRate}%`} />}
+        <div className="px-3 pb-2 pt-1.5 border-t border-border/40">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            <DRow label="Impressions" value={row.impressions >= 1e6 ? `${(row.impressions / 1e6).toFixed(1)}M` : row.impressions.toLocaleString()} />
+            <DRow label="Conv. Rate" value={`${row.conversionRate}%`} />
+            {row.reach != null && <DRow label="Reach" value={row.reach >= 1e6 ? `${(row.reach / 1e6).toFixed(1)}M` : row.reach.toLocaleString()} />}
+            {row.frequency != null && <DRow label="Frequency" value={`${row.frequency}`} />}
+            {row.videoViews != null && <DRow label="Video Views" value={row.videoViews.toLocaleString()} />}
+            {row.completionRate != null && <DRow label="Completion" value={`${row.completionRate}%`} />}
           </div>
         </div>
       )}
 
-      {/* Expand toggle */}
+      {/* Toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-1 py-2.5 text-[11px] font-medium text-muted-foreground hover:text-primary border-t border-border/40 bg-muted/20 hover:bg-muted/40 transition-colors"
+        className="w-full flex items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-muted-foreground hover:text-primary border-t border-border/30 bg-muted/15 transition-colors"
       >
-        {expanded ? 'Less' : 'More details'}
-        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        {expanded ? 'Less' : 'More'}
+        {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
       </button>
     </div>
   );
 }
 
-function MetricCell({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+function MCell({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
-    <div className="bg-card px-3 py-2.5 text-center">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">{label}</p>
-      <p className={cn("leading-none", emphasis ? "text-[15px] font-bold text-card-foreground" : "text-[13px] font-semibold text-card-foreground")}>{value}</p>
+    <div className="bg-card px-2 py-2 text-center">
+      <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">{label}</p>
+      <p className={cn("leading-none", bold ? "text-[13px] font-bold text-card-foreground" : "text-[12px] font-semibold text-card-foreground")}>{value}</p>
     </div>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
-      <span className="text-[12px] font-semibold text-card-foreground">{value}</span>
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-semibold text-card-foreground">{value}</span>
     </div>
   );
 }
