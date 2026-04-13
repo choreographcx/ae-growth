@@ -140,6 +140,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [exporting, setExporting] = useState(false);
 
   const allCampaigns = useMemo(() => {
     return enabledPlatforms.flatMap(p => generateCampaigns(p));
@@ -155,36 +158,100 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
   const handleExportPDF = useCallback(async () => {
-    const el = document.getElementById('dashboard-main-content');
-    if (!el) return;
-    try {
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        scrollY: -window.scrollY,
-        windowHeight: el.scrollHeight,
-        height: el.scrollHeight,
-      });
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const pdfWidth = 297; // A4 landscape width in mm
-      const pdfHeight = 210; // A4 landscape height in mm
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const pages = Math.ceil(imgHeight * ratio / pdfHeight);
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const originalPath = location.pathname;
+    setExporting(true);
 
-      for (let i = 0; i < pages; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -(i * pdfHeight), imgWidth * ratio, imgHeight * ratio);
+    // Build list of routes to capture: overview + enabled platforms
+    const platformRoutes: { path: string; label: string }[] = enabledPlatforms.map(p => ({
+      path: `/${p}`,
+      label: client.platforms[p].label,
+    }));
+    const routes = [
+      { path: '/', label: 'Overview' },
+      ...platformRoutes,
+    ];
+
+    try {
+      const captures: { canvas: HTMLCanvasElement; label: string }[] = [];
+
+      for (const route of routes) {
+        // Navigate to route
+        navigate(route.path);
+        // Wait for render
+        await new Promise(r => setTimeout(r, 800));
+
+        const el = document.getElementById('dashboard-main-content');
+        if (!el) continue;
+
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          scrollY: -window.scrollY,
+          windowHeight: el.scrollHeight,
+          height: el.scrollHeight,
+          width: el.scrollWidth,
+        });
+        captures.push({ canvas, label: route.label });
       }
 
-      pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
+      if (captures.length === 0) return;
+
+      // Use the first capture to determine PDF page dimensions based on content width
+      const firstCanvas = captures[0].canvas;
+      const contentWidthMM = 290; // leave 10mm margin
+      const scale = contentWidthMM / firstCanvas.width;
+      const marginX = 5;
+      const marginY = 5;
+
+      let pdf: jsPDF | null = null;
+
+      for (let c = 0; c < captures.length; c++) {
+        const { canvas } = captures[c];
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const pageWidthMM = canvas.width * scale + marginX * 2;
+        const totalHeightMM = canvas.height * scale;
+        const pageHeightMM = pageWidthMM * (210 / 297); // A4 aspect ratio
+
+        if (c === 0) {
+          pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: [pageWidthMM, pageHeightMM],
+          });
+        }
+
+        if (!pdf) continue;
+
+        // Split this section into pages
+        const usableHeight = pageHeightMM - marginY * 2;
+        const numPages = Math.ceil(totalHeightMM / usableHeight);
+
+        for (let p = 0; p < numPages; p++) {
+          if (c > 0 || p > 0) {
+            pdf.addPage([pageWidthMM, pageHeightMM], 'landscape');
+          }
+          pdf.addImage(
+            imgData, 'JPEG',
+            marginX,
+            marginY - (p * usableHeight),
+            canvas.width * scale,
+            totalHeightMM
+          );
+        }
+      }
+
+      if (pdf) {
+        pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
+      }
     } catch (err) {
       console.error('PDF export failed', err);
+    } finally {
+      // Navigate back to original page
+      navigate(originalPath);
+      setExporting(false);
     }
-  }, []);
+  }, [enabledPlatforms, client.platforms, navigate, location.pathname]);
 
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
