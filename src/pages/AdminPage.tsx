@@ -32,7 +32,7 @@ const standardMetrics = [
 ];
 
 export default function AdminPage() {
-  const { client, updateClient, togglePlatform } = useDashboard();
+  const { client, updateClient, togglePlatform, saveConfig, isSaving, lastSavedAt } = useDashboard();
   const { isAdmin } = useAuth();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
