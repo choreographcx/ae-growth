@@ -43,7 +43,7 @@ export default function OverviewPage() {
     const updatedSpend: KPIGroupData | undefined = spendCard ? {
       ...spendCard,
       supporting: [
-        { label: 'Budget', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{totalBudget.toLocaleString()}</span> },
+        { label: 'Budget', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} size={11} />{totalBudget.toLocaleString()}</span> },
         { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
       ],
     } : undefined;
