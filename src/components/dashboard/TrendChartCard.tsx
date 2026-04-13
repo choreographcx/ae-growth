@@ -89,7 +89,7 @@ export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', val
             <YAxis
               tickLine={false}
               axisLine={false}
-              width={currencyIcon ? 60 : 44}
+              width={currency ? 60 : 44}
               tick={currency ? <CurrencyTick currency={currency} valueSuffix={valueSuffix} /> : { fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               tickFormatter={currency ? undefined : (v: number) => `${valuePrefix}${formatCompactValue(v)}${valueSuffix}`}
             />
