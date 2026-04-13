@@ -340,3 +340,91 @@ function AccountIdRepeater({ label, idLabel, placeholder, values, onChange }: { 
     </div>
   );
 }
+
+/* ─── Platform Card with budget inline edit ─── */
+function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currencySymbol, formatBudgetNumber, parseBudgetString }: {
+  platform: typeof allPlatforms[0];
+  cfg: ClientProfile['platforms'][PlatformKey];
+  togglePlatform: (k: PlatformKey) => void;
+  updateClient: (u: Partial<ClientProfile>) => void;
+  client: ClientProfile;
+  currencySymbol: string;
+  formatBudgetNumber: (n: number) => string;
+  parseBudgetString: (s: string) => number;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const hasIds = cfg.accountIds.filter(Boolean).length > 0;
+
+  const startEdit = () => {
+    setDraft(cfg.budget ? formatBudgetNumber(cfg.budget) : '');
+    setEditing(true);
+  };
+
+  const handleChange = (val: string) => {
+    // Allow digits and commas only
+    const clean = val.replace(/[^0-9,]/g, '');
+    // Re-format with commas
+    const num = Number(clean.replace(/,/g, ''));
+    setDraft(isNaN(num) || num === 0 ? clean : num.toLocaleString());
+  };
+
+  const saveBudget = () => {
+    const num = parseBudgetString(draft);
+    updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: num } } });
+    setEditing(false);
+  };
+
+  const clearBudget = () => {
+    updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: 0 } } });
+    setEditing(false);
+  };
+
+  return (
+    <div className={cn(
+      "flex flex-col p-4 rounded-xl border-2 transition-all duration-200",
+      cfg.enabled ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"
+    )}>
+      <div className="flex items-center justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-card-foreground">{p.label}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[10px] text-muted-foreground">{cfg.accountIds.filter(Boolean).length} account(s)</span>
+            {cfg.enabled && !hasIds && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 text-warning bg-warning/5">No IDs</Badge>
+            )}
+          </div>
+        </div>
+        <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
+      </div>
+      {cfg.enabled && (
+        <div className="mt-3 pt-3 border-t border-border/40">
+          <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget</Label>
+          {editing ? (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-xs text-muted-foreground shrink-0">{currencySymbol}</span>
+              <Input
+                autoFocus
+                value={draft}
+                onChange={e => handleChange(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveBudget(); if (e.key === 'Escape') setEditing(false); }}
+                className="h-7 text-xs tabular-nums flex-1"
+                placeholder="0"
+              />
+              <button onClick={saveBudget} className="p-1 rounded hover:bg-primary/10 text-primary transition-colors" title="Save">
+                <Check size={13} />
+              </button>
+              <button onClick={clearBudget} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Clear">
+                <X size={13} />
+              </button>
+            </div>
+          ) : (
+            <button onClick={startEdit} className="mt-1 text-xs tabular-nums text-card-foreground hover:text-primary transition-colors text-left">
+              {cfg.budget ? `${currencySymbol}${formatBudgetNumber(cfg.budget)}` : <span className="text-muted-foreground italic">Set budget…</span>}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
