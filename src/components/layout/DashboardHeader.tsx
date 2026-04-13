@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
-import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
+import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
@@ -141,7 +140,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [exporting, setExporting] = useState(false);
+  
 
   const allCampaigns = useMemo(() => {
     return enabledPlatforms.flatMap(p => generateCampaigns(p));
