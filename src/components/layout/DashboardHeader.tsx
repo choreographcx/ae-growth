@@ -54,9 +54,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     setOpen(false);
   };
 
-  const displayText = activePreset
-    ? activePreset.label
-    : `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d')}`;
+  const displayText = `${format(range.from, 'MMM d, yyyy')} – ${format(range.to, 'MMM d, yyyy')}`;
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
@@ -65,7 +63,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
           variant="outline"
           className={cn(
             "justify-start text-left font-normal gap-1.5",
-            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[180px]"
+            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[240px]"
           )}
         >
           <CalendarIcon size={compact ? 12 : 12} className="shrink-0 text-muted-foreground" />
@@ -177,7 +175,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-4 w-px bg-border mx-0.5" />
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export</Button>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export PDF</Button>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock size={11} />
                 <span>{lastRefresh}</span>
