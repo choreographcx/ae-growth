@@ -1,5 +1,5 @@
 import { KPIGroupData } from '@/types/dashboard';
-import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, type LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, Play, UserCheck, type LucideIcon } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,8 @@ const iconMap: Record<string, LucideIcon> = {
   Target,
   Users,
   FileText,
+  Play,
+  UserCheck,
 };
 
 const iconColorMap: Record<string, string> = {
@@ -21,6 +23,8 @@ const iconColorMap: Record<string, string> = {
   Target: 'text-orange-600 bg-orange-50',
   Users: 'text-cyan-600 bg-cyan-50',
   FileText: 'text-rose-600 bg-rose-50',
+  Play: 'text-pink-600 bg-pink-50',
+  UserCheck: 'text-teal-600 bg-teal-50',
 };
 
 interface KPIGroupCardProps {
