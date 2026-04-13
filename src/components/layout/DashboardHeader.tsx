@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Menu, Download, Clock, CalendarIcon } from 'lucide-react';
+import { Menu, Download, Clock, CalendarIcon, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -99,6 +100,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { comparePeriod, setComparePeriod, lastRefresh } = useDashboard();
   const isMobile = useIsMobile();
+  const { signOut, profile } = useAuth();
 
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-6">
@@ -125,6 +127,11 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 <Clock size={12} />
                 <span>{lastRefresh}</span>
               </div>
+              <div className="h-5 w-px bg-border mx-1" />
+              <span className="text-xs text-muted-foreground truncate max-w-[120px]">{profile?.email}</span>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={signOut} title="Sign out">
+                <LogOut size={14} />
+              </Button>
             </>
           )}
         </div>
