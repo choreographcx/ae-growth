@@ -69,6 +69,7 @@ function generateTimeSeries(days: number, base: number, variance: number): TimeS
 export const overviewKPIGroups: KPIGroupData[] = [
   {
     title: 'Spend',
+    icon: 'DollarSign',
     primary: { label: 'Total Spend', value: 142580, formattedValue: '$142,580', change: 8.2, trend: generateTrend(142000, 10000) },
     supporting: [
       { label: 'Budget', formattedValue: '$165,000' },
@@ -77,6 +78,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
   },
   {
     title: 'Impressions',
+    icon: 'Eye',
     primary: { label: 'Impressions', value: 12450000, formattedValue: '12.45M', change: 12.4, trend: generateTrend(12000000, 2000000) },
     supporting: [
       { label: 'CPM', formattedValue: '$11.45', change: -3.8 },
@@ -84,6 +86,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
   },
   {
     title: 'Clicks',
+    icon: 'MousePointerClick',
     primary: { label: 'Clicks', value: 186750, formattedValue: '186,750', change: 9.1, trend: generateTrend(180000, 20000) },
     supporting: [
       { label: 'CTR', formattedValue: '1.50%', change: -2.3 },
@@ -92,6 +95,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
   },
   {
     title: 'Conversions',
+    icon: 'Target',
     primary: { label: 'Conversions', value: 3842, formattedValue: '3,842', change: 15.3, trend: generateTrend(3500, 500) },
     supporting: [
       { label: 'CPA', formattedValue: '$37.10', change: -5.8 },
@@ -100,6 +104,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
   },
   {
     title: 'Reach',
+    icon: 'Users',
     primary: { label: 'Reach', value: 8920000, formattedValue: '8.92M', change: 10.1, trend: generateTrend(8500000, 1000000) },
     supporting: [
       { label: 'Frequency', formattedValue: '1.40', change: 2.1 },
@@ -110,6 +115,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
 export const overviewKPIGroupsRow2: KPIGroupData[] = [
   {
     title: 'Landing Page Views',
+    icon: 'FileText',
     primary: { label: 'LPV', value: 142300, formattedValue: '142,300', change: 7.5, trend: generateTrend(140000, 15000) },
     supporting: [
       { label: 'Cost per LPV', formattedValue: '$1.00', change: -2.1 },
