@@ -26,6 +26,8 @@ export interface ClientProfile {
   conversionNotes: string;
   platforms: Record<PlatformKey, PlatformConfig>;
   alertThresholds: AlertThresholds;
+  metricMappings: MetricMapping[];
+  namingNormalization: NamingNormalization;
 }
 
 export interface AlertThresholds {
@@ -34,6 +36,21 @@ export interface AlertThresholds {
   frequencyThreshold: number;
   zeroConversionSpend: number;
   viewabilityThreshold: number;
+}
+
+export interface MetricMapping {
+  standardLabel: string;
+  platformMetric: string;
+  platform: PlatformKey;
+}
+
+export interface NamingNormalization {
+  campaign: string;
+  adSetOrAdGroup: string;
+  adOrCreative: string;
+  placement: string;
+  audience: string;
+  objective: string;
 }
 
 export interface KPIMetric {
@@ -47,6 +64,12 @@ export interface KPIMetric {
 export interface KPIPair {
   primary: KPIMetric;
   secondary: KPIMetric;
+}
+
+export interface KPIGroupData {
+  title: string;
+  primary: KPIMetric;
+  supporting: { label: string; formattedValue: string; change?: number }[];
 }
 
 export interface CampaignRow {
