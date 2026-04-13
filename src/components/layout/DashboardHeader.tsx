@@ -243,7 +243,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
         if (!pdf) continue;
 
-        pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', margin, margin, imgW, imgH);
       }
 
       if (pdf) {
