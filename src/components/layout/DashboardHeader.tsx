@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
@@ -151,6 +153,38 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
+  const handleExportPDF = useCallback(async () => {
+    const el = document.getElementById('dashboard-main-content');
+    if (!el) return;
+    try {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        scrollY: -window.scrollY,
+        windowHeight: el.scrollHeight,
+        height: el.scrollHeight,
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const pdfWidth = 297; // A4 landscape width in mm
+      const pdfHeight = 210; // A4 landscape height in mm
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const pages = Math.ceil(imgHeight * ratio / pdfHeight);
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      for (let i = 0; i < pages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -(i * pdfHeight), imgWidth * ratio, imgHeight * ratio);
+      }
+
+      pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed', err);
+    }
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
       <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
@@ -178,7 +212,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]"><Download size={11} /> Export PDF</Button>
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF}><Download size={11} /> Export PDF</Button>
               <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
                 <LogOut size={12} /> Sign out
