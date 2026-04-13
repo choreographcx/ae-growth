@@ -63,7 +63,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
 
   return (
     <div className="space-y-6 md:space-y-10">
-      <SectionHeader title={title} subtitle={client.platforms[platformKey].accountIds.join(', ')} />
+      <SectionHeader title={title} />
 
       {tabs && tabs.length > 1 && (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
