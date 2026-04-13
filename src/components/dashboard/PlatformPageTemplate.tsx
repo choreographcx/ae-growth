@@ -38,7 +38,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
         ],
       } as KPIGroupData;
     });
-    return applyCurrencyToKPIGroups(withBudget, currency);
+    return applyCurrencyToKPIGroups(withBudget, currency, 20);
   }, [platformKey, budget, currency]);
 
   const campaigns = useMemo(() => generateCampaigns(platformKey), [platformKey]);
