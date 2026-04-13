@@ -176,12 +176,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               )}
               <div className="h-4 w-px bg-border mx-0.5" />
               <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export PDF</Button>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock size={11} />
-                <span>{lastRefresh}</span>
-              </div>
               <div className="h-4 w-px bg-border mx-0.5" />
-              <span className="text-xs text-muted-foreground truncate max-w-[120px]">{profile?.email}</span>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Sign out">
                 <LogOut size={13} />
               </Button>
