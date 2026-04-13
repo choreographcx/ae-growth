@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
@@ -178,7 +180,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]"><Download size={11} /> Export PDF</Button>
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF}><Download size={11} /> Export PDF</Button>
               <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
                 <LogOut size={12} /> Sign out
