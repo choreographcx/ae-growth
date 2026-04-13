@@ -8,7 +8,7 @@ import { getPlatformKPIGroups, generateCampaigns, alerts } from '@/data/mockData
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useMemo } from 'react';
-import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
+import { CurrencySymbol, applyCurrencyToKPIGroups, getCurrencyPrefix } from '@/lib/currency';
 
 interface PlatformPageTemplateProps {
   platformKey: PlatformKey;
