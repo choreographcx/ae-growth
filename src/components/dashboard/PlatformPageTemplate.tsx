@@ -33,7 +33,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       return {
         ...g,
         supporting: [
-          { label: 'Budget', formattedValue: <span className="inline-flex items-baseline gap-0.5"><CurrencySymbol currency={currency} size={11} />{budget.toLocaleString()}</span> },
+          { label: 'Budget', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{budget.toLocaleString()}</span> },
           { label: 'Pacing', formattedValue: `${pacing}%` },
         ],
       } as KPIGroupData;
