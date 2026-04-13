@@ -71,21 +71,6 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Summary bar */}
-      <div className="flex flex-wrap gap-4 px-1">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-block w-2 h-2 rounded-full bg-success" />
-          <span>{enabledCount} platform{enabledCount !== 1 ? 's' : ''} enabled</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-block w-2 h-2 rounded-full bg-primary" />
-          <span>{totalAccounts} account ID{totalAccounts !== 1 ? 's' : ''} configured</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-block w-2 h-2 rounded-full bg-chart-4" />
-          <span>{client.metricMappings.length} metric mapping{client.metricMappings.length !== 1 ? 's' : ''}</span>
-        </div>
-      </div>
 
       <Accordion type="multiple" defaultValue={['client', 'platforms']} className="space-y-3">
         {/* Client Profile */}
