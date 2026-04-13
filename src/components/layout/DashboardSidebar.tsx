@@ -1,9 +1,17 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
-import { platformIcons } from '@/lib/platformIcons';
+import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+
+function PlatformIcon({ entry, size = 18, className }: { entry: PlatformIconEntry; size?: number; className?: string }) {
+  if (entry.type === 'lucide') {
+    const Icon = entry.icon;
+    return <Icon size={size} className={cn("shrink-0", className)} />;
+  }
+  return <img src={entry.src} alt="" width={size} height={size} className={cn("shrink-0 dark:invert", className)} />;
+}
 
 export function DashboardSidebar() {
   const { enabledPlatforms, client } = useDashboard();
@@ -11,14 +19,14 @@ export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
-    { to: '/', label: 'Overview', icon: LayoutDashboard },
+    { to: '/', label: 'Overview', entry: { type: 'lucide' as const, icon: LayoutDashboard } },
     ...enabledPlatforms.map(p => ({
       to: `/${p}`,
       label: client.platforms[p].label,
-      icon: platformIcons[p],
+      entry: platformIconEntries[p],
     })),
-    { to: '/tracking-health', label: 'Tracking Health', icon: Activity },
-    { to: '/admin', label: 'Admin / Settings', icon: Settings },
+    { to: '/tracking-health', label: 'Tracking Health', entry: { type: 'lucide' as const, icon: Activity } },
+    { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
   ];
 
   return (
@@ -34,7 +42,6 @@ export function DashboardSidebar() {
       </div>
       <nav className="flex-1 py-3 px-2 space-y-0.5">
         {navItems.map(item => {
-          const Icon = item.icon;
           const isActive = location.pathname === item.to;
           return (
             <NavLink key={item.to} to={item.to} className={cn(
@@ -43,7 +50,7 @@ export function DashboardSidebar() {
                 ? "bg-sidebar-accent text-sidebar-primary"
                 : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
             )}>
-              <Icon size={18} className="shrink-0" />
+              <PlatformIcon entry={item.entry} size={18} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </NavLink>
           );
