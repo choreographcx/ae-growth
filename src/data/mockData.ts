@@ -203,16 +203,19 @@ export function getPlatformKPIGroups(platform: PlatformKey): KPIGroupData[] {
   const base: KPIGroupData[] = [
     {
       title: 'Spend',
+      icon: 'DollarSign',
       primary: { label: 'Spend', value: summary.spend, formattedValue: `$${summary.spend.toLocaleString()}`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.spend, summary.spend * 0.1) },
       supporting: [],
     },
     {
       title: 'Impressions',
+      icon: 'Eye',
       primary: { label: 'Impressions', value: summary.impressions, formattedValue: `${(summary.impressions / 1e6).toFixed(2)}M`, change: +(Math.random() * 20 - 5).toFixed(1), trend: generateTrend(summary.impressions, summary.impressions * 0.15) },
       supporting: [{ label: 'CPM', formattedValue: `$${(summary.spend / summary.impressions * 1000).toFixed(2)}`, change: +(Math.random() * 10 - 5).toFixed(1) }],
     },
     {
       title: 'Clicks',
+      icon: 'MousePointerClick',
       primary: { label: 'Clicks', value: summary.clicks, formattedValue: summary.clicks.toLocaleString(), change: +(Math.random() * 15 - 3).toFixed(1), trend: generateTrend(summary.clicks, summary.clicks * 0.1) },
       supporting: [
         { label: 'CTR', formattedValue: `${summary.ctr.toFixed(2)}%`, change: +(Math.random() * 10 - 5).toFixed(1) },
@@ -221,6 +224,7 @@ export function getPlatformKPIGroups(platform: PlatformKey): KPIGroupData[] {
     },
     {
       title: 'Conversions',
+      icon: 'Target',
       primary: { label: 'Conversions', value: summary.conversions, formattedValue: summary.conversions.toLocaleString(), change: +(Math.random() * 20 - 3).toFixed(1), trend: generateTrend(summary.conversions, summary.conversions * 0.15) },
       supporting: [
         { label: 'CPA', formattedValue: `$${summary.cpa.toFixed(2)}`, change: +(Math.random() * 15 - 8).toFixed(1) },
