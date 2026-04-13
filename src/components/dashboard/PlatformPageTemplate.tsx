@@ -1,10 +1,10 @@
 import { PlatformKey } from '@/types/dashboard';
-import { KPIPairCard } from '@/components/dashboard/KPIPairCard';
+import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PerformanceTable } from '@/components/dashboard/PerformanceTable';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { getPlatformKPIs, generateCampaigns, alerts } from '@/data/mockData';
+import { getPlatformKPIGroups, generateCampaigns, alerts } from '@/data/mockData';
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useMemo } from 'react';
@@ -19,7 +19,7 @@ interface PlatformPageTemplateProps {
 
 export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }: PlatformPageTemplateProps) {
   const { client } = useDashboard();
-  const kpis = useMemo(() => getPlatformKPIs(platformKey), [platformKey]);
+  const kpiGroups = useMemo(() => getPlatformKPIGroups(platformKey), [platformKey]);
   const campaigns = useMemo(() => generateCampaigns(platformKey), [platformKey]);
   const platformAlerts = alerts.filter(a => a.platform === platformKey);
   const [activeTab, setActiveTab] = useState(tabs?.[0]?.key || 'all');
@@ -41,7 +41,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <SectionHeader title={title} subtitle={`${client.name} · ${client.platforms[platformKey].accountIds.join(', ')}`} />
 
       {tabs && tabs.length > 1 && (
@@ -53,31 +53,35 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {kpis.map((pair, i) => <KPIPairCard key={i} pair={pair} />)}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiGroups.map((group, i) => <KPIGroupCard key={i} data={group} />)}
       </div>
 
       {/* Trends */}
-      <SectionHeader title="Trends" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TrendChartCard title="Spend" data={spendData} valuePrefix="$" color="hsl(var(--chart-1))" />
-        <TrendChartCard title="Conversions" data={convData} color="hsl(var(--chart-3))" />
+      <div>
+        <SectionHeader title="Trends" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TrendChartCard title="Spend" data={spendData} valuePrefix="$" color="hsl(var(--chart-1))" />
+          <TrendChartCard title="Conversions" data={convData} color="hsl(var(--chart-3))" />
+        </div>
       </div>
 
       {/* Campaign Table */}
-      <PerformanceTable data={campaigns} title="Campaign Performance" />
+      <div>
+        <PerformanceTable data={campaigns} title="Campaign Performance" />
+      </div>
 
       {/* Extra sections */}
       {extraSections}
 
       {/* Diagnostics */}
       {platformAlerts.length > 0 && (
-        <>
+        <div>
           <SectionHeader title="Diagnostics" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {platformAlerts.map(a => <AlertCard key={a.id} alert={a} />)}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
