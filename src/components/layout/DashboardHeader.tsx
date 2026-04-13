@@ -158,7 +158,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
+    <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
       <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
         <div className="flex items-center gap-2 min-w-0">
           {isMobile && (
