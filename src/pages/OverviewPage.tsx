@@ -8,6 +8,7 @@ import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsT
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
+import { CurrencySymbol } from '@/lib/currency';
 
 // CTR time series derived from clicks/impressions mock pattern
 function generateCTRTimeSeries() {
@@ -28,7 +29,7 @@ export default function OverviewPage() {
     []
   );
 
-  const currencyPrefix = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'د.إ' : client.currency === 'SAR' ? '﷼' : client.currency + ' ';
+  const currency = client.currency;
 
   // Derive total budget from platform configs
   const totalBudget = useMemo(() =>
@@ -42,12 +43,12 @@ export default function OverviewPage() {
     const updatedSpend: KPIGroupData | undefined = spendCard ? {
       ...spendCard,
       supporting: [
-        { label: 'Budget', formattedValue: `${currencyPrefix}${totalBudget.toLocaleString()}` },
+        { label: 'Budget', formattedValue: <span className="inline-flex items-baseline gap-0.5"><CurrencySymbol currency={currency} size={11} />{totalBudget.toLocaleString()}</span> },
         { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
       ],
     } : undefined;
     return [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
-  }, [totalBudget, currencyPrefix]);
+  }, [totalBudget, currency]);
 
   return (
     <div className="space-y-5 md:space-y-7">

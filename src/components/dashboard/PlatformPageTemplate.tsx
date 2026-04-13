@@ -8,6 +8,7 @@ import { getPlatformKPIGroups, generateCampaigns, alerts } from '@/data/mockData
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useMemo } from 'react';
+import { CurrencySymbol } from '@/lib/currency';
 
 interface PlatformPageTemplateProps {
   platformKey: PlatformKey;
@@ -21,7 +22,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
   const { client } = useDashboard();
   const platformCfg = client.platforms[platformKey];
   const budget = platformCfg?.budget || 0;
-  const currencyPrefix = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'د.إ' : client.currency === 'SAR' ? '﷼' : client.currency + ' ';
+  const currency = client.currency;
 
   const kpiGroups = useMemo(() => {
     const base = getPlatformKPIGroups(platformKey);
@@ -32,12 +33,12 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       return {
         ...g,
         supporting: [
-          { label: 'Budget', formattedValue: `${currencyPrefix}${budget.toLocaleString()}` },
+          { label: 'Budget', formattedValue: <span className="inline-flex items-baseline gap-0.5"><CurrencySymbol currency={currency} size={11} />{budget.toLocaleString()}</span> },
           { label: 'Pacing', formattedValue: `${pacing}%` },
         ],
       } as KPIGroupData;
     });
-  }, [platformKey, budget, currencyPrefix]);
+  }, [platformKey, budget, currency]);
 
   const campaigns = useMemo(() => generateCampaigns(platformKey), [platformKey]);
   const platformAlerts = alerts.filter(a => a.platform === platformKey);
