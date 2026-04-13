@@ -63,15 +63,16 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
 
   return (
     <div className="space-y-6 md:space-y-10">
-      <SectionHeader title={title} />
-
-      {tabs && tabs.length > 1 && (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            {tabs.map(t => <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>)}
-          </TabsList>
-        </Tabs>
-      )}
+      <SectionHeader
+        title={title}
+        action={tabs && tabs.length > 1 ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              {tabs.map(t => <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>)}
+            </TabsList>
+          </Tabs>
+        ) : undefined}
+      />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
