@@ -49,11 +49,6 @@ export function DashboardSidebar() {
           );
         })}
       </nav>
-      {!collapsed && (
-        <div className="p-4 border-t border-sidebar-border">
-          <p className="text-xs text-sidebar-muted">Powered by MediaPulse</p>
-        </div>
-      )}
     </aside>
   );
 }
