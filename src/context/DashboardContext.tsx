@@ -67,8 +67,27 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const fallback: DashboardContextType = {
+  client: defaultClient,
+  setClient: () => {},
+  clients: savedClients,
+  dateRange: 'Last 30 Days',
+  setDateRange: () => {},
+  showPreviousPeriod: false,
+  setShowPreviousPeriod: () => {},
+  togglePlatform: () => {},
+  updateClient: () => {},
+  enabledPlatforms: [],
+  lastRefresh: '',
+  selectedPlatforms: [],
+  setSelectedPlatforms: () => {},
+  selectedCampaigns: [],
+  setSelectedCampaigns: () => {},
+  selectedObjectives: [],
+  setSelectedObjectives: () => {},
+};
+
 export function useDashboard() {
   const ctx = useContext(DashboardContext);
-  if (!ctx) throw new Error('useDashboard must be used within DashboardProvider');
-  return ctx;
+  return ctx ?? fallback;
 }
