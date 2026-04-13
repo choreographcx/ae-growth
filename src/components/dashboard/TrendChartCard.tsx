@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { TimeSeriesPoint } from '@/types/dashboard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
