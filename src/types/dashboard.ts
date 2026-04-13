@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'x' | 'linkedin' | 'programmatic';
 
 /** Canonical display order for all platforms */
