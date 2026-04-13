@@ -57,12 +57,12 @@ export default function AdminPage() {
         <TabsContent value="configuration">
 
       {/* Action bar */}
-      <div className="flex items-center gap-2 flex-wrap mb-2">
+      <div className="flex items-center justify-end gap-2 mb-2">
         <div className="hidden sm:flex items-center gap-2">
           <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
           <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
         </div>
-        <div className="ml-auto flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1">
           <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <Clock size={10} />
