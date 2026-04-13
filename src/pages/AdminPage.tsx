@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Copy, Archive, CheckCircle, Plus, X, Upload, Download, Building2, Globe, Hash, Clock } from 'lucide-react';
+import { Save, CheckCircle, Plus, X, Upload, Download, Building2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
@@ -29,15 +29,7 @@ const standardMetrics = [
 ];
 
 export default function AdminPage() {
-  const { client, updateClient, togglePlatform, clients, setClient } = useDashboard();
-
-  const handleLoadProfile = (id: string) => {
-    const found = clients.find(c => c.id === id);
-    if (found) {
-      setClient(found);
-      toast.success(`Switched to ${found.name}`);
-    }
-  };
+  const { client, updateClient, togglePlatform } = useDashboard();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
   const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
@@ -46,54 +38,20 @@ export default function AdminPage() {
     <div className="space-y-8">
       <SectionHeader title="Admin / Settings" subtitle="Configure client profile, platforms, and tracking" />
 
-      {/* Client Switcher */}
+      {/* Action bar */}
       <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <Building2 size={16} className="text-primary" />
-            <h3 className="text-sm font-semibold text-card-foreground">Client Profiles</h3>
+            <h3 className="text-sm font-semibold text-card-foreground">Configuration</h3>
           </div>
           <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
             <Clock size={10} />
             <span>Last saved: Today, 2:45 PM</span>
           </div>
         </div>
-
-        {/* Profile cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
-          {clients.map(c => {
-            const isActive = c.id === client.id;
-            const platformCount = Object.values(c.platforms).filter(p => p.enabled).length;
-            return (
-              <button
-                key={c.id}
-                onClick={() => handleLoadProfile(c.id)}
-                className={cn(
-                  "relative text-left p-4 rounded-xl border-2 transition-all duration-200",
-                  isActive
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-border hover:border-primary/30 hover:bg-muted/30"
-                )}
-              >
-                {isActive && (
-                  <Badge className="absolute -top-2 right-3 text-[9px] px-1.5 py-0 bg-primary text-primary-foreground">Active</Badge>
-                )}
-                <p className="text-sm font-semibold text-card-foreground">{c.name}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Hash size={9} />{c.code}</span>
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Globe size={9} />{c.currency}</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-1.5">{platformCount} platform{platformCount !== 1 ? 's' : ''} · {c.websiteDomain}</p>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Action bar */}
-        <div className="flex items-center gap-2 flex-wrap pt-4 border-t border-border/60">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button size="sm" onClick={() => toast.success('Configuration saved')} className="gap-1.5 h-8 text-xs"><Save size={12} /> Save</Button>
-          <Button size="sm" variant="outline" onClick={() => toast.info('Configuration duplicated')} className="gap-1.5 h-8 text-xs"><Copy size={12} /> Duplicate</Button>
-          <Button size="sm" variant="outline" onClick={() => toast.info('Configuration archived')} className="gap-1.5 h-8 text-xs"><Archive size={12} /> Archive</Button>
           <Button size="sm" variant="outline" onClick={() => {
             if (!client.name || !client.code) {
               toast.error('Missing required fields: Client Name, Code');
