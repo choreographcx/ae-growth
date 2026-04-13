@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Menu, Download, Clock, CalendarIcon, LogOut } from 'lucide-react';
+import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
@@ -67,7 +67,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
             compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[240px]"
           )}
         >
-          <CalendarIcon size={compact ? 12 : 12} className="shrink-0 text-muted-foreground" />
+          <CalendarIcon size={12} className="shrink-0 text-muted-foreground" />
           <span className="truncate">{displayText}</span>
         </Button>
       </PopoverTrigger>
@@ -128,13 +128,13 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const {
-    lastRefresh, enabledPlatforms, client,
+    enabledPlatforms, client,
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
     selectedObjectives, setSelectedObjectives,
   } = useDashboard();
   const isMobile = useIsMobile();
-  const { signOut, profile } = useAuth();
+  const { signOut } = useAuth();
 
   const allCampaigns = useMemo(() => {
     return enabledPlatforms.flatMap(p => generateCampaigns(p));
@@ -150,8 +150,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
   return (
-    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-6">
-      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-14'}`}>
+    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
+      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
         <div className="flex items-center gap-2 min-w-0">
           {isMobile && (
             <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
@@ -159,27 +159,27 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5">
           {!isMobile && (
             <>
               <DateRangePicker />
-              <div className="h-4 w-px bg-border mx-0.5" />
+              <div className="h-3.5 w-px bg-border mx-1" />
               <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
               <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
               <MultiSelectFilter label="Objectives" options={objectives} selected={selectedObjectives} onChange={setSelectedObjectives} />
               {hasFilters && (
                 <button
                   onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); setSelectedObjectives([]); }}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
                 >
                   Clear
                 </button>
               )}
-              <div className="h-4 w-px bg-border mx-0.5" />
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export PDF</Button>
-              <div className="h-4 w-px bg-border mx-0.5" />
+              <div className="h-3.5 w-px bg-border mx-1" />
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]"><Download size={11} /> Export PDF</Button>
+              <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Sign out">
-                <LogOut size={13} />
+                <LogOut size={12} />
               </Button>
             </>
           )}
