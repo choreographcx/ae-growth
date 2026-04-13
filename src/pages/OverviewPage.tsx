@@ -19,11 +19,14 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      {/* Secondary KPI Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 md:gap-4">
-        {overviewKPIGroupsRow2.map((group, i) => (
-          <KPIGroupCard key={i} data={group} />
-        ))}
+      {/* Secondary KPI Row + Funnel */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
+        <div>
+          {overviewKPIGroupsRow2.map((group, i) => (
+            <KPIGroupCard key={i} data={group} />
+          ))}
+        </div>
+        <FunnelCard />
       </div>
 
       {/* Trend Charts */}
@@ -43,19 +46,13 @@ export default function OverviewPage() {
         <PlatformComparison data={platformSummaries} />
       </div>
 
-      {/* Funnel & Alerts side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        <div className="space-y-3 md:space-y-4">
-          <SectionHeader title="Funnel" />
-          <FunnelCard />
-        </div>
-        <div className="space-y-3 md:space-y-4">
-          <SectionHeader title="Diagnostics & Alerts" />
-          <div className="space-y-2.5 md:space-y-3">
-            {alerts.map(alert => (
-              <AlertCard key={alert.id} alert={alert} />
-            ))}
-          </div>
+      {/* Diagnostics & Alerts */}
+      <div className="space-y-3 md:space-y-4">
+        <SectionHeader title="Diagnostics & Alerts" />
+        <div className="space-y-2.5 md:space-y-3">
+          {alerts.map(alert => (
+            <AlertCard key={alert.id} alert={alert} />
+          ))}
         </div>
       </div>
     </div>
