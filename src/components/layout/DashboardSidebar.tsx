@@ -27,7 +27,7 @@ export function DashboardSidebar() {
       collapsed ? "w-16" : "w-60"
     )}>
       <div className="flex items-center justify-between px-4 h-16 border-b border-sidebar-border">
-        {!collapsed && <span className="text-lg font-bold text-sidebar-foreground tracking-tight">MediaPulse</span>}
+        {!collapsed && <span className="text-lg font-bold text-sidebar-foreground tracking-tight"></span>}
         <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-muted transition-colors">
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
