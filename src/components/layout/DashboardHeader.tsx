@@ -54,7 +54,8 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     setOpen(false);
   };
 
-  const displayText = `${format(range.from, 'MMM d, yyyy')} – ${format(range.to, 'MMM d, yyyy')}`;
+  const fromFormat = range.from.getFullYear() === range.to.getFullYear() ? 'MMM d' : 'MMM d, yyyy';
+  const displayText = `${format(range.from, fromFormat)} – ${format(range.to, 'MMM d, yyyy')}`;
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
