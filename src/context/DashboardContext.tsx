@@ -8,12 +8,19 @@ interface DashboardContextType {
   clients: ClientProfile[];
   dateRange: string;
   setDateRange: (d: string) => void;
-  comparePeriod: string;
-  setComparePeriod: (c: string) => void;
+  showPreviousPeriod: boolean;
+  setShowPreviousPeriod: (v: boolean) => void;
   togglePlatform: (key: PlatformKey) => void;
   updateClient: (updates: Partial<ClientProfile>) => void;
   enabledPlatforms: PlatformKey[];
   lastRefresh: string;
+  // Filters
+  selectedPlatforms: string[];
+  setSelectedPlatforms: (v: string[]) => void;
+  selectedCampaigns: string[];
+  setSelectedCampaigns: (v: string[]) => void;
+  selectedObjectives: string[];
+  setSelectedObjectives: (v: string[]) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -21,8 +28,13 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ClientProfile>(defaultClient);
   const [dateRange, setDateRange] = useState('Last 30 Days');
-  const [comparePeriod, setComparePeriod] = useState('Previous Period');
+  const [showPreviousPeriod, setShowPreviousPeriod] = useState(false);
   const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Filters
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
+  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
 
   const togglePlatform = (key: PlatformKey) => {
     setClient(prev => ({
@@ -43,8 +55,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   return (
     <DashboardContext.Provider value={{
       client, setClient, clients: savedClients,
-      dateRange, setDateRange, comparePeriod, setComparePeriod,
+      dateRange, setDateRange,
+      showPreviousPeriod, setShowPreviousPeriod,
       togglePlatform, updateClient, enabledPlatforms, lastRefresh,
+      selectedPlatforms, setSelectedPlatforms,
+      selectedCampaigns, setSelectedCampaigns,
+      selectedObjectives, setSelectedObjectives,
     }}>
       {children}
     </DashboardContext.Provider>

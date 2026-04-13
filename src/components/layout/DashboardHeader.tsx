@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Menu, Download, Clock, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
+import { generateCampaigns } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
@@ -23,8 +25,10 @@ const presets = [
   { label: 'Last 90 Days', from: subDays(new Date(), 90), to: new Date() },
 ];
 
+const objectives = ['Awareness', 'Traffic', 'Conversions', 'Lead Gen', 'Engagement'];
+
 function DateRangePicker({ compact = false }: { compact?: boolean }) {
-  const { dateRange, setDateRange } = useDashboard();
+  const { dateRange, setDateRange, showPreviousPeriod, setShowPreviousPeriod } = useDashboard();
   const [open, setOpen] = useState(false);
 
   const activePreset = presets.find(p => p.label === dateRange);
@@ -49,10 +53,10 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
           variant="outline"
           className={cn(
             "justify-start text-left font-normal gap-1.5",
-            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-9 text-sm w-[200px]"
+            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[180px]"
           )}
         >
-          <CalendarIcon size={compact ? 12 : 14} className="shrink-0 text-muted-foreground" />
+          <CalendarIcon size={compact ? 12 : 12} className="shrink-0 text-muted-foreground" />
           <span className="truncate">{displayText}</span>
         </Button>
       </PopoverTrigger>
@@ -90,6 +94,16 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
               numberOfMonths={compact ? 1 : 2}
               className={cn("p-3 pointer-events-auto")}
             />
+            <div className="border-t border-border px-3 py-2.5 flex items-center gap-2">
+              <Checkbox
+                id="prev-period"
+                checked={showPreviousPeriod}
+                onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
+              />
+              <label htmlFor="prev-period" className="text-xs text-muted-foreground cursor-pointer select-none">
+                Compare to previous period
+              </label>
+            </div>
           </div>
         </div>
       </PopoverContent>
@@ -98,13 +112,31 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
-  const { comparePeriod, setComparePeriod, lastRefresh } = useDashboard();
+  const {
+    lastRefresh, enabledPlatforms, client,
+    selectedPlatforms, setSelectedPlatforms,
+    selectedCampaigns, setSelectedCampaigns,
+    selectedObjectives, setSelectedObjectives,
+  } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut, profile } = useAuth();
 
+  const allCampaigns = useMemo(() => {
+    return enabledPlatforms.flatMap(p => generateCampaigns(p));
+  }, [enabledPlatforms]);
+
+  const campaignNames = useMemo(() => [...new Set(allCampaigns.map(c => c.name))], [allCampaigns]);
+
+  const platformOptions = useMemo(
+    () => enabledPlatforms.map(k => client.platforms[k].label),
+    [enabledPlatforms, client.platforms]
+  );
+
+  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
+
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-6">
-      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-16'}`}>
+      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-14'}`}>
         <div className="flex items-center gap-2 min-w-0">
           {isMobile && (
             <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
@@ -112,25 +144,32 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {!isMobile && (
             <>
               <DateRangePicker />
-              <Select value={comparePeriod} onValueChange={setComparePeriod}>
-                <SelectTrigger className="w-[150px] h-9 text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {['Previous Period', 'Previous Month', 'Previous Year', 'None'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm" className="h-9 gap-1.5"><Download size={14} /> Export</Button>
+              <div className="h-4 w-px bg-border mx-0.5" />
+              <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+              <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
+              <MultiSelectFilter label="Objectives" options={objectives} selected={selectedObjectives} onChange={setSelectedObjectives} />
+              {hasFilters && (
+                <button
+                  onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); setSelectedObjectives([]); }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+              <div className="h-4 w-px bg-border mx-0.5" />
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs"><Download size={12} /> Export</Button>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock size={12} />
+                <Clock size={11} />
                 <span>{lastRefresh}</span>
               </div>
-              <div className="h-5 w-px bg-border mx-1" />
+              <div className="h-4 w-px bg-border mx-0.5" />
               <span className="text-xs text-muted-foreground truncate max-w-[120px]">{profile?.email}</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={signOut} title="Sign out">
-                <LogOut size={14} />
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut} title="Sign out">
+                <LogOut size={13} />
               </Button>
             </>
           )}
