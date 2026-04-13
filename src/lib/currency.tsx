@@ -32,13 +32,13 @@ export function getCurrencyPrefix(currency: string): string {
  * Replace leading "$" in a string formattedValue with a CurrencySymbol component.
  * Returns a ReactNode (either the original string or a span with the icon).
  */
-export function replaceDollarWithSymbol(formattedValue: React.ReactNode, currency: string, size = 11): React.ReactNode {
+export function replaceDollarWithSymbol(formattedValue: React.ReactNode, currency: string): React.ReactNode {
   if (typeof formattedValue !== 'string') return formattedValue;
   if (!formattedValue.startsWith('$')) return formattedValue;
   const rest = formattedValue.slice(1);
   return (
     <span className="inline-flex items-baseline">
-      <CurrencySymbol currency={currency} size={size} />
+      <CurrencySymbol currency={currency} />
       {rest}
     </span>
   );
@@ -53,7 +53,7 @@ export function applyCurrencyToKPIGroups(groups: import('@/types/dashboard').KPI
     ...g,
     primary: {
       ...g.primary,
-      formattedValue: replaceDollarWithSymbol(g.primary.formattedValue, currency, 18),
+      formattedValue: replaceDollarWithSymbol(g.primary.formattedValue, currency),
     },
     supporting: g.supporting.map(s => ({
       ...s,
