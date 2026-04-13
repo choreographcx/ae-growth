@@ -68,7 +68,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
                 key={p.label}
                 onClick={() => handlePreset(p)}
                 className={cn(
-                  "w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors",
+                  "text-left text-sm px-3 py-1.5 rounded-md transition-colors whitespace-nowrap",
                   dateRange === p.label
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted text-foreground"
