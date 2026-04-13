@@ -411,17 +411,17 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
         <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
       </div>
       {cfg.enabled && (
-        <div className="mt-3 pt-3 border-t border-border/40">
+        <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
           <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget</Label>
           {editing ? (
-            <div className="flex items-center gap-1 mt-1">
+            <div className="flex items-center gap-1">
               <span className="text-xs text-muted-foreground shrink-0"><CurrencySymbol currency={currency} size={11} /></span>
               <Input
                 autoFocus
                 value={draft}
                 onChange={e => handleChange(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') saveBudget(); if (e.key === 'Escape') setEditing(false); }}
-                className="h-7 text-xs tabular-nums flex-1"
+                className="h-7 text-xs tabular-nums w-28"
                 placeholder="0"
               />
               <button onClick={saveBudget} className="p-1 rounded hover:bg-primary/10 text-primary transition-colors" title="Save">
@@ -431,10 +431,12 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
                 <X size={13} />
               </button>
             </div>
-          ) : (
-            <button onClick={startEdit} className="mt-1 text-xs tabular-nums text-card-foreground hover:text-primary transition-colors text-left">
-              {cfg.budget ? <span className="flex items-center gap-0.5"><CurrencySymbol currency={currency} size={11} />{formatBudgetNumber(cfg.budget)}</span> : <span className="text-muted-foreground italic">Set budget…</span>}
+          ) : cfg.budget ? (
+            <button onClick={startEdit} className="text-xs tabular-nums text-card-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+              <CurrencySymbol currency={currency} size={11} />{formatBudgetNumber(cfg.budget)}
             </button>
+          ) : (
+            <Button size="sm" variant="outline" onClick={startEdit} className="h-6 text-[10px] px-2">Set Budget</Button>
           )}
         </div>
       )}
