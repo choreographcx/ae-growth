@@ -35,10 +35,22 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const [range, setRange] = useState<{ from: Date; to: Date }>(
     activePreset ? { from: activePreset.from, to: activePreset.to } : { from: subDays(new Date(), 30), to: new Date() }
   );
+  const [draftRange, setDraftRange] = useState(range);
+
+  const handleOpen = (isOpen: boolean) => {
+    if (isOpen) setDraftRange(range);
+    setOpen(isOpen);
+  };
 
   const handlePreset = (preset: typeof presets[0]) => {
     setRange({ from: preset.from, to: preset.to });
     setDateRange(preset.label);
+    setOpen(false);
+  };
+
+  const handleApply = () => {
+    setRange(draftRange);
+    setDateRange(`${format(draftRange.from, 'MMM d')} – ${format(draftRange.to, 'MMM d, yyyy')}`);
     setOpen(false);
   };
 
@@ -47,7 +59,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     : `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d')}`;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -90,22 +102,24 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
               </label>
             </div>
           </div>
-          <div className="p-2">
+          <div className="p-2 flex flex-col">
             <Calendar
               mode="range"
-              selected={{ from: range.from, to: range.to }}
+              selected={{ from: draftRange.from, to: draftRange.to }}
               onSelect={(r) => {
                 if (r?.from && r?.to) {
-                  setRange({ from: r.from, to: r.to });
-                  setDateRange(`${format(r.from, 'MMM d')} – ${format(r.to, 'MMM d, yyyy')}`);
-                  setOpen(false);
+                  setDraftRange({ from: r.from, to: r.to });
                 } else if (r?.from) {
-                  setRange(prev => ({ ...prev, from: r.from! }));
+                  setDraftRange(prev => ({ ...prev, from: r.from! }));
                 }
               }}
               numberOfMonths={compact ? 1 : 2}
               className={cn("p-3 pointer-events-auto")}
             />
+            <div className="border-t border-border px-3 py-2 flex items-center justify-end gap-2">
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button size="sm" className="h-7 text-xs" onClick={handleApply}>Apply</Button>
+            </div>
           </div>
         </div>
       </PopoverContent>
