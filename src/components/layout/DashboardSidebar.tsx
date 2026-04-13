@@ -5,12 +5,12 @@ import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-function PlatformIcon({ entry, size = 18, className }: { entry: PlatformIconEntry; size?: number; className?: string }) {
+function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number }) {
   if (entry.type === 'lucide') {
     const Icon = entry.icon;
-    return <Icon size={size} className={cn("shrink-0", className)} />;
+    return <Icon size={size} className="shrink-0" />;
   }
-  return <img src={entry.src} alt="" width={size} height={size} className={cn("shrink-0 dark:invert", className)} />;
+  return <entry.Component size={size} className="shrink-0" />;
 }
 
 export function DashboardSidebar() {
@@ -50,7 +50,7 @@ export function DashboardSidebar() {
                 ? "bg-sidebar-accent text-sidebar-primary"
                 : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
             )}>
-              <PlatformIcon entry={item.entry} size={18} />
+              <NavIcon entry={item.entry} size={18} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </NavLink>
           );
