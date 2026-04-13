@@ -108,7 +108,7 @@ export default function AdminPage() {
             <p className="text-xs text-muted-foreground mb-4">Enable platforms and set budgets for pacing calculations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {allPlatforms.map(p => (
-                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} saveConfig={saveConfig} />
+                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
               ))}
             </div>
           </AccordionContent>
@@ -353,7 +353,6 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
   currency: string;
   formatBudgetNumber: (n: number) => string;
   parseBudgetString: (s: string) => number;
-  saveConfig: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
