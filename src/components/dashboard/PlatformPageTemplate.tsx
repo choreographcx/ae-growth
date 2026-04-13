@@ -58,7 +58,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       </div>
 
       {/* Trends */}
-      <div>
+      <div className="space-y-4">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TrendChartCard title="Spend" data={spendData} valuePrefix="$" color="hsl(var(--chart-1))" />
@@ -76,7 +76,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
 
       {/* Diagnostics */}
       {platformAlerts.length > 0 && (
-        <div>
+        <div className="space-y-4">
           <SectionHeader title="Diagnostics" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {platformAlerts.map(a => <AlertCard key={a.id} alert={a} />)}
