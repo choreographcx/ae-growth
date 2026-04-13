@@ -5,8 +5,9 @@ import { DirhamSymbol } from 'dirham/react';
 import { SaudiRiyal } from 'saudi-riyal/react';
 
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
-  if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: size ? `${size}px` : '1em', display: 'inline', verticalAlign: 'baseline' }} />;
-  if (currency === 'AED') return <DirhamSymbol size={size ?? '1em'} color="currentColor" className={className} style={{ display: 'inline-block', verticalAlign: 'baseline' }} />;
+  const emSize = size ? `${size}px` : '1em';
+  if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline', verticalAlign: 'baseline', lineHeight: 1 }} />;
+  if (currency === 'AED') return <DirhamSymbol size={emSize} color="currentColor" className={className} style={{ display: 'inline-block', verticalAlign: 'baseline', height: emSize, width: 'auto' }} />;
   return <span className={className}>$</span>;
 }
 
