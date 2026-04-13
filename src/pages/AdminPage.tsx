@@ -65,11 +65,11 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
             <Clock size={10} />
-            <span>Last saved: Today, 2:45 PM</span>
+            <span>Last saved: {lastSavedAt ?? 'Never'}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button size="sm" onClick={() => toast.success('Configuration saved')} className="gap-1.5 h-8 text-xs"><Save size={12} /> Save</Button>
+          <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
           <Button size="sm" variant="outline" onClick={() => {
             if (!client.name || !client.code) {
               toast.error('Missing required fields: Client Name, Code');
