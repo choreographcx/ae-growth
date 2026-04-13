@@ -29,14 +29,6 @@ function CurrencyValue({ amount, decimals = 0, currency }: { amount: number; dec
   );
 }
 
-function InCellBar({ value, max, color = 'bg-primary/15' }: { value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  return (
-    <div className="absolute inset-0 pointer-events-none">
-      <div className={cn("h-full rounded-sm", color)} style={{ width: `${pct}%` }} />
-    </div>
-  );
-}
 
 export function PerformanceTable({ data, title, className }: PerformanceTableProps) {
   const isMobile = useIsMobile();
@@ -51,12 +43,6 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
     return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
   });
 
-  const maxValues = useMemo(() => ({
-    spend: Math.max(...data.map(d => d.spend)),
-    impressions: Math.max(...data.map(d => d.impressions)),
-    clicks: Math.max(...data.map(d => d.clicks)),
-    conversions: Math.max(...data.map(d => d.conversions)),
-  }), [data]);
 
   const handleSort = (key: keyof CampaignRow) => {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -65,7 +51,7 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
 
   if (isMobile) return <MobileCards data={sorted} title={title} currency={currency} className={className} />;
 
-  const barColumns = new Set(['spend', 'impressions', 'clicks', 'conversions']);
+  
 
   const columns: { key: keyof CampaignRow; label: string; format: (v: any) => React.ReactNode; align?: 'right' }[] = [
     { key: 'name', label: 'Campaign', format: v => v },
@@ -112,27 +98,15 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
               )}>
                 {columns.map(col => (
                   <td key={col.key} className={cn(
-                    "px-4 py-2.5 whitespace-nowrap relative",
+                    "px-4 py-2.5 whitespace-nowrap",
                     col.align === 'right' && 'text-right'
                   )}>
                     {col.key === 'name' ? (
                       <span className="font-medium text-card-foreground text-xs">{row.name}</span>
                     ) : col.key === 'status' ? (
                       <Badge variant="outline" className={cn("text-[10px] capitalize px-1.5 py-0", statusColors[row.status])}>{row.status}</Badge>
-                    ) : barColumns.has(col.key) ? (
-                      <div className="relative">
-                        <InCellBar
-                          value={row[col.key] as number}
-                          max={maxValues[col.key as keyof typeof maxValues]}
-                          color={col.key === 'spend' ? 'bg-primary/8' : col.key === 'conversions' ? 'bg-success/8' : 'bg-muted/40'}
-                        />
-                        <span className={cn(
-                          "relative z-10 text-xs tabular-nums",
-                          col.key === 'spend' ? "font-semibold text-card-foreground" : "text-card-foreground"
-                        )}>{col.format(row[col.key])}</span>
-                      </div>
                     ) : (
-                      <span className="text-card-foreground text-xs tabular-nums">{col.format(row[col.key])}</span>
+                      <span className={cn("text-card-foreground text-xs tabular-nums", col.key === 'spend' && "font-semibold")}>{col.format(row[col.key])}</span>
                     )}
                   </td>
                 ))}
