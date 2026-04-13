@@ -8,7 +8,7 @@ import { getPlatformKPIGroups, generateCampaigns, alerts } from '@/data/mockData
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useMemo } from 'react';
-import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
+import { CurrencySymbol, applyCurrencyToKPIGroups, getCurrencyPrefix } from '@/lib/currency';
 
 interface PlatformPageTemplateProps {
   platformKey: PlatformKey;
@@ -82,7 +82,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       <div className="space-y-3 md:space-y-4">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          <TrendChartCard title="Spend" data={spendData} valuePrefix="$" color="hsl(var(--chart-1))" />
+          <TrendChartCard title="Spend" data={spendData} valuePrefix={getCurrencyPrefix(currency)} color="hsl(var(--chart-1))" />
           <TrendChartCard title="Conversions" data={convData} color="hsl(var(--chart-3))" />
         </div>
       </div>
