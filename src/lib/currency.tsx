@@ -9,8 +9,14 @@ export function CurrencySymbol({ currency, size = 12, className = '' }: { curren
 }
 
 export function formatCurrency(amount: number, currency: string): string {
-  // For rendering with the icon component, we just format the number
   return amount.toLocaleString();
+}
+
+/** Returns a short text prefix for use in chart axes/tooltips where React components can't be used */
+export function getCurrencyPrefix(currency: string): string {
+  if (currency === 'SAR') return 'SAR ';
+  if (currency === 'AED') return 'AED ';
+  return '$';
 }
 
 /**
