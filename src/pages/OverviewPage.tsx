@@ -13,7 +13,7 @@ export default function OverviewPage() {
       <SectionHeader title="Overview" subtitle="Cross-platform performance summary" />
 
       {/* Primary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {overviewKPIGroups.map((group, i) => (
           <KPIGroupCard key={i} data={group} />
         ))}
