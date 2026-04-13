@@ -21,7 +21,7 @@ export const defaultClient: ClientProfile = {
   name: 'Acme Corp',
   code: 'ACME',
   currency: 'USD',
-  timezone: 'America/New_York',
+  timezone: 'Asia/Dubai',
   defaultDateRange: 'last_30_days',
   weekStartDay: 'Monday',
   websiteDomain: 'acmecorp.com',
