@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { ClientProfile, PlatformKey } from '@/types/dashboard';
+import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -123,7 +123,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [client]);
 
-  const enabledPlatforms = (Object.keys(client.platforms) as PlatformKey[]).filter(k => client.platforms[k].enabled);
+  const enabledPlatforms = PLATFORM_ORDER.filter(k => client.platforms[k]?.enabled);
 
   return (
     <DashboardContext.Provider value={{

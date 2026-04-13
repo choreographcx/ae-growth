@@ -1,4 +1,7 @@
-export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'linkedin' | 'x' | 'programmatic';
+export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'x' | 'linkedin' | 'programmatic';
+
+/** Canonical display order for all platforms */
+export const PLATFORM_ORDER: PlatformKey[] = ['meta', 'google', 'tiktok', 'snapchat', 'x', 'linkedin', 'programmatic'];
 
 export interface PlatformConfig {
   key: PlatformKey;
