@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocation } from 'react-router-dom';
+import 'react-router-dom';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -138,8 +138,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   
 
   const allCampaigns = useMemo(() => {
