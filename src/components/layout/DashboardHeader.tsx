@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import 'react-router-dom';
+
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
