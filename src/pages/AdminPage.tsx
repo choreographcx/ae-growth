@@ -344,7 +344,7 @@ function AccountIdRepeater({ label, idLabel, placeholder, values, onChange }: { 
 }
 
 /* ─── Platform Card with budget inline edit ─── */
-function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currency, formatBudgetNumber, parseBudgetString, saveConfig }: {
+function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currency, formatBudgetNumber, parseBudgetString }: {
   platform: typeof allPlatforms[0];
   cfg: ClientProfile['platforms'][PlatformKey];
   togglePlatform: (k: PlatformKey) => void;
