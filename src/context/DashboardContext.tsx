@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { ClientProfile, PlatformKey } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface DashboardContextType {
   client: ClientProfile;
@@ -14,13 +16,16 @@ interface DashboardContextType {
   updateClient: (updates: Partial<ClientProfile>) => void;
   enabledPlatforms: PlatformKey[];
   lastRefresh: string;
-  // Filters
   selectedPlatforms: string[];
   setSelectedPlatforms: (v: string[]) => void;
   selectedCampaigns: string[];
   setSelectedCampaigns: (v: string[]) => void;
   selectedObjectives: string[];
   setSelectedObjectives: (v: string[]) => void;
+  saveConfig: () => Promise<void>;
+  isSaving: boolean;
+  configLoaded: boolean;
+  lastSavedAt: string | null;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -31,10 +36,44 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [showPreviousPeriod, setShowPreviousPeriod] = useState(false);
   const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Filters
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+
+  // Load config from Supabase on mount
+  useEffect(() => {
+    const loadConfig = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setConfigLoaded(true);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('client_configs')
+        .select('config, updated_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (data?.config) {
+        // Merge with defaults to handle new fields
+        const saved = data.config as Record<string, any>;
+        setClient(prev => ({ ...prev, ...saved }));
+        if (data.updated_at) {
+          setLastSavedAt(new Date(data.updated_at).toLocaleString([], { 
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+          }));
+        }
+      }
+      setConfigLoaded(true);
+    };
+
+    loadConfig();
+  }, []);
 
   const togglePlatform = (key: PlatformKey) => {
     setClient(prev => ({
@@ -50,6 +89,40 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setClient(prev => ({ ...prev, ...updates }));
   };
 
+  const saveConfig = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You must be signed in to save');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('client_configs')
+        .upsert(
+          { user_id: user.id, config: client as any },
+          { onConflict: 'user_id' }
+        );
+
+      if (error) {
+        console.error('Save error:', error);
+        toast.error('Failed to save configuration');
+      } else {
+        const now = new Date().toLocaleString([], { 
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+        });
+        setLastSavedAt(now);
+        toast.success('Configuration saved');
+      }
+    } catch (err) {
+      console.error('Save error:', err);
+      toast.error('Failed to save configuration');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [client]);
+
   const enabledPlatforms = (Object.keys(client.platforms) as PlatformKey[]).filter(k => client.platforms[k].enabled);
 
   return (
@@ -61,6 +134,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedPlatforms, setSelectedPlatforms,
       selectedCampaigns, setSelectedCampaigns,
       selectedObjectives, setSelectedObjectives,
+      saveConfig, isSaving, configLoaded, lastSavedAt,
     }}>
       {children}
     </DashboardContext.Provider>
@@ -85,6 +159,10 @@ const fallback: DashboardContextType = {
   setSelectedCampaigns: () => {},
   selectedObjectives: [],
   setSelectedObjectives: () => {},
+  saveConfig: async () => {},
+  isSaving: false,
+  configLoaded: false,
+  lastSavedAt: null,
 };
 
 export function useDashboard() {
