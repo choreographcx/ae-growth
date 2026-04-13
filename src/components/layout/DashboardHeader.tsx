@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
