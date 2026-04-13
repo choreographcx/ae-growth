@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, CheckCircle, Plus, X, Upload, Download, Building2, Clock, Users } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
@@ -58,18 +58,13 @@ export default function AdminPage() {
 
       {/* Action bar */}
       <div className="flex items-center gap-2 flex-wrap mb-2">
-        <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
-        <Button size="sm" variant="outline" onClick={() => {
-          if (!client.name || !client.code) {
-            toast.error('Missing required fields: Client Name, Code');
-          } else {
-            toast.success('All required fields valid');
-          }
-        }} className="gap-1.5 h-8 text-xs"><CheckCircle size={12} /> Validate</Button>
-        <div className="hidden sm:flex items-center gap-2 ml-auto">
+        <div className="hidden sm:flex items-center gap-2">
           <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
           <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground ml-2">
+        </div>
+        <div className="ml-auto flex flex-col items-end gap-1">
+          <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <Clock size={10} />
             <span>Last saved: {lastSavedAt ?? 'Never'}</span>
           </div>
