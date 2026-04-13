@@ -102,22 +102,24 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
               </label>
             </div>
           </div>
-          <div className="p-2">
+          <div className="p-2 flex flex-col">
             <Calendar
               mode="range"
-              selected={{ from: range.from, to: range.to }}
+              selected={{ from: draftRange.from, to: draftRange.to }}
               onSelect={(r) => {
                 if (r?.from && r?.to) {
-                  setRange({ from: r.from, to: r.to });
-                  setDateRange(`${format(r.from, 'MMM d')} – ${format(r.to, 'MMM d, yyyy')}`);
-                  setOpen(false);
+                  setDraftRange({ from: r.from, to: r.to });
                 } else if (r?.from) {
-                  setRange(prev => ({ ...prev, from: r.from! }));
+                  setDraftRange(prev => ({ ...prev, from: r.from! }));
                 }
               }}
               numberOfMonths={compact ? 1 : 2}
               className={cn("p-3 pointer-events-auto")}
             />
+            <div className="border-t border-border px-3 py-2 flex items-center justify-end gap-2">
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button size="sm" className="h-7 text-xs" onClick={handleApply}>Apply</Button>
+            </div>
           </div>
         </div>
       </PopoverContent>
