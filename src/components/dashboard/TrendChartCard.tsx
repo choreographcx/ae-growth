@@ -1,7 +1,7 @@
 import { TimeSeriesPoint } from '@/types/dashboard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
-import { getCurrencyIconSrc, getCurrencyPrefix } from '@/lib/currency';
+import { CurrencySymbol, getCurrencyPrefix } from '@/lib/currency';
 
 interface TrendChartCardProps {
   title: string;
@@ -36,25 +36,17 @@ function formatCompactValue(value: number) {
 }
 
 function CurrencyTick({ x = 0, y = 0, payload, currency, valueSuffix = '' }: CurrencyTickProps) {
-  const iconSrc = getCurrencyIconSrc(currency);
-  const prefix = getCurrencyPrefix(currency);
   const value = Number(payload?.value ?? 0);
   const formattedValue = `${formatCompactValue(value)}${valueSuffix}`;
 
   return (
     <g transform={`translate(${x},${y})`}>
-      {iconSrc ? (
-        <>
-          <image href={iconSrc} x={-44} y={-6} width={12} height={12} preserveAspectRatio="xMidYMid meet" />
-          <text x={-4} y={4} textAnchor="end" fontSize={10} fill="hsl(var(--muted-foreground))">
-            {formattedValue}
-          </text>
-        </>
-      ) : (
-        <text x={0} y={4} textAnchor="end" fontSize={10} fill="hsl(var(--muted-foreground))">
-          {`${prefix}${formattedValue}`}
-        </text>
-      )}
+      <foreignObject x={-56} y={-8} width={56} height={16} style={{ overflow: 'visible' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', fontSize: 10, color: 'hsl(var(--muted-foreground))', whiteSpace: 'nowrap', lineHeight: 1 }}>
+          <CurrencySymbol currency={currency} size={10} />
+          <span>{formattedValue}</span>
+        </div>
+      </foreignObject>
     </g>
   );
 }
