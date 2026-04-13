@@ -8,7 +8,7 @@ import { getPlatformKPIGroups, generateCampaigns, alerts } from '@/data/mockData
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useMemo } from 'react';
-import { CurrencySymbol } from '@/lib/currency';
+import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 
 interface PlatformPageTemplateProps {
   platformKey: PlatformKey;
@@ -27,7 +27,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
   const kpiGroups = useMemo(() => {
     const base = getPlatformKPIGroups(platformKey);
     // Inject budget + pacing into the Spend card
-    return base.map(g => {
+    const withBudget = base.map(g => {
       if (g.title !== 'Spend' || !budget) return g;
       const pacing = Math.round((g.primary.value / budget) * 100);
       return {
@@ -38,6 +38,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
         ],
       } as KPIGroupData;
     });
+    return applyCurrencyToKPIGroups(withBudget, currency);
   }, [platformKey, budget, currency]);
 
   const campaigns = useMemo(() => generateCampaigns(platformKey), [platformKey]);
