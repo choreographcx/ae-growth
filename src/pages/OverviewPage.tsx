@@ -28,6 +28,8 @@ export default function OverviewPage() {
     []
   );
 
+  const currencySymbol = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'AED ' : client.currency === 'SAR' ? 'SAR ' : client.currency + ' ';
+
   // Derive total budget from platform configs
   const totalBudget = useMemo(() =>
     Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0),
@@ -40,12 +42,12 @@ export default function OverviewPage() {
     const updatedSpend: KPIGroupData | undefined = spendCard ? {
       ...spendCard,
       supporting: [
-        { label: 'Budget', formattedValue: `$${totalBudget.toLocaleString()}` },
+        { label: 'Budget', formattedValue: `${currencySymbol}${totalBudget.toLocaleString()}` },
         { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
       ],
     } : undefined;
     return [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
-  }, [totalBudget]);
+  }, [totalBudget, currencySymbol]);
 
   return (
     <div className="space-y-5 md:space-y-7">
