@@ -101,7 +101,7 @@ export default function AdminPage() {
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">Ad Platforms <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
-              <span className="text-xs font-semibold text-card-foreground tabular-nums flex items-center gap-1">Total Budget: <CurrencySymbol currency={currency} size={11} />{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
+              <span className="text-xs font-semibold text-card-foreground tabular-nums flex items-center gap-1">Total Budget: <CurrencySymbol currency={currency} />{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
@@ -415,7 +415,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
           <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget</Label>
           {editing ? (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground shrink-0"><CurrencySymbol currency={currency} size={11} /></span>
+              <span className="text-xs text-muted-foreground shrink-0"><CurrencySymbol currency={currency} /></span>
               <Input
                 autoFocus
                 value={draft}
@@ -433,7 +433,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
             </div>
           ) : cfg.budget ? (
             <button onClick={startEdit} className="text-xs tabular-nums text-card-foreground hover:text-primary transition-colors flex items-center gap-0.5">
-              <CurrencySymbol currency={currency} size={11} />{formatBudgetNumber(cfg.budget)}
+              <CurrencySymbol currency={currency} />{formatBudgetNumber(cfg.budget)}
             </button>
           ) : (
             <Button size="sm" variant="outline" onClick={startEdit} className="h-6 text-[10px] px-2">Set Budget</Button>
