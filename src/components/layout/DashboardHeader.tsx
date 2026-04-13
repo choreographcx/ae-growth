@@ -1,9 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
+import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -140,9 +138,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [exporting, setExporting] = useState(false);
+  
 
   const allCampaigns = useMemo(() => {
     return enabledPlatforms.flatMap(p => generateCampaigns(p));
@@ -157,109 +153,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
-  const handleExportPDF = useCallback(async () => {
-    const originalPath = location.pathname;
-    setExporting(true);
-
-    // Build list of routes to capture: overview + enabled platforms
-    const platformRoutes: { path: string; label: string }[] = enabledPlatforms.map(p => ({
-      path: `/${p}`,
-      label: client.platforms[p].label,
-    }));
-    const routes = [
-      { path: '/', label: 'Overview' },
-      ...platformRoutes,
-    ];
-
-    try {
-      // Force light mode for PDF capture
-      const root = document.documentElement;
-      const originalClass = root.className;
-      root.classList.remove('dark');
-      root.classList.add('light');
-      // Force all backgrounds to be fully opaque for capture
-      const style = document.createElement('style');
-      style.id = 'pdf-export-overrides';
-      style.textContent = `
-        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        .bg-muted\\/30, .bg-muted\\/20, .bg-muted\\/15, .bg-muted\\/\\[0\\.04\\] { background-color: hsl(var(--muted)) !important; }
-      `;
-      document.head.appendChild(style);
-
-      // Small delay for style application
-      await new Promise(r => setTimeout(r, 100));
-
-      const captures: { canvas: HTMLCanvasElement; label: string }[] = [];
-
-      for (const route of routes) {
-        navigate(route.path);
-        await new Promise(r => setTimeout(r, 800));
-
-        const el = document.getElementById('dashboard-main-content');
-        if (!el) continue;
-
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          scrollY: -window.scrollY,
-          windowHeight: el.scrollHeight,
-          height: el.scrollHeight,
-          width: el.scrollWidth,
-        });
-        captures.push({ canvas, label: route.label });
-      }
-
-      // Remove overrides
-      style.remove();
-      root.className = originalClass;
-
-      if (captures.length === 0) return;
-
-      const margin = 5; // mm margin on each side
-
-      let pdf: jsPDF | null = null;
-
-      for (let c = 0; c < captures.length; c++) {
-        const { canvas } = captures[c];
-        const imgData = canvas.toDataURL('image/png');
-
-        // Scale the entire capture to fit on one page
-        const aspectRatio = canvas.height / canvas.width;
-        const pageWidthMM = 300;
-        const pageHeightMM = pageWidthMM * aspectRatio;
-        const imgW = pageWidthMM - margin * 2;
-        const imgH = pageHeightMM - margin * 2;
-
-        if (c === 0) {
-          pdf = new jsPDF({
-            orientation: imgW > imgH ? 'landscape' : 'portrait',
-            unit: 'mm',
-            format: [pageWidthMM, pageHeightMM],
-          });
-        } else if (pdf) {
-          pdf.addPage([pageWidthMM, pageHeightMM], imgW > imgH ? 'landscape' : 'portrait');
-        }
-
-        if (!pdf) continue;
-
-        pdf.addImage(imgData, 'PNG', margin, margin, imgW, imgH);
-      }
-
-      if (pdf) {
-        pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
-      }
-    } catch (err) {
-      console.error('PDF export failed', err);
-    } finally {
-      // Navigate back to original page
-      navigate(originalPath);
-      setExporting(false);
-    }
-  }, [enabledPlatforms, client.platforms, navigate, location.pathname]);
+  const handleExportPDF = useCallback(() => {
+    window.print();
+  }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
+    <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
       <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
         <div className="flex items-center gap-2 min-w-0">
           {isMobile && (
@@ -285,9 +184,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={exporting}>
-                {exporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
-                {exporting ? 'Exporting…' : 'Export PDF'}
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF}>
+                <Download size={11} />
+                Export PDF
               </Button>
               <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>

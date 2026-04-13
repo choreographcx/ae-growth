@@ -95,3 +95,85 @@
     border-radius: 3px;
   }
 }
+
+/* ─── Print-to-PDF styles ─── */
+@media print {
+  /* Force light mode colors */
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --muted: 210 25% 95%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    --success: 152 69% 41%;
+    --warning: 38 92% 50%;
+    --destructive: 0 84% 60%;
+    --sidebar-background: 222 47% 11%;
+    color-scheme: light;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide non-content UI: sidebar, header, mobile drawer, back-to-top, scrollbars */
+  nav,
+  header,
+  [data-sidebar],
+  [data-print-hide],
+  .back-to-top,
+  button {
+    display: none !important;
+  }
+
+  /* Main content fills the page */
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #dashboard-main-content {
+    padding: 8mm !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #dashboard-main-content > div {
+    max-width: none !important;
+  }
+
+  /* The flex wrapper should not constrain */
+  .flex.min-h-screen {
+    display: block !important;
+  }
+
+  /* Keep cards, charts, tables intact */
+  .bg-card {
+    background-color: white !important;
+    box-shadow: none !important;
+    border: 1px solid hsl(214 32% 91%) !important;
+  }
+
+  /* Avoid breaking inside cards and charts */
+  .bg-card,
+  .recharts-wrapper,
+  table,
+  [class*="KPIGroupCard"],
+  [class*="TrendChartCard"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Page setup */
+  @page {
+    size: landscape;
+    margin: 5mm;
+  }
+}
