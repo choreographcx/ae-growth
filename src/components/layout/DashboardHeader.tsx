@@ -62,21 +62,33 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex flex-col sm:flex-row">
-          <div className="border-b sm:border-b-0 sm:border-r border-border p-2 space-y-0.5 min-w-[140px]">
-            {presets.map(p => (
-              <button
-                key={p.label}
-                onClick={() => handlePreset(p)}
-                className={cn(
-                  "text-left text-sm px-3 py-1.5 rounded-md transition-colors whitespace-nowrap",
-                  dateRange === p.label
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted text-foreground"
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
+          <div className="border-b sm:border-b-0 sm:border-r border-border p-2 min-w-[140px]">
+            <div className="space-y-0.5">
+              {presets.map(p => (
+                <button
+                  key={p.label}
+                  onClick={() => handlePreset(p)}
+                  className={cn(
+                    "text-left text-sm px-3 py-1.5 rounded-md transition-colors whitespace-nowrap",
+                    dateRange === p.label
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted text-foreground"
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-border mt-2 pt-2 px-3 flex items-center gap-2">
+              <Checkbox
+                id="prev-period"
+                checked={showPreviousPeriod}
+                onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
+              />
+              <label htmlFor="prev-period" className="text-xs text-muted-foreground cursor-pointer select-none">
+                Compare to previous period
+              </label>
+            </div>
           </div>
           <div className="p-2">
             <Calendar
@@ -94,16 +106,6 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
               numberOfMonths={compact ? 1 : 2}
               className={cn("p-3 pointer-events-auto")}
             />
-            <div className="border-t border-border px-3 py-2.5 flex items-center gap-2">
-              <Checkbox
-                id="prev-period"
-                checked={showPreviousPeriod}
-                onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
-              />
-              <label htmlFor="prev-period" className="text-xs text-muted-foreground cursor-pointer select-none">
-                Compare to previous period
-              </label>
-            </div>
           </div>
         </div>
       </PopoverContent>
