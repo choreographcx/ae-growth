@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ const presets = [
   { label: 'This Month', from: startOfMonth(new Date()), to: new Date() },
   { label: 'Last Month', from: startOfMonth(subMonths(new Date(), 1)), to: endOfMonth(subMonths(new Date(), 1)) },
   { label: 'Last 90 Days', from: subDays(new Date(), 90), to: new Date() },
+  { label: 'This Year', from: startOfYear(new Date()), to: new Date() },
+  { label: 'Last Year', from: startOfYear(subYears(new Date(), 1)), to: endOfYear(subYears(new Date(), 1)) },
 ];
 
 const objectives = ['Awareness', 'Traffic', 'Conversions', 'Lead Gen', 'Engagement'];
