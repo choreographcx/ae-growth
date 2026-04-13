@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { PlatformKey } from '@/types/dashboard';
+import { PlatformKey, ClientProfile } from '@/types/dashboard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Plus, X, Upload, Download, Building2, Clock, Users } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
@@ -37,6 +37,11 @@ export default function AdminPage() {
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
   const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
+
+  const currencySymbol = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'AED ' : client.currency === 'SAR' ? 'SAR ' : client.currency + ' ';
+
+  const formatBudgetNumber = (n: number) => n.toLocaleString();
+  const parseBudgetString = (s: string) => Number(s.replace(/,/g, '')) || 0;
 
   return (
     <div className="space-y-8">
@@ -94,51 +99,15 @@ export default function AdminPage() {
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">Ad Platforms <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
-              <span className="text-xs font-semibold text-card-foreground tabular-nums">Total Budget: ${Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
+              <span className="text-xs font-semibold text-card-foreground tabular-nums">Total Budget: {currencySymbol}{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-4">Enable platforms and set monthly budgets for pacing calculations.</p>
+            <p className="text-xs text-muted-foreground mb-4">Enable platforms and set budgets for pacing calculations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {allPlatforms.map(p => {
-                const cfg = client.platforms[p.key];
-                const hasIds = cfg.accountIds.filter(Boolean).length > 0;
-                return (
-                  <div key={p.key} className={cn(
-                    "flex flex-col p-4 rounded-xl border-2 transition-all duration-200",
-                    cfg.enabled ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"
-                  )}>
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-card-foreground">{p.label}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] text-muted-foreground">{cfg.accountIds.filter(Boolean).length} account(s)</span>
-                          {cfg.enabled && !hasIds && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 text-warning bg-warning/5">No IDs</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
-                    </div>
-                    {cfg.enabled && (
-                      <div className="mt-3 pt-3 border-t border-border/40">
-                        <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Monthly Budget</Label>
-                        <div className="relative mt-1">
-                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
-                          <Input
-                            type="number"
-                            min={0}
-                            value={cfg.budget || ''}
-                            onChange={e => updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: Number(e.target.value) || 0 } } })}
-                            className="h-8 text-xs pl-6 tabular-nums"
-                            placeholder="0"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {allPlatforms.map(p => (
+                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currencySymbol={currencySymbol} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
+              ))}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -368,6 +337,94 @@ function AccountIdRepeater({ label, idLabel, placeholder, values, onChange }: { 
           <Plus size={11} /> Add ID
         </Button>
       </div>
+    </div>
+  );
+}
+
+/* ─── Platform Card with budget inline edit ─── */
+function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currencySymbol, formatBudgetNumber, parseBudgetString }: {
+  platform: typeof allPlatforms[0];
+  cfg: ClientProfile['platforms'][PlatformKey];
+  togglePlatform: (k: PlatformKey) => void;
+  updateClient: (u: Partial<ClientProfile>) => void;
+  client: ClientProfile;
+  currencySymbol: string;
+  formatBudgetNumber: (n: number) => string;
+  parseBudgetString: (s: string) => number;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const hasIds = cfg.accountIds.filter(Boolean).length > 0;
+
+  const startEdit = () => {
+    setDraft(cfg.budget ? formatBudgetNumber(cfg.budget) : '');
+    setEditing(true);
+  };
+
+  const handleChange = (val: string) => {
+    // Allow digits and commas only
+    const clean = val.replace(/[^0-9,]/g, '');
+    // Re-format with commas
+    const num = Number(clean.replace(/,/g, ''));
+    setDraft(isNaN(num) || num === 0 ? clean : num.toLocaleString());
+  };
+
+  const saveBudget = () => {
+    const num = parseBudgetString(draft);
+    updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: num } } });
+    setEditing(false);
+  };
+
+  const clearBudget = () => {
+    updateClient({ platforms: { ...client.platforms, [p.key]: { ...cfg, budget: 0 } } });
+    setEditing(false);
+  };
+
+  return (
+    <div className={cn(
+      "flex flex-col p-4 rounded-xl border-2 transition-all duration-200",
+      cfg.enabled ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"
+    )}>
+      <div className="flex items-center justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-card-foreground">{p.label}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[10px] text-muted-foreground">{cfg.accountIds.filter(Boolean).length} account(s)</span>
+            {cfg.enabled && !hasIds && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 border-warning/40 text-warning bg-warning/5">No IDs</Badge>
+            )}
+          </div>
+        </div>
+        <Switch checked={cfg.enabled} onCheckedChange={() => togglePlatform(p.key)} />
+      </div>
+      {cfg.enabled && (
+        <div className="mt-3 pt-3 border-t border-border/40">
+          <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget</Label>
+          {editing ? (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-xs text-muted-foreground shrink-0">{currencySymbol}</span>
+              <Input
+                autoFocus
+                value={draft}
+                onChange={e => handleChange(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveBudget(); if (e.key === 'Escape') setEditing(false); }}
+                className="h-7 text-xs tabular-nums flex-1"
+                placeholder="0"
+              />
+              <button onClick={saveBudget} className="p-1 rounded hover:bg-primary/10 text-primary transition-colors" title="Save">
+                <Check size={13} />
+              </button>
+              <button onClick={clearBudget} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Clear">
+                <X size={13} />
+              </button>
+            </div>
+          ) : (
+            <button onClick={startEdit} className="mt-1 text-xs tabular-nums text-card-foreground hover:text-primary transition-colors text-left">
+              {cfg.budget ? `${currencySymbol}${formatBudgetNumber(cfg.budget)}` : <span className="text-muted-foreground italic">Set budget…</span>}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
