@@ -1,4 +1,4 @@
-import { Layers, Megaphone } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { PlatformKey } from '@/types/dashboard';
 import { LucideIcon } from 'lucide-react';
 
@@ -54,6 +54,6 @@ export const platformIconEntries: Record<PlatformKey, PlatformIconEntry> = {
   tiktok: { type: 'custom', Component: TikTokIcon },
   snapchat: { type: 'custom', Component: SnapchatIcon },
   linkedin: { type: 'custom', Component: LinkedInIcon },
-  x: { type: 'lucide', icon: Megaphone },
+  x: { type: 'custom', Component: XIcon },
   programmatic: { type: 'lucide', icon: Layers },
 };
