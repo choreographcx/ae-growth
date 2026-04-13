@@ -2,7 +2,7 @@ import { CampaignRow } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface PerformanceTableProps {
@@ -17,6 +17,15 @@ const statusColors = {
   completed: 'bg-muted text-muted-foreground border-border',
 };
 
+function InCellBar({ value, max, color = 'bg-primary/15' }: { value: number; max: number; color?: string }) {
+  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className={cn("h-full rounded-sm", color)} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
 export function PerformanceTable({ data, title, className }: PerformanceTableProps) {
   const isMobile = useIsMobile();
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
@@ -28,6 +37,13 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
     return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
   });
 
+  const maxValues = useMemo(() => ({
+    spend: Math.max(...data.map(d => d.spend)),
+    impressions: Math.max(...data.map(d => d.impressions)),
+    clicks: Math.max(...data.map(d => d.clicks)),
+    conversions: Math.max(...data.map(d => d.conversions)),
+  }), [data]);
+
   const handleSort = (key: keyof CampaignRow) => {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
     else { setSortKey(key); setSortDir('desc'); }
@@ -35,29 +51,38 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
 
   if (isMobile) return <MobileCards data={sorted} title={title} className={className} />;
 
-  const columns: { key: keyof CampaignRow; label: string; format: (v: any) => string }[] = [
+  const barColumns = new Set(['spend', 'impressions', 'clicks', 'conversions']);
+
+  const columns: { key: keyof CampaignRow; label: string; format: (v: any) => string; align?: 'right' }[] = [
     { key: 'name', label: 'Campaign', format: v => v },
     { key: 'status', label: 'Status', format: v => v },
-    { key: 'spend', label: 'Spend', format: v => `$${v.toLocaleString()}` },
-    { key: 'impressions', label: 'Impr.', format: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v.toLocaleString() },
-    { key: 'clicks', label: 'Clicks', format: v => v.toLocaleString() },
-    { key: 'ctr', label: 'CTR', format: v => `${v}%` },
-    { key: 'cpc', label: 'CPC', format: v => `$${v.toFixed(2)}` },
-    { key: 'conversions', label: 'Conv.', format: v => v.toLocaleString() },
-    { key: 'cpa', label: 'CPA', format: v => v > 0 ? `$${v.toFixed(2)}` : '—' },
-    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%` },
+    { key: 'spend', label: 'Spend', format: v => `$${v.toLocaleString()}`, align: 'right' },
+    { key: 'impressions', label: 'Impr.', format: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v.toLocaleString(), align: 'right' },
+    { key: 'clicks', label: 'Clicks', format: v => v.toLocaleString(), align: 'right' },
+    { key: 'ctr', label: 'CTR', format: v => `${v}%`, align: 'right' },
+    { key: 'cpc', label: 'CPC', format: v => `$${v.toFixed(2)}`, align: 'right' },
+    { key: 'conversions', label: 'Conv.', format: v => v.toLocaleString(), align: 'right' },
+    { key: 'cpa', label: 'CPA', format: v => v > 0 ? `$${v.toFixed(2)}` : '—', align: 'right' },
+    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%`, align: 'right' },
   ];
 
   return (
     <div className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden", className)}>
-      {title && <div className="px-5 py-4 border-b border-border"><h3 className="text-sm font-semibold text-card-foreground">{title}</h3></div>}
+      {title && <div className="px-5 py-3.5 border-b border-border"><h3 className="text-sm font-semibold text-card-foreground">{title}</h3></div>}
       <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
               {columns.map(col => (
-                <th key={col.key} className="px-4 py-3 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground select-none transition-colors" onClick={() => col.key !== 'name' && col.key !== 'status' && handleSort(col.key)}>
-                  <div className="flex items-center gap-1">
+                <th
+                  key={col.key}
+                  className={cn(
+                    "px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground select-none transition-colors",
+                    col.align === 'right' ? 'text-right' : 'text-left'
+                  )}
+                  onClick={() => col.key !== 'name' && col.key !== 'status' && handleSort(col.key)}
+                >
+                  <div className={cn("flex items-center gap-1", col.align === 'right' && "justify-end")}>
                     {col.label}
                     {sortKey === col.key && (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />)}
                   </div>
@@ -66,16 +91,34 @@ export function PerformanceTable({ data, title, className }: PerformanceTablePro
             </tr>
           </thead>
           <tbody>
-            {sorted.map(row => (
-              <tr key={row.id} className="border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors">
+            {sorted.map((row, rowIdx) => (
+              <tr key={row.id} className={cn(
+                "border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors",
+                rowIdx % 2 === 1 && "bg-muted/[0.04]"
+              )}>
                 {columns.map(col => (
-                  <td key={col.key} className="px-4 py-3 whitespace-nowrap">
+                  <td key={col.key} className={cn(
+                    "px-4 py-2.5 whitespace-nowrap relative",
+                    col.align === 'right' && 'text-right'
+                  )}>
                     {col.key === 'name' ? (
                       <span className="font-medium text-card-foreground text-xs">{row.name}</span>
                     ) : col.key === 'status' ? (
                       <Badge variant="outline" className={cn("text-[10px] capitalize px-1.5 py-0", statusColors[row.status])}>{row.status}</Badge>
+                    ) : barColumns.has(col.key) ? (
+                      <div className="relative">
+                        <InCellBar
+                          value={row[col.key] as number}
+                          max={maxValues[col.key as keyof typeof maxValues]}
+                          color={col.key === 'spend' ? 'bg-primary/8' : col.key === 'conversions' ? 'bg-success/8' : 'bg-muted/40'}
+                        />
+                        <span className={cn(
+                          "relative z-10 text-xs tabular-nums",
+                          col.key === 'spend' ? "font-semibold text-card-foreground" : "text-card-foreground"
+                        )}>{col.format(row[col.key])}</span>
+                      </div>
                     ) : (
-                      <span className="text-card-foreground text-xs">{col.format(row[col.key])}</span>
+                      <span className="text-card-foreground text-xs tabular-nums">{col.format(row[col.key])}</span>
                     )}
                   </td>
                 ))}
@@ -108,7 +151,6 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
-      {/* Header — name + status */}
       <div className="px-3 pt-3 pb-2 flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-[12px] font-semibold text-card-foreground leading-snug truncate">{row.name}</p>
@@ -116,8 +158,6 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
         </div>
         <Badge variant="outline" className={cn("text-[9px] capitalize shrink-0 px-1.5 py-0", statusColors[row.status])}>{row.status}</Badge>
       </div>
-
-      {/* Metrics grid — compact 3-col */}
       <div className="px-3 pb-2">
         <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
           <MCell label="Spend" value={`$${row.spend.toLocaleString()}`} bold />
@@ -130,8 +170,6 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
           <MCell label="CPA" value={row.cpa > 0 ? `$${row.cpa.toFixed(2)}` : '—'} />
         </div>
       </div>
-
-      {/* Expandable details */}
       {expanded && (
         <div className="px-3 pb-2 pt-1.5 border-t border-border/40">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -144,8 +182,6 @@ function MobileRowCard({ row }: { row: CampaignRow }) {
           </div>
         </div>
       )}
-
-      {/* Toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-muted-foreground hover:text-primary border-t border-border/30 bg-muted/15 transition-colors"

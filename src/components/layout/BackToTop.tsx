@@ -15,15 +15,15 @@ export function BackToTop() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       className={cn(
-        "fixed bottom-8 right-8 z-40 h-10 w-10 rounded-full border border-border/80 bg-card/90 backdrop-blur-sm text-muted-foreground shadow-sm",
+        "fixed bottom-6 right-6 z-40 h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm text-muted-foreground border border-border/50 shadow-sm",
         "flex items-center justify-center",
-        "hover:bg-card hover:text-foreground hover:shadow-md hover:border-border",
+        "hover:text-foreground hover:border-border hover:shadow",
         "transition-all duration-300 ease-out",
-        visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"
+        visible ? "opacity-70 translate-y-0 pointer-events-auto hover:opacity-100" : "opacity-0 translate-y-3 pointer-events-none"
       )}
       aria-label="Back to top"
     >
-      <ChevronUp size={16} strokeWidth={2} />
+      <ChevronUp size={14} strokeWidth={2} />
     </button>
   );
 }

@@ -34,23 +34,23 @@ export function DashboardSidebar() {
       "sticky top-0 h-screen flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 scrollbar-thin overflow-y-auto",
       collapsed ? "w-16" : "w-60"
     )}>
-      <div className="flex items-center justify-between px-4 h-16 border-b border-sidebar-border">
+      <div className="flex items-center justify-between px-4 h-14 border-b border-sidebar-border">
         {!collapsed && <span className="text-lg font-bold text-sidebar-foreground tracking-tight"></span>}
         <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-muted transition-colors">
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
-      <nav className="flex-1 py-3 px-2 space-y-0.5">
+      <nav className="flex-1 py-2.5 px-2 space-y-0.5">
         {navItems.map(item => {
           const isActive = location.pathname === item.to;
           return (
             <NavLink key={item.to} to={item.to} className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
               isActive
-                ? "bg-sidebar-accent text-sidebar-primary"
-                : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                ? "bg-sidebar-primary/15 text-sidebar-primary border-l-2 border-sidebar-primary shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.1)]"
+                : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground border-l-2 border-transparent"
             )}>
-              <NavIcon entry={item.entry} size={18} />
+              <NavIcon entry={item.entry} size={17} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </NavLink>
           );
