@@ -20,8 +20,8 @@ export function formatCurrency(amount: number, currency: string): string {
 
 /** Returns a short text prefix for use in chart axes/tooltips where React components can't be used */
 export function getCurrencyPrefix(currency: string): string {
-  if (currency === 'SAR') return 'SAR ';
-  if (currency === 'AED') return 'AED ';
+  if (currency === 'SAR') return '﷼';
+  if (currency === 'AED') return 'د.إ';
   return '$';
 }
 
