@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { CurrencySymbol } from '@/lib/currency';
 import { useDashboard } from '@/context/DashboardContext';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { PlatformKey, ClientProfile } from '@/types/dashboard';
@@ -38,7 +39,7 @@ export default function AdminPage() {
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
   const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
 
-  const currencySymbol = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'AED ' : client.currency === 'SAR' ? 'SAR ' : client.currency + ' ';
+  const currency = client.currency;
 
   const formatBudgetNumber = (n: number) => n.toLocaleString();
   const parseBudgetString = (s: string) => Number(s.replace(/,/g, '')) || 0;
@@ -99,14 +100,14 @@ export default function AdminPage() {
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">Ad Platforms <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
-              <span className="text-xs font-semibold text-card-foreground tabular-nums">Total Budget: {currencySymbol}{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
+              <span className="text-xs font-semibold text-card-foreground tabular-nums flex items-center gap-1">Total Budget: <CurrencySymbol currency={currency} size={11} />{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
             <p className="text-xs text-muted-foreground mb-4">Enable platforms and set budgets for pacing calculations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {allPlatforms.map(p => (
-                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currencySymbol={currencySymbol} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
+                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
               ))}
             </div>
           </AccordionContent>
