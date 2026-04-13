@@ -1,4 +1,4 @@
-import { PlatformKey } from '@/types/dashboard';
+import { PlatformKey, KPIGroupData } from '@/types/dashboard';
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PerformanceTable } from '@/components/dashboard/PerformanceTable';
@@ -19,7 +19,26 @@ interface PlatformPageTemplateProps {
 
 export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }: PlatformPageTemplateProps) {
   const { client } = useDashboard();
-  const kpiGroups = useMemo(() => getPlatformKPIGroups(platformKey), [platformKey]);
+  const platformCfg = client.platforms[platformKey];
+  const budget = platformCfg?.budget || 0;
+  const currencyPrefix = client.currency === 'USD' ? '$' : client.currency === 'AED' ? 'د.إ' : client.currency === 'SAR' ? '﷼' : client.currency + ' ';
+
+  const kpiGroups = useMemo(() => {
+    const base = getPlatformKPIGroups(platformKey);
+    // Inject budget + pacing into the Spend card
+    return base.map(g => {
+      if (g.title !== 'Spend' || !budget) return g;
+      const pacing = Math.round((g.primary.value / budget) * 100);
+      return {
+        ...g,
+        supporting: [
+          { label: 'Budget', formattedValue: `${currencyPrefix}${budget.toLocaleString()}` },
+          { label: 'Pacing', formattedValue: `${pacing}%` },
+        ],
+      } as KPIGroupData;
+    });
+  }, [platformKey, budget, currencyPrefix]);
+
   const campaigns = useMemo(() => generateCampaigns(platformKey), [platformKey]);
   const platformAlerts = alerts.filter(a => a.platform === platformKey);
   const [activeTab, setActiveTab] = useState(tabs?.[0]?.key || 'all');
