@@ -54,9 +54,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     setOpen(false);
   };
 
-  const displayText = activePreset
-    ? activePreset.label
-    : `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d')}`;
+  const displayText = `${format(range.from, 'MMM d, yyyy')} – ${format(range.to, 'MMM d, yyyy')}`;
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
