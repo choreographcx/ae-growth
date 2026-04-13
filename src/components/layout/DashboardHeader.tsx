@@ -63,13 +63,13 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex flex-col sm:flex-row">
           <div className="border-b sm:border-b-0 sm:border-r border-border p-2 min-w-[140px]">
-            <div className="space-y-0.5">
+            <div className="flex flex-col space-y-0.5">
               {presets.map(p => (
                 <button
                   key={p.label}
                   onClick={() => handlePreset(p)}
                   className={cn(
-                    "text-left text-sm px-3 py-1.5 rounded-md transition-colors whitespace-nowrap",
+                    "w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors",
                     dateRange === p.label
                       ? "bg-primary text-primary-foreground"
                       : "hover:bg-muted text-foreground"
