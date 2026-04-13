@@ -8,7 +8,7 @@ import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsT
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
-import { CurrencySymbol } from '@/lib/currency';
+import { CurrencySymbol, replaceDollarWithSymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 
 // CTR time series derived from clicks/impressions mock pattern
 function generateCTRTimeSeries() {
@@ -47,7 +47,8 @@ export default function OverviewPage() {
         { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
       ],
     } : undefined;
-    return [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
+    const merged = [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
+    return applyCurrencyToKPIGroups(merged, currency);
   }, [totalBudget, currency]);
 
   return (
