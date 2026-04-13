@@ -123,7 +123,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [client]);
 
-  const enabledPlatforms = (Object.keys(client.platforms) as PlatformKey[]).filter(k => client.platforms[k].enabled);
+  const enabledPlatforms = PLATFORM_ORDER.filter(k => client.platforms[k]?.enabled);
 
   return (
     <DashboardContext.Provider value={{
