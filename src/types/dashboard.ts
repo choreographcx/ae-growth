@@ -9,6 +9,7 @@ export interface PlatformConfig {
   enabled: boolean;
   color: string;
   accountIds: string[];
+  budget: number;
 }
 
 export interface ClientProfile {
