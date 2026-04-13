@@ -343,13 +343,13 @@ function AccountIdRepeater({ label, idLabel, placeholder, values, onChange }: { 
 }
 
 /* ─── Platform Card with budget inline edit ─── */
-function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currencySymbol, formatBudgetNumber, parseBudgetString }: {
+function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, currency, formatBudgetNumber, parseBudgetString }: {
   platform: typeof allPlatforms[0];
   cfg: ClientProfile['platforms'][PlatformKey];
   togglePlatform: (k: PlatformKey) => void;
   updateClient: (u: Partial<ClientProfile>) => void;
   client: ClientProfile;
-  currencySymbol: string;
+  currency: string;
   formatBudgetNumber: (n: number) => string;
   parseBudgetString: (s: string) => number;
 }) {
@@ -403,7 +403,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
           <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget</Label>
           {editing ? (
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-xs text-muted-foreground shrink-0">{currencySymbol}</span>
+              <span className="text-xs text-muted-foreground shrink-0"><CurrencySymbol currency={currency} size={11} /></span>
               <Input
                 autoFocus
                 value={draft}
@@ -421,7 +421,7 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
             </div>
           ) : (
             <button onClick={startEdit} className="mt-1 text-xs tabular-nums text-card-foreground hover:text-primary transition-colors text-left">
-              {cfg.budget ? `${currencySymbol}${formatBudgetNumber(cfg.budget)}` : <span className="text-muted-foreground italic">Set budget…</span>}
+              {cfg.budget ? <span className="flex items-center gap-0.5"><CurrencySymbol currency={currency} size={11} />{formatBudgetNumber(cfg.budget)}</span> : <span className="text-muted-foreground italic">Set budget…</span>}
             </button>
           )}
         </div>
