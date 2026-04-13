@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Copy, Archive, CheckCircle, Plus, X, Upload, Download, Building2, Globe, Hash, Clock } from 'lucide-react';
+import { Save, CheckCircle, Plus, X, Upload, Download, Building2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
