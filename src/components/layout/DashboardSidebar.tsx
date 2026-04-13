@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number }) {
   if (entry.type === 'lucide') {
     const Icon = entry.icon;
-    return <Icon size={size} className="shrink-0" />;
+    return <Icon size={size} className="shrink-0 transition-colors duration-200" />;
   }
-  return <entry.Component size={size} className="shrink-0" />;
+  return <entry.Component size={size} className="shrink-0 transition-colors duration-200" />;
 }
 
 export function DashboardSidebar() {
