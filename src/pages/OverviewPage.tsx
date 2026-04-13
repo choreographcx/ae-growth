@@ -6,8 +6,8 @@ import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { overviewKPIGroups, overviewKPIGroupsRow2, spendTimeSeries, conversionsTimeSeries, cpaTimeSeries, platformSummaries, alerts } from '@/data/mockData';
 import { useMemo } from 'react';
-
-const allKPICards = [...overviewKPIGroups, ...overviewKPIGroupsRow2];
+import { useDashboard } from '@/context/DashboardContext';
+import { KPIGroupData } from '@/types/dashboard';
 
 // CTR time series derived from clicks/impressions mock pattern
 function generateCTRTimeSeries() {
@@ -21,11 +21,31 @@ function generateCTRTimeSeries() {
 const severityOrder = { error: 0, warning: 1, success: 2, info: 3 };
 
 export default function OverviewPage() {
+  const { client } = useDashboard();
   const ctrTimeSeries = useMemo(() => generateCTRTimeSeries(), []);
   const sortedAlerts = useMemo(() =>
     [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]),
     []
   );
+
+  // Derive total budget from platform configs
+  const totalBudget = useMemo(() =>
+    Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0),
+    [client.platforms]
+  );
+
+  const allKPICards: KPIGroupData[] = useMemo(() => {
+    const spendCard = overviewKPIGroups.find(g => g.title === 'Spend');
+    const others = overviewKPIGroups.filter(g => g.title !== 'Spend');
+    const updatedSpend: KPIGroupData | undefined = spendCard ? {
+      ...spendCard,
+      supporting: [
+        { label: 'Budget', formattedValue: `$${totalBudget.toLocaleString()}` },
+        { label: 'Pacing', formattedValue: totalBudget > 0 ? `${Math.round((spendCard.primary.value / totalBudget) * 100)}%` : '—', change: spendCard.supporting.find(s => s.label === 'Pacing')?.change },
+      ],
+    } : undefined;
+    return [...(updatedSpend ? [updatedSpend] : []), ...others, ...overviewKPIGroupsRow2];
+  }, [totalBudget]);
 
   return (
     <div className="space-y-5 md:space-y-7">
