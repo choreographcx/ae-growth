@@ -313,10 +313,10 @@ function CurrencySelectField({ label, value, onChange }: { label: string; value:
         </SelectTrigger>
         <SelectContent>
           {CURRENCY_OPTIONS.map(o => (
-            <SelectItem key={o.value} value={o.value}>
+            <SelectItem key={o} value={o}>
               <span className="inline-flex items-center gap-2">
-                <CurrencySymbol currency={o.value} size={14} />
-                <span>{o.label}</span>
+                <CurrencySymbol currency={o} size={14} />
+                <span>{o}</span>
               </span>
             </SelectItem>
           ))}
