@@ -80,7 +80,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       </div>
 
       {/* Trends */}
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-3 md:space-y-4 print-break-before">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <TrendChartCard title="Spend" data={spendData} currency={currency} color="hsl(var(--chart-1))" />
@@ -89,7 +89,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       </div>
 
       {/* Campaign Table */}
-      <div>
+      <div className="print-break-before">
         <PerformanceTable data={campaigns} title="Campaign Performance" />
       </div>
 

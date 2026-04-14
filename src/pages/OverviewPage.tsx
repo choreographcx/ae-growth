@@ -63,7 +63,7 @@ export default function OverviewPage() {
       </div>
 
       {/* Trend Charts */}
-      <div className="space-y-2.5 md:space-y-3">
+      <div className="space-y-2.5 md:space-y-3 print-break-before">
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
           <TrendChartCard title="Spend Over Time" data={spendTimeSeries} currency={currency} color="hsl(var(--chart-1))" />
@@ -77,7 +77,7 @@ export default function OverviewPage() {
       <FunnelCard />
 
       {/* Platform Comparison */}
-      <div className="space-y-2.5 md:space-y-3">
+      <div className="space-y-2.5 md:space-y-3 print-break-before">
         <SectionHeader title="Platform Performance" />
         <PlatformComparison data={platformSummaries} />
       </div>
