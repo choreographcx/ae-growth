@@ -7,8 +7,8 @@ import { SaudiRiyal } from 'saudi-riyal/react';
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
   const emSize = size ? `${size}px` : '1em';
   if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline-block', verticalAlign: 'baseline', lineHeight: 1, minWidth: emSize }} />;
-  if (currency === 'AED') return <DirhamSymbol size={emSize} color="currentColor" className={className} style={{ display: 'inline-block', verticalAlign: 'baseline', height: emSize, width: 'auto' }} />;
-  return <span className={className}>$</span>;
+  if (currency === 'AED') return <DirhamSymbol size={emSize} color="currentColor" className={className} style={{ display: 'inline-block', verticalAlign: 'baseline', height: emSize, width: 'auto', minWidth: emSize }} />;
+  return <span className={className} style={{ display: 'inline-block', minWidth: emSize }}>$</span>;
 }
 
 export function getCurrencyIconSrc(currency: string): string | null {
