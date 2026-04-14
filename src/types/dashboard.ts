@@ -3,7 +3,7 @@ import React from 'react';
 export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'x' | 'linkedin' | 'programmatic';
 
 /** Canonical display order for all platforms */
-export const PLATFORM_ORDER: PlatformKey[] = ['meta', 'google', 'tiktok', 'snapchat', 'x', 'linkedin', 'programmatic'];
+export const PLATFORM_ORDER: PlatformKey[] = ['meta', 'google', 'tiktok', 'snapchat', 'linkedin', 'x', 'programmatic'];
 
 export interface PlatformConfig {
   key: PlatformKey;
