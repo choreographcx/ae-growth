@@ -11,17 +11,8 @@ import {
 } from '@react-pdf/renderer';
 import type { ClientProfile, PlatformSummary, KPIGroupData, AlertItem } from '@/types/dashboard';
 
-// Register Inter font from Google Fonts CDN
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.ttf', fontWeight: 300 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLufAZ9hjQ.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hjQ.ttf', fontWeight: 500 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hjQ.ttf', fontWeight: 600 },
-    { src: 'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYAZ9hjQ.ttf', fontWeight: 700 },
-  ],
-});
+// Use built-in Helvetica to avoid network font fetching issues
+// @react-pdf/renderer includes Helvetica, Helvetica-Bold, etc. by default
 
 const colors = {
   bg: '#F8FAFC',
@@ -38,7 +29,7 @@ const colors = {
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     fontSize: 9,
     color: colors.text,
     backgroundColor: colors.bg,
