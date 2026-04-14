@@ -25,7 +25,6 @@ export function CurrencySymbol({ currency, size, className = '' }: { currency: s
 
 export function getCurrencyIconSrc(currency: string): string | null {
   if (currency === 'SAR') return sarIcon;
-  if (currency === 'AED') return aedIcon;
   return null;
 }
 
