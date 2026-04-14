@@ -6,7 +6,7 @@ import { SaudiRiyal } from 'saudi-riyal/react';
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
   const emSize = size ? `${size}px` : '1em';
   if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline-block', verticalAlign: 'baseline', lineHeight: 1 }} />;
-  if (currency === 'AED') return <span className={className} style={{ fontFamily: 'UAEDirham, sans-serif', fontSize: `calc(${emSize} * 0.7)`, fontWeight: 'bold', verticalAlign: 'middle', lineHeight: 1 }}>&#xEA;</span>;
+  if (currency === 'AED') return <span className={className} style={{ fontFamily: 'UAEDirham, sans-serif', fontSize: `calc(${emSize} * 0.7)`, fontWeight: 'bold', verticalAlign: 'baseline', lineHeight: 1, display: 'inline-block', transform: 'translateY(-0.05em)' }}>&#xEA;</span>;
   return <span className={className}>$</span>;
 }
 
