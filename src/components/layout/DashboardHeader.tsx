@@ -43,6 +43,7 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
     activePreset ? { from: activePreset.from, to: activePreset.to } : { from: subDays(new Date(), 30), to: new Date() }
   );
   const [draftRange, setDraftRange] = useState(range);
+  const [calendarMonth, setCalendarMonth] = useState(draftRange.from);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) setDraftRange(range);
