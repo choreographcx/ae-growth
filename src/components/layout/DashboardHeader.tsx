@@ -109,6 +109,33 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
           <div className="p-2 flex flex-col">
+            {/* Start / End date inputs */}
+            <div className="flex items-center gap-2 px-3 pb-2">
+              <div className="flex-1">
+                <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Start Date</label>
+                <input
+                  type="date"
+                  value={format(draftRange.from, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const d = new Date(e.target.value + 'T00:00:00');
+                    if (!isNaN(d.getTime())) setDraftRange(prev => ({ ...prev, from: d }));
+                  }}
+                  className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">End Date</label>
+                <input
+                  type="date"
+                  value={format(draftRange.to, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const d = new Date(e.target.value + 'T00:00:00');
+                    if (!isNaN(d.getTime())) setDraftRange(prev => ({ ...prev, to: d }));
+                  }}
+                  className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
             <Calendar
               mode="range"
               selected={{ from: draftRange.from, to: draftRange.to }}
