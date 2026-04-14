@@ -1,6 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
+import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { pdf } from '@react-pdf/renderer';
+import { PDFReport } from '@/components/pdf/PDFReport';
+import { overviewKPIGroups, overviewKPIGroupsRow2, platformSummaries, alerts } from '@/data/mockData';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
@@ -135,9 +138,11 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
     selectedObjectives, setSelectedObjectives,
+    dateRange,
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
+  const [isExporting, setIsExporting] = useState(false);
   
 
   const allCampaigns = useMemo(() => {
@@ -153,9 +158,43 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
-  const handleExportPDF = useCallback(() => {
-    window.print();
-  }, []);
+  const handleExportPDF = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const allKPIs = [...overviewKPIGroups, ...overviewKPIGroupsRow2];
+      const kpiData = allKPIs.map(g => ({
+        ...g,
+        primary: { ...g.primary, formattedValue: typeof g.primary.formattedValue === 'string' ? g.primary.formattedValue : `${g.primary.value.toLocaleString()}` },
+        supporting: g.supporting.map(s => ({ ...s, formattedValue: typeof s.formattedValue === 'string' ? s.formattedValue : '' })),
+      }));
+
+      const severityOrder: Record<string, number> = { error: 0, warning: 1, success: 2, info: 3 };
+      const sortedAlerts = [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]);
+
+      const doc = (
+        <PDFReport
+          client={client}
+          dateRange={dateRange}
+          kpiGroups={kpiData}
+          platformSummaries={platformSummaries}
+          alerts={sortedAlerts}
+          enabledPlatforms={enabledPlatforms}
+        />
+      );
+
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${client.code}_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [client, dateRange, enabledPlatforms]);
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
@@ -184,9 +223,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 </button>
               )}
               <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF}>
-                <Download size={11} />
-                Export PDF
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={isExporting}>
+                {isExporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+                {isExporting ? 'Exporting…' : 'Export PDF'}
               </Button>
               <div className="h-3.5 w-px bg-border mx-1" />
               <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
