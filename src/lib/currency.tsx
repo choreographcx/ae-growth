@@ -18,7 +18,7 @@ function AedSymbol({ className = '', style }: { className?: string; style?: Reac
 
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
   const emSize = size ? `${size}px` : '1em';
-  if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline-block', verticalAlign: 'baseline', lineHeight: 1 }} />;
+  if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline-block', verticalAlign: 'baseline', lineHeight: 1, overflow: 'visible' }} />;
   if (currency === 'AED') return <AedSymbol className={className} />;
   return <span className={className}>$</span>;
 }
