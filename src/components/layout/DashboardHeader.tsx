@@ -138,9 +138,11 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
     selectedObjectives, setSelectedObjectives,
+    dateRange,
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
+  const [isExporting, setIsExporting] = useState(false);
   
 
   const allCampaigns = useMemo(() => {
@@ -156,9 +158,43 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
 
-  const handleExportPDF = useCallback(() => {
-    window.print();
-  }, []);
+  const handleExportPDF = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const allKPIs = [...overviewKPIGroups, ...overviewKPIGroupsRow2];
+      const kpiData = allKPIs.map(g => ({
+        ...g,
+        primary: { ...g.primary, formattedValue: typeof g.primary.formattedValue === 'string' ? g.primary.formattedValue : `${g.primary.value.toLocaleString()}` },
+        supporting: g.supporting.map(s => ({ ...s, formattedValue: typeof s.formattedValue === 'string' ? s.formattedValue : '' })),
+      }));
+
+      const severityOrder: Record<string, number> = { error: 0, warning: 1, success: 2, info: 3 };
+      const sortedAlerts = [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]);
+
+      const doc = (
+        <PDFReport
+          client={client}
+          dateRange={dateRange}
+          kpiGroups={kpiData}
+          platformSummaries={platformSummaries}
+          alerts={sortedAlerts}
+          enabledPlatforms={enabledPlatforms}
+        />
+      );
+
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${client.code}_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [client, dateRange, enabledPlatforms]);
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
