@@ -1,6 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Menu, Download, CalendarIcon, LogOut } from 'lucide-react';
+import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { pdf } from '@react-pdf/renderer';
+import { PDFReport } from '@/components/pdf/PDFReport';
+import { overviewKPIGroups, overviewKPIGroupsRow2, platformSummaries, alerts } from '@/data/mockData';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
