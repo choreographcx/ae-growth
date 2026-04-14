@@ -88,7 +88,7 @@ export default function AdminPage() {
           <AccordionContent className="pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <Field label="Client Name" value={client.name} onChange={v => updateClient({ name: v })} required />
-              <SelectField label="Reporting Currency" value={client.currency} options={['USD', 'SAR', 'AED']} onChange={v => updateClient({ currency: v })} />
+              <CurrencySelectField label="Reporting Currency" value={client.currency} onChange={v => updateClient({ currency: v })} />
               <SelectField label="Time Zone" value={client.timezone} options={['Asia/Dubai', 'Asia/Riyadh']} onChange={v => updateClient({ timezone: v })} />
               <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} onChange={v => updateClient({ defaultDateRange: v })} />
               <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
@@ -293,6 +293,38 @@ function SelectField({ label, value, options, onChange }: { label: string; value
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className={cn(label ? "mt-1.5" : "", "h-9 text-sm")}><SelectValue /></SelectTrigger>
         <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD / $' },
+  { value: 'SAR', label: 'SAR' },
+  { value: 'AED', label: 'AED' },
+];
+
+function CurrencySelectField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      {label && <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</Label>}
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="mt-1.5 h-9 text-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <CurrencySymbol currency={value} size={14} />
+            <span>{value}</span>
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          {CURRENCY_OPTIONS.map(o => (
+            <SelectItem key={o.value} value={o.value}>
+              <span className="inline-flex items-center gap-1.5">
+                <CurrencySymbol currency={o.value} size={14} />
+                <span>{o.label}</span>
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
     </div>
   );
