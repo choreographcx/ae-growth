@@ -306,17 +306,15 @@ function CurrencySelectField({ label, value, onChange }: { label: string; value:
       {label && <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</Label>}
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="mt-1.5 h-9 text-sm">
-          <span className="inline-flex items-center gap-2">
-            <CurrencySymbol currency={value} size={14} />
-            <span>{value}</span>
+          <span className="inline-flex items-baseline">
+            <CurrencySymbol currency={value} size={14} />&nbsp;{value}
           </span>
         </SelectTrigger>
         <SelectContent>
           {CURRENCY_OPTIONS.map(o => (
             <SelectItem key={o} value={o}>
-              <span className="inline-flex items-center gap-2">
-                <CurrencySymbol currency={o} size={14} />
-                <span>{o}</span>
+              <span className="inline-flex items-baseline">
+                <CurrencySymbol currency={o} size={14} />&nbsp;{o}
               </span>
             </SelectItem>
           ))}
