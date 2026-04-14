@@ -1,13 +1,12 @@
 import React from 'react';
 import sarIcon from '@/assets/currency/sar.svg';
 import aedIcon from '@/assets/currency/aed.svg';
-import { DirhamSymbol } from 'dirham/react';
 import { SaudiRiyal } from 'saudi-riyal/react';
 
 export function CurrencySymbol({ currency, size, className = '' }: { currency: string; size?: number; className?: string }) {
   const emSize = size ? `${size}px` : '1em';
   if (currency === 'SAR') return <SaudiRiyal className={className} style={{ fontSize: emSize, display: 'inline-block', verticalAlign: 'baseline', lineHeight: 1 }} />;
-  if (currency === 'AED') return <DirhamSymbol size={emSize} color="currentColor" className={className} style={{ display: 'inline-block', verticalAlign: 'baseline', height: emSize, width: 'auto' }} />;
+  if (currency === 'AED') return <span className={className} style={{ fontFamily: 'UAEDirham, sans-serif', fontSize: emSize, fontWeight: 'bold' }}>&#xEA;</span>;
   return <span className={className}>$</span>;
 }
 
