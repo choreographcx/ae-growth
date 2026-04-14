@@ -105,9 +105,24 @@
   }
 }
 
+/* ─── Print report header (hidden on screen) ─── */
+.print-report-header {
+  display: none;
+}
+
 /* ─── Print-to-PDF styles ─── */
 @media print {
-  /* Force light mode colors */
+  /* Page setup: A4 landscape with consistent margins */
+  @page {
+    size: A4 landscape;
+    margin: 10mm 12mm;
+  }
+
+  @page :first {
+    margin-top: 8mm;
+  }
+
+  /* Force light mode colors regardless of user theme */
   :root {
     --background: 210 20% 98%;
     --foreground: 222 47% 11%;
@@ -125,64 +140,161 @@
     color-scheme: light;
   }
 
+  /* Exact color reproduction */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide non-content UI: sidebar, header, mobile drawer, back-to-top, scrollbars */
+  /* Show the print report header */
+  .print-report-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 6mm 0;
+    margin-bottom: 4mm;
+    border-bottom: 1.5px solid hsl(214 32% 91%);
+  }
+
+  .print-report-header h1 {
+    font-size: 16pt;
+    font-weight: 700;
+    color: hsl(222 47% 11%);
+    margin: 0;
+  }
+
+  .print-report-header .print-meta {
+    text-align: right;
+    font-size: 8pt;
+    color: hsl(215 16% 47%);
+    line-height: 1.6;
+  }
+
+  /* Hide non-content UI: sidebar, header, mobile drawer, back-to-top, interactive buttons */
   nav,
   header,
   [data-sidebar],
   [data-print-hide],
-  .back-to-top,
-  button {
+  .back-to-top {
+    display: none !important;
+  }
+
+  /* Hide interactive-only buttons but keep content */
+  button:not(.print-keep) {
     display: none !important;
   }
 
   /* Main content fills the page */
-  body {
+  html, body {
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  #dashboard-main-content {
-    padding: 8mm !important;
+    font-size: 10pt;
     overflow: visible !important;
-    width: 100% !important;
-    max-width: none !important;
+    height: auto !important;
   }
 
-  #dashboard-main-content > div {
-    max-width: none !important;
-  }
-
-  /* The flex wrapper should not constrain */
+  /* Remove the flex layout wrapper */
   .flex.min-h-screen {
     display: block !important;
   }
 
-  /* Keep cards, charts, tables intact */
-  .bg-card {
+  #dashboard-main-content {
+    padding: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+  }
+
+  #dashboard-main-content > div {
+    max-width: none !important;
+    animation: none !important;
+  }
+
+  /* ── Cards ── */
+  .bg-card,
+  [class*="rounded-xl"] {
     background-color: white !important;
     box-shadow: none !important;
     border: 1px solid hsl(214 32% 91%) !important;
   }
 
-  /* Avoid breaking inside cards and charts */
+  /* ── Page-break rules ── */
+  /* Never break inside cards, charts, or table rows */
   .bg-card,
   .recharts-wrapper,
-  table,
   [class*="KPIGroupCard"],
-  [class*="TrendChartCard"] {
+  [class*="TrendChartCard"],
+  [class*="FunnelCard"],
+  [class*="AlertCard"] {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Page setup */
-  @page {
-    size: landscape;
-    margin: 5mm;
+  /* Avoid breaking inside table rows */
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Section headers should stay with their content */
+  [class*="SectionHeader"],
+  h2, h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Major sections get a page break before them (trends, funnel, tables, diagnostics) */
+  .print-break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Grids should not break oddly */
+  .grid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* But allow grid to break if it contains many items */
+  .grid.print-breakable {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* ── Charts: ensure SVG renders as vectors ── */
+  .recharts-wrapper {
+    overflow: visible !important;
+  }
+
+  .recharts-wrapper svg {
+    overflow: visible !important;
+  }
+
+  /* ── Tables ── */
+  table {
+    font-size: 9pt;
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* ── Animations off ── */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* ── Scrollable areas become visible ── */
+  [class*="overflow-auto"],
+  [class*="overflow-x-auto"],
+  [class*="overflow-y-auto"],
+  [class*="overflow-hidden"] {
+    overflow: visible !important;
+    max-height: none !important;
   }
 }
