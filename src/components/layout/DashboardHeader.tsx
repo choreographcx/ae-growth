@@ -46,7 +46,10 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const [calendarMonth, setCalendarMonth] = useState(draftRange.from);
 
   const handleOpen = (isOpen: boolean) => {
-    if (isOpen) setDraftRange(range);
+    if (isOpen) {
+      setDraftRange(range);
+      setCalendarMonth(range.from);
+    }
     setOpen(isOpen);
   };
 
@@ -119,7 +122,10 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
                   value={format(draftRange.from, 'yyyy-MM-dd')}
                   onChange={(e) => {
                     const d = new Date(e.target.value + 'T00:00:00');
-                    if (!isNaN(d.getTime())) setDraftRange(prev => ({ ...prev, from: d }));
+                    if (!isNaN(d.getTime())) {
+                      setDraftRange(prev => ({ ...prev, from: d }));
+                      setCalendarMonth(d);
+                    }
                   }}
                   className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
@@ -131,7 +137,11 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
                   value={format(draftRange.to, 'yyyy-MM-dd')}
                   onChange={(e) => {
                     const d = new Date(e.target.value + 'T00:00:00');
-                    if (!isNaN(d.getTime())) setDraftRange(prev => ({ ...prev, to: d }));
+                    if (!isNaN(d.getTime())) {
+                      setDraftRange(prev => ({ ...prev, to: d }));
+                      // Show end date on the right calendar (set left calendar to one month before)
+                      setCalendarMonth(subMonths(d, 1));
+                    }
                   }}
                   className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
@@ -140,6 +150,8 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
             <Calendar
               mode="range"
               selected={{ from: draftRange.from, to: draftRange.to }}
+              month={calendarMonth}
+              onMonthChange={setCalendarMonth}
               onSelect={(r) => {
                 if (r?.from && r?.to) {
                   setDraftRange({ from: r.from, to: r.to });
