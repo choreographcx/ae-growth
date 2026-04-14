@@ -298,6 +298,38 @@ function SelectField({ label, value, options, onChange }: { label: string; value
   );
 }
 
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD / $' },
+  { value: 'SAR', label: 'SAR' },
+  { value: 'AED', label: 'AED' },
+];
+
+function CurrencySelectField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      {label && <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</Label>}
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="mt-1.5 h-9 text-sm">
+          <span className="inline-flex items-center gap-1.5">
+            <CurrencySymbol currency={value} size={14} />
+            <span>{value}</span>
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          {CURRENCY_OPTIONS.map(o => (
+            <SelectItem key={o.value} value={o.value}>
+              <span className="inline-flex items-center gap-1.5">
+                <CurrencySymbol currency={o.value} size={14} />
+                <span>{o.label}</span>
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function ThresholdField({ label, value, onChange, helper }: { label: string; value: number; onChange: (v: number) => void; helper?: string }) {
   return (
     <div>
