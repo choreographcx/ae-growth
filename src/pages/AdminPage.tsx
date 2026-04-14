@@ -88,7 +88,7 @@ export default function AdminPage() {
           <AccordionContent className="pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <Field label="Client Name" value={client.name} onChange={v => updateClient({ name: v })} required />
-              <SelectField label="Reporting Currency" value={client.currency} options={['USD', 'SAR', 'AED']} onChange={v => updateClient({ currency: v })} />
+              <CurrencySelectField label="Reporting Currency" value={client.currency} onChange={v => updateClient({ currency: v })} />
               <SelectField label="Time Zone" value={client.timezone} options={['Asia/Dubai', 'Asia/Riyadh']} onChange={v => updateClient({ timezone: v })} />
               <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} onChange={v => updateClient({ defaultDateRange: v })} />
               <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
