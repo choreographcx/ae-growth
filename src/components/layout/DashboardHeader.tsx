@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { pdf } from '@react-pdf/renderer';
 import { PDFReport } from '@/components/pdf/PDFReport';
@@ -191,6 +192,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PDF export failed:', err);
+      toast.error('PDF export failed. Please try again.');
     } finally {
       setIsExporting(false);
     }
