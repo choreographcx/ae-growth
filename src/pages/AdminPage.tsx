@@ -23,8 +23,8 @@ const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placehol
   { key: 'google', label: 'Google Ads', idLabel: 'Customer ID(s)', placeholder: '123-456-7890' },
   { key: 'tiktok', label: 'TikTok', idLabel: 'Ad Account ID(s)', placeholder: 'tt_123456789' },
   { key: 'snapchat', label: 'Snapchat', idLabel: 'Ad Account ID(s)', placeholder: 'sc_123456789' },
-  { key: 'linkedin', label: 'LinkedIn', idLabel: 'Account ID(s)', placeholder: 'li_123456789' },
   { key: 'x', label: 'X', idLabel: 'Account ID(s)', placeholder: 'x_123456789' },
+  { key: 'linkedin', label: 'LinkedIn', idLabel: 'Account ID(s)', placeholder: 'li_123456789' },
   { key: 'programmatic', label: 'Programmatic', idLabel: 'Advertiser / Seat / Partner ID(s)', placeholder: 'prog_123456789' },
 ];
 
