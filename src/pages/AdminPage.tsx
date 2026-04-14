@@ -298,11 +298,7 @@ function SelectField({ label, value, options, onChange }: { label: string; value
   );
 }
 
-const CURRENCY_OPTIONS = [
-  { value: 'USD', label: 'USD / $' },
-  { value: 'SAR', label: 'SAR' },
-  { value: 'AED', label: 'AED' },
-];
+const CURRENCY_OPTIONS = ['USD', 'SAR', 'AED'];
 
 function CurrencySelectField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
