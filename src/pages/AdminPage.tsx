@@ -192,63 +192,7 @@ export default function AdminPage() {
           subtitle="Metric mapping, naming normalization, aliases, and taxonomy"
           badge={<Badge variant="secondary" className="text-[9px] font-normal">{client.metricMappings.length} mappings</Badge>}
         >
-          <div className="pt-4 space-y-6">
-            <div>
-              <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Metric Mapping</h4>
-              <div className="space-y-2.5">
-                <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_36px] gap-3 px-3 text-[10px] text-muted-foreground uppercase tracking-wider">
-                  <span>Standard Label</span>
-                  <span>Platform Metric</span>
-                  <span>Platform</span>
-                  <span />
-                </div>
-                {client.metricMappings.map((mapping, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/10 hover:bg-muted/20 transition-colors">
-                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <SelectField label="" value={mapping.standardLabel} options={standardMetrics} onChange={v => {
-                        const updated = [...client.metricMappings];
-                        updated[i] = { ...updated[i], standardLabel: v };
-                        updateClient({ metricMappings: updated });
-                      }} />
-                      <Field label="" value={mapping.platformMetric} onChange={v => {
-                        const updated = [...client.metricMappings];
-                        updated[i] = { ...updated[i], platformMetric: v };
-                        updateClient({ metricMappings: updated });
-                      }} placeholder="e.g. purchase, lead_form_submit" />
-                      <SelectField label="" value={mapping.platform} options={allPlatforms.map(p => p.key)} onChange={v => {
-                        const updated = [...client.metricMappings];
-                        updated[i] = { ...updated[i], platform: v as PlatformKey };
-                        updateClient({ metricMappings: updated });
-                      }} />
-                    </div>
-                    <button onClick={() => updateClient({ metricMappings: client.metricMappings.filter((_, idx) => idx !== i) })} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-                <Button size="sm" variant="outline" onClick={() => updateClient({ metricMappings: [...client.metricMappings, { standardLabel: 'Primary Conversion', platformMetric: '', platform: 'meta' }] })} className="gap-1.5 mt-1">
-                  <Plus size={12} /> Add Mapping
-                </Button>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border/50">
-              <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Naming Normalization</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <Field label="Campaign" value={client.namingNormalization.campaign} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, campaign: v } })} />
-                <Field label="Ad Set / Ad Group" value={client.namingNormalization.adSetOrAdGroup} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adSetOrAdGroup: v } })} />
-                <Field label="Ad / Creative" value={client.namingNormalization.adOrCreative} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adOrCreative: v } })} />
-                <Field label="Placement" value={client.namingNormalization.placement} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, placement: v } })} />
-                <Field label="Audience" value={client.namingNormalization.audience} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, audience: v } })} />
-                <Field label="Objective" value={client.namingNormalization.objective} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, objective: v } })} />
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-border/50">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Alias Manager · Taxonomy Dictionary · Label Overrides</h4>
-              <p className="text-xs text-muted-foreground/60">These sub-panels will be built in Phase 5.</p>
-            </div>
-          </div>
+          <ReportingRulesSection client={client} updateClient={updateClient} />
         </AdminSection>
 
         {/* 5. Alert Rules */}
