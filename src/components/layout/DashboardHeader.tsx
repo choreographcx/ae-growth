@@ -2,8 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { pdf } from '@react-pdf/renderer';
-import { PDFReport } from '@/components/pdf/PDFReport';
 import { overviewKPIGroups, overviewKPIGroupsRow2, platformSummaries, alerts } from '@/data/mockData';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
@@ -113,7 +111,6 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
           <div className="p-2 flex flex-col">
-            {/* Start / End date inputs */}
             <div className="flex items-center gap-2 px-3 pb-2">
               <div className="flex-1">
                 <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Start Date</label>
@@ -139,7 +136,6 @@ function DateRangePicker({ compact = false }: { compact?: boolean }) {
                     const d = new Date(e.target.value + 'T00:00:00');
                     if (!isNaN(d.getTime())) {
                       setDraftRange(prev => ({ ...prev, to: d }));
-                      // Show end date on the right calendar (set left calendar to one month before)
                       setCalendarMonth(subMonths(d, 1));
                     }
                   }}
@@ -184,7 +180,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
-  
 
   const allCampaigns = useMemo(() => {
     return enabledPlatforms.flatMap(p => generateCampaigns(p));
@@ -202,41 +197,14 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const handleExportPDF = useCallback(async () => {
     setIsExporting(true);
     try {
-      const allKPIs = [...overviewKPIGroups, ...overviewKPIGroupsRow2];
-      const kpiData = allKPIs.map(g => ({
-        ...g,
-        primary: { ...g.primary, formattedValue: typeof g.primary.formattedValue === 'string' ? g.primary.formattedValue : `${g.primary.value.toLocaleString()}` },
-        supporting: g.supporting.map(s => ({ ...s, formattedValue: typeof s.formattedValue === 'string' ? s.formattedValue : '' })),
-      }));
-
-      const severityOrder: Record<string, number> = { error: 0, warning: 1, success: 2, info: 3 };
-      const sortedAlerts = [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]);
-
-      const doc = (
-        <PDFReport
-          client={client}
-          dateRange={dateRange}
-          kpiGroups={kpiData}
-          platformSummaries={platformSummaries}
-          alerts={sortedAlerts}
-          enabledPlatforms={enabledPlatforms}
-        />
-      );
-
-      const blob = await pdf(doc).toBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${client.code}_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      toast.info('PDF export is temporarily unavailable. We are working on restoring this feature.');
     } catch (err) {
       console.error('PDF export failed:', err);
       toast.error('PDF export failed. Please try again.');
     } finally {
       setIsExporting(false);
     }
-  }, [client, dateRange, enabledPlatforms]);
+  }, []);
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
