@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { useAuth } from '@/hooks/useAuth';
+import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/components/admin/AdminSections';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
@@ -46,44 +47,32 @@ export default function AdminPage() {
   const parseBudgetString = (s: string) => Number(s.replace(/,/g, '')) || 0;
 
   return (
-    <div className="space-y-8">
-      <SectionHeader title="Admin / Settings" subtitle="Configure client profile, platforms, and tracking" />
-
-      <Tabs defaultValue="configuration" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="configuration" className="gap-1.5"><Building2 size={14} /> Configuration</TabsTrigger>
-          {isAdmin && <TabsTrigger value="users" className="gap-1.5"><Users size={14} /> User Management</TabsTrigger>}
-        </TabsList>
-
-        <TabsContent value="users">
-          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-            <UserManagement />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <SectionHeader title="Admin / Settings" subtitle="Configure your paid media dashboard" />
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
+            <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
           </div>
-        </TabsContent>
-
-        <TabsContent value="configuration">
-
-      {/* Action bar */}
-      <div className="flex items-center justify-end gap-2 mb-2">
-        <div className="hidden sm:flex items-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
-          <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Clock size={10} />
-            <span>Last saved: {lastSavedAt ?? 'Never'}</span>
+          <div className="flex flex-col items-end gap-1">
+            <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Clock size={10} />
+              <span>Last saved: {lastSavedAt ?? 'Never'}</span>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Setup Status Summary */}
+      <SetupStatusSummary />
 
-      <Accordion type="multiple" defaultValue={['client', 'platforms']} className="space-y-3">
-        {/* Client Profile */}
+      {/* Client Setup — kept exactly as-is */}
+      <Accordion type="multiple" defaultValue={['client']} className="space-y-3">
         <AccordionItem value="client" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center gap-2">Client Profile <Badge variant="secondary" className="text-[9px] font-normal ml-1">{client.name}</Badge></div>
+            <div className="flex items-center gap-2">Client Setup <Badge variant="secondary" className="text-[9px] font-normal ml-1">{client.name}</Badge></div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -95,33 +84,57 @@ export default function AdminPage() {
             </div>
           </AccordionContent>
         </AccordionItem>
+      </Accordion>
 
-        {/* Ad Platforms */}
-        <AccordionItem value="platforms" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center justify-between w-full pr-2">
-              <div className="flex items-center gap-2">Ad Platforms <Badge variant="secondary" className="text-[9px] font-normal ml-1">{enabledCount} / {allPlatforms.length}</Badge></div>
-              <span className="text-xs font-semibold text-card-foreground tabular-nums flex items-center gap-1">Total Budget: <CurrencySymbol currency={currency} />{Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-4">Enable platforms and set budgets for pacing calculations.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {allPlatforms.map(p => (
-                <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      {/* New Section Layout */}
+      <div className="space-y-3">
 
-        {/* Ad Account IDs */}
-        <AccordionItem value="accounts" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center gap-2">Ad Account Configuration <Badge variant="secondary" className="text-[9px] font-normal ml-1">{totalAccounts} IDs</Badge></div>
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-5">Add account IDs for each enabled platform. Multiple IDs are supported per platform.</p>
-            <div className="space-y-6">
+        {/* 1. Branding & Theme */}
+        <AdminSection
+          id="branding"
+          icon={<Palette size={16} />}
+          title="Branding & Theme"
+          subtitle="Client logo, colors, and visual customization"
+          badge={<Badge variant="outline" className="text-[9px] font-normal border-amber-200 text-amber-600 bg-amber-50">Not Configured</Badge>}
+        >
+          <SectionPlaceholder description="Upload logos, set brand colors, choose chart palettes, and preview your theme." />
+        </AdminSection>
+
+        {/* 2. Platform Setup */}
+        <AdminSection
+          id="platforms"
+          icon={<LayoutGrid size={16} />}
+          title="Platform Setup"
+          subtitle="Enable platforms, set budgets, and manage account connections"
+          badge={<Badge variant="secondary" className="text-[9px] font-normal">{enabledCount} / {allPlatforms.length} platforms</Badge>}
+          defaultOpen
+        >
+          {/* Platform summary strip */}
+          <div className="flex flex-wrap items-center gap-4 py-3 mb-4 border-b border-border/50 text-xs text-muted-foreground">
+            <span><strong className="text-card-foreground">{enabledCount}</strong> enabled</span>
+            <span><strong className="text-card-foreground">{totalAccounts}</strong> connected accounts</span>
+            <span>
+              <strong className="text-card-foreground">
+                <CurrencySymbol currency={currency} />
+                {Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}
+              </strong> total budget
+            </span>
+            {enabledCount - totalAccounts > 0 && (
+              <span className="text-amber-600">{enabledCount - totalAccounts} need setup</span>
+            )}
+          </div>
+
+          {/* Platform cards grid — reusing existing cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {allPlatforms.map(p => (
+              <PlatformCard key={p.key} platform={p} cfg={client.platforms[p.key]} togglePlatform={togglePlatform} updateClient={updateClient} client={client} currency={currency} formatBudgetNumber={formatBudgetNumber} parseBudgetString={parseBudgetString} />
+            ))}
+          </div>
+
+          {/* Account IDs section within platform setup */}
+          <div className="mt-6 pt-4 border-t border-border/50">
+            <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Account IDs</h4>
+            <div className="space-y-4">
               {allPlatforms.filter(p => client.platforms[p.key].enabled).map(p => (
                 <AccountIdRepeater
                   key={p.key}
@@ -132,21 +145,23 @@ export default function AdminPage() {
                   onChange={ids => updateClient({ platforms: { ...client.platforms, [p.key]: { ...client.platforms[p.key], accountIds: ids } } })}
                 />
               ))}
-              {allPlatforms.filter(p => !client.platforms[p.key].enabled).length > 0 && (
-                <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-                  <span className="text-[10px] text-muted-foreground italic">Disabled: {allPlatforms.filter(p => !client.platforms[p.key].enabled).map(p => p.label).join(', ')}</span>
-                </div>
-              )}
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </AdminSection>
 
-        {/* Analytics & Measurement */}
-        <AccordionItem value="analytics" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            Analytics & Measurement
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
+        {/* 3. Measurement Setup */}
+        <AdminSection
+          id="measurement"
+          icon={<BarChart3 size={16} />}
+          title="Measurement Setup"
+          subtitle="Analytics, tracking, and conversion configuration"
+          badge={
+            client.ga4PropertyId && client.primaryConversion
+              ? <Badge variant="secondary" className="text-[9px] font-normal border-emerald-200 text-emerald-600 bg-emerald-50">Configured</Badge>
+              : <Badge variant="outline" className="text-[9px] font-normal border-amber-200 text-amber-600 bg-amber-50">Incomplete</Badge>
+          }
+        >
+          <div className="pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <Field label="GA4 Property ID" value={client.ga4PropertyId} onChange={v => updateClient({ ga4PropertyId: v })} placeholder="123456789" />
               <Field label="GA4 Stream ID" value={client.ga4StreamId} onChange={v => updateClient({ ga4StreamId: v })} placeholder="987654321" />
@@ -181,80 +196,92 @@ export default function AdminPage() {
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Conversion Notes</Label>
               <textarea className="mt-2 w-full border border-input rounded-lg p-3 text-sm bg-background text-foreground resize-none focus:ring-1 focus:ring-ring focus:border-ring outline-none transition-colors" rows={3} value={client.conversionNotes} onChange={e => updateClient({ conversionNotes: e.target.value })} placeholder="Document conversion setup, attribution notes, tracking methodology..." />
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </AdminSection>
 
-        {/* Metric Mapping */}
-        <AccordionItem value="metrics" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center gap-2">Metric Mapping <Badge variant="secondary" className="text-[9px] font-normal ml-1">{client.metricMappings.length}</Badge></div>
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-5">Map platform-native metrics to standardized dashboard labels.</p>
-            <div className="space-y-2.5">
-              {/* Column headers */}
-              <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_36px] gap-3 px-3 text-[10px] text-muted-foreground uppercase tracking-wider">
-                <span>Standard Label</span>
-                <span>Platform Metric</span>
-                <span>Platform</span>
-                <span />
-              </div>
-              {client.metricMappings.map((mapping, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/10 hover:bg-muted/20 transition-colors">
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <SelectField label="" value={mapping.standardLabel} options={standardMetrics} onChange={v => {
-                      const updated = [...client.metricMappings];
-                      updated[i] = { ...updated[i], standardLabel: v };
-                      updateClient({ metricMappings: updated });
-                    }} />
-                    <Field label="" value={mapping.platformMetric} onChange={v => {
-                      const updated = [...client.metricMappings];
-                      updated[i] = { ...updated[i], platformMetric: v };
-                      updateClient({ metricMappings: updated });
-                    }} placeholder="e.g. purchase, lead_form_submit" />
-                    <SelectField label="" value={mapping.platform} options={allPlatforms.map(p => p.key)} onChange={v => {
-                      const updated = [...client.metricMappings];
-                      updated[i] = { ...updated[i], platform: v as PlatformKey };
-                      updateClient({ metricMappings: updated });
-                    }} />
-                  </div>
-                  <button onClick={() => updateClient({ metricMappings: client.metricMappings.filter((_, idx) => idx !== i) })} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
-                    <X size={14} />
-                  </button>
+        {/* 4. Reporting Rules */}
+        <AdminSection
+          id="reporting"
+          icon={<FileText size={16} />}
+          title="Reporting Rules"
+          subtitle="Metric mapping, naming normalization, aliases, and taxonomy"
+          badge={<Badge variant="secondary" className="text-[9px] font-normal">{client.metricMappings.length} mappings</Badge>}
+        >
+          <div className="pt-4 space-y-6">
+            {/* Metric Mapping sub-section */}
+            <div>
+              <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Metric Mapping</h4>
+              <div className="space-y-2.5">
+                <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_36px] gap-3 px-3 text-[10px] text-muted-foreground uppercase tracking-wider">
+                  <span>Standard Label</span>
+                  <span>Platform Metric</span>
+                  <span>Platform</span>
+                  <span />
                 </div>
-              ))}
-              <Button size="sm" variant="outline" onClick={() => updateClient({ metricMappings: [...client.metricMappings, { standardLabel: 'Primary Conversion', platformMetric: '', platform: 'meta' }] })} className="gap-1.5 mt-1">
-                <Plus size={12} /> Add Mapping
-              </Button>
+                {client.metricMappings.map((mapping, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/10 hover:bg-muted/20 transition-colors">
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <SelectField label="" value={mapping.standardLabel} options={standardMetrics} onChange={v => {
+                        const updated = [...client.metricMappings];
+                        updated[i] = { ...updated[i], standardLabel: v };
+                        updateClient({ metricMappings: updated });
+                      }} />
+                      <Field label="" value={mapping.platformMetric} onChange={v => {
+                        const updated = [...client.metricMappings];
+                        updated[i] = { ...updated[i], platformMetric: v };
+                        updateClient({ metricMappings: updated });
+                      }} placeholder="e.g. purchase, lead_form_submit" />
+                      <SelectField label="" value={mapping.platform} options={allPlatforms.map(p => p.key)} onChange={v => {
+                        const updated = [...client.metricMappings];
+                        updated[i] = { ...updated[i], platform: v as PlatformKey };
+                        updateClient({ metricMappings: updated });
+                      }} />
+                    </div>
+                    <button onClick={() => updateClient({ metricMappings: client.metricMappings.filter((_, idx) => idx !== i) })} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                <Button size="sm" variant="outline" onClick={() => updateClient({ metricMappings: [...client.metricMappings, { standardLabel: 'Primary Conversion', platformMetric: '', platform: 'meta' }] })} className="gap-1.5 mt-1">
+                  <Plus size={12} /> Add Mapping
+                </Button>
+              </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
 
-        {/* Naming Normalization */}
-        <AccordionItem value="naming" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            Naming Normalization
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-5">Standardize entity naming conventions across platforms.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <Field label="Campaign" value={client.namingNormalization.campaign} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, campaign: v } })} />
-              <Field label="Ad Set / Ad Group" value={client.namingNormalization.adSetOrAdGroup} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adSetOrAdGroup: v } })} />
-              <Field label="Ad / Creative" value={client.namingNormalization.adOrCreative} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adOrCreative: v } })} />
-              <Field label="Placement" value={client.namingNormalization.placement} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, placement: v } })} />
-              <Field label="Audience" value={client.namingNormalization.audience} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, audience: v } })} />
-              <Field label="Objective" value={client.namingNormalization.objective} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, objective: v } })} />
+            {/* Naming Normalization sub-section */}
+            <div className="pt-4 border-t border-border/50">
+              <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Naming Normalization</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <Field label="Campaign" value={client.namingNormalization.campaign} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, campaign: v } })} />
+                <Field label="Ad Set / Ad Group" value={client.namingNormalization.adSetOrAdGroup} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adSetOrAdGroup: v } })} />
+                <Field label="Ad / Creative" value={client.namingNormalization.adOrCreative} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, adOrCreative: v } })} />
+                <Field label="Placement" value={client.namingNormalization.placement} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, placement: v } })} />
+                <Field label="Audience" value={client.namingNormalization.audience} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, audience: v } })} />
+                <Field label="Objective" value={client.namingNormalization.objective} onChange={v => updateClient({ namingNormalization: { ...client.namingNormalization, objective: v } })} />
+              </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
 
-        {/* Alert Thresholds */}
-        <AccordionItem value="alerts" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            Alert Thresholds
-          </AccordionTrigger>
-          <AccordionContent className="pb-6">
-            <p className="text-xs text-muted-foreground mb-5">Set thresholds to trigger diagnostic alerts.</p>
+            {/* Placeholder sub-sections */}
+            <div className="pt-4 border-t border-border/50">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Alias Manager · Taxonomy Dictionary · Label Overrides</h4>
+              <p className="text-xs text-muted-foreground/60">These sub-panels will be built in Phase 5.</p>
+            </div>
+          </div>
+        </AdminSection>
+
+        {/* 5. Alert Rules */}
+        <AdminSection
+          id="alerts"
+          icon={<Bell size={16} />}
+          title="Alert Rules"
+          subtitle="Configure thresholds, severity levels, and alert policies"
+          badge={
+            <Badge variant="secondary" className="text-[9px] font-normal">
+              {Object.values(client.alertThresholds).filter(v => v > 0).length} active
+            </Badge>
+          }
+        >
+          <div className="pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <ThresholdField label="CPA Spike Threshold (%)" value={client.alertThresholds.cpaSpike} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, cpaSpike: v } })} helper="Alert when CPA rises above this %" />
               <ThresholdField label="CTR Drop Threshold (%)" value={client.alertThresholds.ctrDrop} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, ctrDrop: v } })} helper="Alert when CTR falls below this %" />
@@ -262,11 +289,37 @@ export default function AdminPage() {
               <ThresholdField label="Zero-Conv Spend Threshold ($)" value={client.alertThresholds.zeroConversionSpend} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, zeroConversionSpend: v } })} helper="Alert when spend exceeds this with 0 conv." />
               <ThresholdField label="Viewability Threshold (%)" value={client.alertThresholds.viewabilityThreshold} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, viewabilityThreshold: v } })} helper="Alert when viewability drops below this %" />
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-        </TabsContent>
-      </Tabs>
+          </div>
+        </AdminSection>
+
+        {/* 6. Users & Access */}
+        <AdminSection
+          id="users"
+          icon={<Users size={16} />}
+          title="Users & Access"
+          subtitle="Manage team members, roles, and permissions"
+          badge={isAdmin ? undefined : <Badge variant="outline" className="text-[9px] font-normal">Admin only</Badge>}
+        >
+          {isAdmin ? (
+            <div className="pt-4">
+              <UserManagement />
+            </div>
+          ) : (
+            <SectionPlaceholder description="You need admin permissions to manage users." />
+          )}
+        </AdminSection>
+
+        {/* 7. Templates & Portability */}
+        <AdminSection
+          id="templates"
+          icon={<Package size={16} />}
+          title="Templates & Portability"
+          subtitle="Export, import, and reuse dashboard configurations across clients"
+        >
+          <SectionPlaceholder description="Export configs, save templates, duplicate setups, and manage portability across clients." />
+        </AdminSection>
+
+      </div>
     </div>
   );
 }
@@ -401,7 +454,6 @@ function PlatformCard({ platform: p, cfg, togglePlatform, updateClient, client, 
     const updatedClient = { ...client, platforms: updatedPlatforms };
     updateClient({ platforms: updatedPlatforms });
     setEditing(false);
-    // Save directly to Supabase with the updated data
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
