@@ -113,9 +113,16 @@ export default function AdminPage() {
           icon={<Palette size={16} />}
           title="Branding & Theme"
           subtitle="Client logo, colors, and visual customization"
-          badge={<Badge variant="outline" className="text-[9px] font-normal border-amber-200 text-amber-600 bg-amber-50">Not Configured</Badge>}
+          badge={
+            (client as any).branding?.primaryColor
+              ? <Badge variant="secondary" className="text-[9px] font-normal border-emerald-200 text-emerald-600 bg-emerald-50">Configured</Badge>
+              : <Badge variant="outline" className="text-[9px] font-normal border-amber-200 text-amber-600 bg-amber-50">Not Configured</Badge>
+          }
         >
-          <SectionPlaceholder description="Upload logos, set brand colors, choose chart palettes, and preview your theme." />
+          <BrandingThemeSection
+            branding={(client as any).branding}
+            onChange={b => updateClient({ branding: b } as any)}
+          />
         </AdminSection>
 
         {/* 2. Platform Setup — Full Modular Cards */}
