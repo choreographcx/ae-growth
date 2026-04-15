@@ -21,6 +21,7 @@ import { platformIconEntries } from '@/lib/platformIcons';
 import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
 import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
+import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
@@ -203,19 +204,14 @@ export default function AdminPage() {
           subtitle="Configure thresholds, severity levels, and alert policies"
           badge={
             <Badge variant="secondary" className="text-[9px] font-normal">
-              {Object.values(client.alertThresholds).filter(v => v > 0).length} active
+              {((client as any).alertRules ?? []).filter((r: any) => r?.active).length || Object.values(client.alertThresholds).filter(v => v > 0).length} active
             </Badge>
           }
         >
-          <div className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <ThresholdField label="CPA Spike Threshold (%)" value={client.alertThresholds.cpaSpike} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, cpaSpike: v } })} helper="Alert when CPA rises above this %" />
-              <ThresholdField label="CTR Drop Threshold (%)" value={client.alertThresholds.ctrDrop} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, ctrDrop: v } })} helper="Alert when CTR falls below this %" />
-              <ThresholdField label="Frequency Threshold" value={client.alertThresholds.frequencyThreshold} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, frequencyThreshold: v } })} helper="Alert when frequency exceeds this" />
-              <ThresholdField label="Zero-Conv Spend Threshold ($)" value={client.alertThresholds.zeroConversionSpend} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, zeroConversionSpend: v } })} helper="Alert when spend exceeds this with 0 conv." />
-              <ThresholdField label="Viewability Threshold (%)" value={client.alertThresholds.viewabilityThreshold} onChange={v => updateClient({ alertThresholds: { ...client.alertThresholds, viewabilityThreshold: v } })} helper="Alert when viewability drops below this %" />
-            </div>
-          </div>
+          <AlertRulesSection
+            alertRules={(client as any).alertRules}
+            onChange={rules => updateClient({ alertRules: rules } as any)}
+          />
         </AdminSection>
 
         {/* 6. Users & Access */}
