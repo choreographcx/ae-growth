@@ -58,7 +58,6 @@ function buildPalettes(primaryHex: string): Record<string, string[]> {
     brand: [primaryHex, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#14b8a6'],
   };
 }
-};
 
 function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
