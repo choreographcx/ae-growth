@@ -18,6 +18,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { useAuth } from '@/hooks/useAuth';
 import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/components/admin/AdminSections';
 import { platformIconEntries } from '@/lib/platformIcons';
+import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
