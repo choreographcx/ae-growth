@@ -202,7 +202,7 @@ export function TemplatesPortabilitySection({ client }: Props) {
                 setTemplateType(t.value);
                 setSaveDialogOpen(true);
               }}
-              className="flex items-start gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] text-left transition-all"
+              className="flex items-start gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
             >
               <t.icon size={16} className="text-primary mt-0.5 shrink-0" />
               <div>
@@ -274,7 +274,7 @@ function ActionButton({ icon: Icon, label, sublabel, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group"
+      className="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
     >
       <Icon size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
       <span className="text-xs font-medium text-card-foreground">{label}</span>
