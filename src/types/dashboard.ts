@@ -5,6 +5,8 @@ export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'x' | 'lin
 /** Canonical display order for all platforms */
 export const PLATFORM_ORDER: PlatformKey[] = ['meta', 'google', 'tiktok', 'snapchat', 'x', 'linkedin', 'programmatic'];
 
+export type BudgetType = 'monthly' | 'campaign' | 'custom';
+
 export interface PlatformConfig {
   key: PlatformKey;
   label: string;
@@ -12,6 +14,16 @@ export interface PlatformConfig {
   color: string;
   accountIds: string[];
   budget: number;
+  budgetType: BudgetType;
+  primaryKpi: string;
+  conversionSource: string;
+  includeInOverview: boolean;
+  includeInDiagnostics: boolean;
+  // Advanced settings
+  sourceLabel: string;
+  namingConvention: string;
+  excludedCampaignFilter: string;
+  notes: string;
 }
 
 export interface ClientProfile {
