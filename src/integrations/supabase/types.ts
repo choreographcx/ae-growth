@@ -91,6 +91,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_profile_is_approved: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
