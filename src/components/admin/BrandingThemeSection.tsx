@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Upload, Image, Palette, Eye } from 'lucide-react';
+import { Upload, Palette, Eye, Paintbrush, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface BrandingConfig {
   logoUrl: string;
@@ -76,6 +77,63 @@ function generateShades(hex: string) {
   ];
 }
 
+/** Apply branding CSS variables to the document root */
+function applyBrandingToRoot(branding: BrandingConfig) {
+  const root = document.documentElement;
+  const isValid = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
+
+  if (isValid(branding.primaryColor)) {
+    const hsl = hexToHsl(branding.primaryColor);
+    if (hsl) {
+      const val = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
+      root.style.setProperty('--primary', val);
+      root.style.setProperty('--accent', val);
+      root.style.setProperty('--ring', val);
+      root.style.setProperty('--sidebar-primary', val);
+    }
+  }
+
+  if (isValid(branding.accentColor)) {
+    const hsl = hexToHsl(branding.accentColor);
+    if (hsl) {
+      root.style.setProperty('--warning', `${hsl.h} ${hsl.s}% ${hsl.l}%`);
+    }
+  }
+
+  // Card radius
+  const radiusMap = { small: '0.375rem', medium: '0.75rem', large: '1rem' };
+  root.style.setProperty('--radius', radiusMap[branding.cardRadius] || '0.75rem');
+
+  // Sidebar style
+  if (branding.sidebarStyle === 'light') {
+    root.style.setProperty('--sidebar-background', '0 0% 100%');
+    root.style.setProperty('--sidebar-foreground', '222 47% 11%');
+    root.style.setProperty('--sidebar-border', '214 32% 91%');
+  } else if (branding.sidebarStyle === 'brand' && isValid(branding.primaryColor)) {
+    const hsl = hexToHsl(branding.primaryColor);
+    if (hsl) {
+      root.style.setProperty('--sidebar-background', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 20, 8)}%`);
+      root.style.setProperty('--sidebar-foreground', '210 40% 96%');
+      root.style.setProperty('--sidebar-border', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 15, 12)}%`);
+    }
+  } else {
+    root.style.setProperty('--sidebar-background', '222 47% 11%');
+    root.style.setProperty('--sidebar-foreground', '210 40% 96%');
+    root.style.setProperty('--sidebar-border', '217 33% 17%');
+  }
+
+  // Favicon
+  if (branding.faviconUrl) {
+    let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = branding.faviconUrl;
+  }
+}
+
 interface Props {
   branding: BrandingConfig | undefined;
   onChange: (b: BrandingConfig) => void;
@@ -87,6 +145,11 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
   const update = (updates: Partial<BrandingConfig>) => {
     onChange({ ...branding, ...updates });
   };
+
+  const handleApply = useCallback(() => {
+    applyBrandingToRoot(branding);
+    toast.success('Colors & styles applied to dashboard');
+  }, [branding]);
 
   const isValidHex = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
   const shades = useMemo(() => isValidHex(branding.primaryColor) ? generateShades(branding.primaryColor) : [], [branding.primaryColor]);
@@ -103,9 +166,9 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
       <div>
         <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Logos</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <LogoUpload label="Client Logo" sublabel="Light background" value={branding.logoUrl} onChange={v => update({ logoUrl: v })} />
-          <LogoUpload label="Dark Mode Logo" sublabel="Dark background" value={branding.darkLogoUrl} onChange={v => update({ darkLogoUrl: v })} dark />
-          <LogoUpload label="Favicon" sublabel="Optional, 32×32" value={branding.faviconUrl} onChange={v => update({ faviconUrl: v })} small />
+          <LogoUpload label="Client Logo" sublabel="Light background · PNG or SVG" value={branding.logoUrl} onChange={v => update({ logoUrl: v })} />
+          <LogoUpload label="Dark Mode Logo" sublabel="Dark background · PNG or SVG" value={branding.darkLogoUrl} onChange={v => update({ darkLogoUrl: v })} dark />
+          <LogoUpload label="Favicon" sublabel="32×32 · PNG, ICO, or SVG" value={branding.faviconUrl} onChange={v => update({ faviconUrl: v })} small />
         </div>
       </div>
 
@@ -174,7 +237,7 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
                   key={r}
                   onClick={() => update({ cardRadius: r })}
                   className={cn(
-                    'flex-1 py-2 border rounded-md text-xs font-medium transition-all',
+                    'flex-1 py-2 border rounded-md text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     branding.cardRadius === r
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-border text-muted-foreground hover:border-primary/40'
@@ -190,9 +253,14 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
 
       {/* Live Theme Preview */}
       <div className="pt-4 border-t border-border/50">
-        <div className="flex items-center gap-2 mb-4">
-          <Eye size={14} className="text-muted-foreground" />
-          <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider">Theme Preview</h4>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Eye size={14} className="text-muted-foreground" />
+            <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider">Theme Preview</h4>
+          </div>
+          <Button size="sm" onClick={handleApply} className="gap-1.5 h-8 text-xs">
+            <Paintbrush size={12} /> Apply Colors & Styles
+          </Button>
         </div>
 
         <div className="border border-border rounded-xl overflow-hidden bg-muted/30">
@@ -338,27 +406,81 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
   );
 }
 
-/* ─── Sub-components ─── */
+/* ─── Logo Upload with actual file picker ─── */
 
 function LogoUpload({ label, sublabel, value, onChange, dark, small }: {
   label: string; sublabel: string; value: string; onChange: (v: string) => void; dark?: boolean; small?: boolean;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    const allowed = ['image/png', 'image/svg+xml', 'image/jpeg', 'image/x-icon', 'image/vnd.microsoft.icon'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Please upload a PNG, SVG, JPG, or ICO file');
+      return;
+    }
+
+    // Validate size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('File must be under 2 MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange(reader.result as string);
+      toast.success(`${label} uploaded`);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange('');
+    toast.success(`${label} removed`);
+  };
+
   return (
     <div>
       <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</Label>
       <p className="text-[9px] text-muted-foreground/60 mb-1.5">{sublabel}</p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png,image/svg+xml,image/jpeg,image/x-icon,.ico"
+        onChange={handleFile}
+        className="hidden"
+      />
       <div
         className={cn(
-          'border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors hover:border-primary/40',
+          'border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors hover:border-primary/40 relative group',
           dark ? 'bg-sidebar border-sidebar-border' : 'bg-muted/20 border-border',
           small ? 'h-20' : 'h-28',
         )}
-        onClick={() => {
-          // Placeholder — in production this would open a file picker
-        }}
+        onClick={() => inputRef.current?.click()}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click(); } }}
+        tabIndex={0}
+        role="button"
+        aria-label={`Upload ${label}`}
       >
         {value ? (
-          <img src={value} alt={label} className="max-h-16 w-auto object-contain" />
+          <>
+            <img src={value} alt={label} className={cn('object-contain', small ? 'max-h-12' : 'max-h-16')} />
+            <button
+              onClick={handleRemove}
+              className="absolute top-1.5 right-1.5 p-1 rounded-full bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label={`Remove ${label}`}
+            >
+              <X size={10} />
+            </button>
+          </>
         ) : (
           <>
             <Upload size={16} className={cn('text-muted-foreground', dark && 'text-sidebar-foreground/50')} />
@@ -371,6 +493,8 @@ function LogoUpload({ label, sublabel, value, onChange, dark, small }: {
     </div>
   );
 }
+
+/* ─── Color Input ─── */
 
 function ColorInput({ label, value, onChange, required }: {
   label: string; value: string; onChange: (v: string) => void; required?: boolean;
