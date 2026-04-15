@@ -22,6 +22,7 @@ import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
 import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
 import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
+import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
@@ -237,8 +238,20 @@ export default function AdminPage() {
           icon={<Package size={16} />}
           title="Templates & Portability"
           subtitle="Export, import, and reuse dashboard configurations across clients"
+          badge={
+            <Badge variant="secondary" className="text-[9px] font-normal">
+              {Math.round((Object.entries({
+                client_info: !!client.name,
+                branding: !!(client as any).branding?.primaryColor,
+                platforms: Object.values(client.platforms).some(p => p.enabled),
+                measurement: !!(client.ga4PropertyId && client.primaryConversion),
+                reporting: client.metricMappings.length > 0,
+                alerts: ((client as any).alertRules ?? []).some((r: any) => r?.active),
+              }).filter(([, v]) => v).length / 6) * 100)}% complete
+            </Badge>
+          }
         >
-          <SectionPlaceholder description="Export configs, save templates, duplicate setups, and manage portability across clients." />
+          <TemplatesPortabilitySection client={client} />
         </AdminSection>
 
       </div>
