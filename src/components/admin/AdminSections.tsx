@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -6,14 +6,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Palette,
-  LayoutGrid,
-  BarChart3,
-  FileText,
-  Bell,
-  Users,
   Package,
-  Shield,
   ChevronDown,
 } from 'lucide-react';
 
@@ -58,18 +51,19 @@ export function SetupStatusSummary() {
   const hasBranding = !!(client as any).branding?.primaryColor;
   const hasMeasurement = !!(client.ga4PropertyId && client.primaryConversion);
   const hasReporting = client.metricMappings.length > 0;
-  const alertsConfigured = Object.values(client.alertThresholds).some(v => v > 0);
+  const alertsConfigured = ((client as any).alertRules ?? []).some((r: any) => r?.active) ||
+    Object.values(client.alertThresholds).some(v => v > 0);
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-card-foreground uppercase tracking-wider">Setup Status</h3>
         <div className="flex items-center gap-2">
-          <button className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors">
+          <button className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-sm">
             Validate Setup
           </button>
           <span className="text-border">·</span>
-          <button className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors">
+          <button className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-sm">
             Export Config
           </button>
         </div>
@@ -102,18 +96,53 @@ interface AdminSectionProps {
 
 export function AdminSection({ id, icon, title, subtitle, badge, children, defaultOpen = false }: AdminSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | undefined>(defaultOpen ? undefined : 0);
+
+  const updateHeight = useCallback(() => {
+    if (!contentRef.current) return;
+    if (open) {
+      setHeight(contentRef.current.scrollHeight);
+      // After transition completes, set to auto so content can resize naturally
+      const timeout = setTimeout(() => setHeight(undefined), 250);
+      return () => clearTimeout(timeout);
+    } else {
+      // First set explicit height so transition can animate from it
+      setHeight(contentRef.current.scrollHeight);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setHeight(0));
+      });
+    }
+  }, [open]);
+
+  useEffect(() => {
+    updateHeight();
+  }, [updateHeight]);
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+    <div
+      className={cn(
+        'bg-card rounded-xl border border-border shadow-sm overflow-hidden transition-shadow duration-200',
+        open && 'shadow-md'
+      )}
+    >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-muted/30 transition-colors"
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen(!open);
+          }
+        }}
+        aria-expanded={open}
+        aria-controls={`section-${id}`}
+        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-muted/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-inset rounded-xl"
       >
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary shrink-0">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
             {badge}
           </div>
@@ -122,16 +151,27 @@ export function AdminSection({ id, icon, title, subtitle, badge, children, defau
         <ChevronDown
           size={16}
           className={cn(
-            'text-muted-foreground transition-transform duration-200 shrink-0',
+            'text-muted-foreground transition-transform duration-250 shrink-0',
             open && 'rotate-180'
           )}
         />
       </button>
-      {open && (
+      <div
+        id={`section-${id}`}
+        ref={contentRef}
+        role="region"
+        aria-labelledby={`section-trigger-${id}`}
+        style={{ height: height === undefined ? 'auto' : height }}
+        className={cn(
+          'transition-[height,opacity] duration-250 ease-in-out overflow-hidden',
+          !open && 'opacity-0',
+          open && 'opacity-100'
+        )}
+      >
         <div className="px-6 pb-6 border-t border-border/50">
           {children}
         </div>
-      )}
+      </div>
     </div>
   );
 }
