@@ -148,6 +148,3 @@ export function SectionPlaceholder({ description }: { description: string }) {
     </div>
   );
 }
-
-// Need to import useState for AdminSection
-import { useState } from 'react';
