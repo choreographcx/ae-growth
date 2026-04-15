@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
-import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
