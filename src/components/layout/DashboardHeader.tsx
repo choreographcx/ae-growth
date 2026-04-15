@@ -209,11 +209,18 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
       <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           {isMobile && (
             <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
               <Menu size={18} />
             </button>
+          )}
+          {(client as any).branding?.logoUrl && (
+            <img
+              src={(client as any).branding.logoUrl}
+              alt={client.name}
+              className="h-7 w-auto object-contain shrink-0"
+            />
           )}
         </div>
         <div className="flex items-center gap-1.5">
