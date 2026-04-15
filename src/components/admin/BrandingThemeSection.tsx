@@ -32,12 +32,32 @@ const DEFAULT_BRANDING: BrandingConfig = {
   cardRadius: 'medium',
 };
 
-const CHART_PALETTES: Record<string, string[]> = {
+const STATIC_PALETTES: Record<string, string[]> = {
   vibrant: ['#0fa968', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4'],
   muted: ['#6b9e8a', '#7c9cbf', '#c4727e', '#c4a35e', '#9c8abf', '#6ba8b8'],
-  monochrome: ['#0fa968', '#0d8a55', '#0b6b42', '#094d30', '#073e26', '#05301d'],
-  brand: ['#0fa968', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#14b8a6'],
 };
+
+function generateMonochromePalette(hex: string): string[] {
+  const hsl = hexToHsl(hex);
+  if (!hsl) return ['#0fa968', '#0d8a55', '#0b6b42', '#094d30', '#073e26', '#05301d'];
+  const { h, s } = hsl;
+  return [
+    `hsl(${h}, ${s}%, 45%)`,
+    `hsl(${h}, ${s}%, 38%)`,
+    `hsl(${h}, ${s}%, 30%)`,
+    `hsl(${h}, ${s}%, 22%)`,
+    `hsl(${h}, ${s}%, 15%)`,
+    `hsl(${h}, ${s}%, 9%)`,
+  ];
+}
+
+function buildPalettes(primaryHex: string): Record<string, string[]> {
+  return {
+    ...STATIC_PALETTES,
+    monochrome: generateMonochromePalette(primaryHex),
+    brand: [primaryHex, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#14b8a6'],
+  };
+}
 
 function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -153,7 +173,9 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
 
   const isValidHex = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
   const shades = useMemo(() => isValidHex(branding.primaryColor) ? generateShades(branding.primaryColor) : [], [branding.primaryColor]);
-  const palette = CHART_PALETTES[branding.chartPalette] || CHART_PALETTES.vibrant;
+  const allPalettes = useMemo(() => buildPalettes(isValidHex(branding.primaryColor) ? branding.primaryColor : '#0fa968'), [branding.primaryColor]);
+  const palette = allPalettes[branding.chartPalette] || allPalettes.vibrant;
+  
 
   const radiusMap = { small: '0.375rem', medium: '0.75rem', large: '1rem' };
   const previewRadius = radiusMap[branding.cardRadius] || '0.75rem';
