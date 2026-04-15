@@ -55,7 +55,7 @@ export function SetupStatusSummary() {
   const connectedCount = Object.values(client.platforms).filter(p => p.enabled && p.accountIds.filter(Boolean).length > 0).length;
   const needsAttention = enabledCount - connectedCount;
 
-  const hasBranding = false; // placeholder - no branding config yet
+  const hasBranding = !!(client as any).branding?.primaryColor;
   const hasMeasurement = !!(client.ga4PropertyId && client.primaryConversion);
   const hasReporting = client.metricMappings.length > 0;
   const alertsConfigured = Object.values(client.alertThresholds).some(v => v > 0);
