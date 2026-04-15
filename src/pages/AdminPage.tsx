@@ -19,6 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/components/admin/AdminSections';
 import { platformIconEntries } from '@/lib/platformIcons';
 import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
+import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
@@ -179,42 +180,7 @@ export default function AdminPage() {
               : <Badge variant="outline" className="text-[9px] font-normal border-amber-200 text-amber-600 bg-amber-50">Incomplete</Badge>
           }
         >
-          <div className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <Field label="GA4 Property ID" value={client.ga4PropertyId} onChange={v => updateClient({ ga4PropertyId: v })} placeholder="123456789" />
-              <Field label="GA4 Stream ID" value={client.ga4StreamId} onChange={v => updateClient({ ga4StreamId: v })} placeholder="987654321" />
-              <Field label="GTM Container ID" value={client.gtmContainerId} onChange={v => updateClient({ gtmContainerId: v })} placeholder="GTM-XXXXX" />
-              <Field label="Primary Website Domain" value={client.websiteDomain} onChange={v => updateClient({ websiteDomain: v })} />
-              <Field label="Primary Conversion Event" value={client.primaryConversion} onChange={v => updateClient({ primaryConversion: v })} required />
-              <Field label="Secondary Conversion Event" value={client.secondaryConversion} onChange={v => updateClient({ secondaryConversion: v })} />
-            </div>
-            <div className="mt-5">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Micro Conversions</Label>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {client.microConversions.map((mc, i) => (
-                  <Badge key={i} variant="secondary" className="gap-1.5 text-xs pl-2.5 pr-1.5 py-1">
-                    {mc}
-                    <button onClick={() => updateClient({ microConversions: client.microConversions.filter((_, idx) => idx !== i) })} className="hover:text-destructive transition-colors">
-                      <X size={10} />
-                    </button>
-                  </Badge>
-                ))}
-                <button
-                  onClick={() => {
-                    const val = prompt('Enter micro conversion name');
-                    if (val) updateClient({ microConversions: [...client.microConversions, val] });
-                  }}
-                  className="px-2.5 py-1 rounded-md border border-dashed border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                >
-                  + Add
-                </button>
-              </div>
-            </div>
-            <div className="mt-5">
-              <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Conversion Notes</Label>
-              <textarea className="mt-2 w-full border border-input rounded-lg p-3 text-sm bg-background text-foreground resize-none focus:ring-1 focus:ring-ring focus:border-ring outline-none transition-colors" rows={3} value={client.conversionNotes} onChange={e => updateClient({ conversionNotes: e.target.value })} placeholder="Document conversion setup, attribution notes, tracking methodology..." />
-            </div>
-          </div>
+          <MeasurementSetupSection client={client} updateClient={updateClient} />
         </AdminSection>
 
         {/* 4. Reporting Rules */}
