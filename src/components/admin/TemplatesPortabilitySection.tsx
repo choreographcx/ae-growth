@@ -202,7 +202,7 @@ export function TemplatesPortabilitySection({ client }: Props) {
                 setTemplateType(t.value);
                 setSaveDialogOpen(true);
               }}
-              className="flex items-start gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] text-left transition-all"
+              className="flex items-start gap-3 p-3 rounded-lg border border-border/60 hover:border-primary/30 hover:bg-primary/[0.02] text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
             >
               <t.icon size={16} className="text-primary mt-0.5 shrink-0" />
               <div>
