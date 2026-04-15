@@ -175,7 +175,7 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
   const shades = useMemo(() => isValidHex(branding.primaryColor) ? generateShades(branding.primaryColor) : [], [branding.primaryColor]);
   const allPalettes = useMemo(() => buildPalettes(isValidHex(branding.primaryColor) ? branding.primaryColor : '#0fa968'), [branding.primaryColor]);
   const palette = allPalettes[branding.chartPalette] || allPalettes.vibrant;
-  const palette = CHART_PALETTES[branding.chartPalette] || CHART_PALETTES.vibrant;
+  
 
   const radiusMap = { small: '0.375rem', medium: '0.75rem', large: '1rem' };
   const previewRadius = radiusMap[branding.cardRadius] || '0.75rem';
