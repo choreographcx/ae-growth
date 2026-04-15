@@ -20,6 +20,7 @@ import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/componen
 import { platformIconEntries } from '@/lib/platformIcons';
 import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
+import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
