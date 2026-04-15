@@ -105,6 +105,13 @@
   }
 }
 
+/* Ensure SVG icons inside interactive elements follow text color on hover */
+button:hover svg,
+a:hover svg,
+[role="button"]:hover svg {
+  color: currentColor;
+}
+
 /* ─── Print report header (hidden on screen) ─── */
 .print-report-header {
   display: none;
