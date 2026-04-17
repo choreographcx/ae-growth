@@ -138,12 +138,12 @@ export function cacheBranding(branding: Partial<BrandingConfig> | undefined | nu
   }
 }
 
-export function loadCachedBranding(): BrandingConfig | null {
+export function loadCachedBranding(): Partial<BrandingConfig> | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return { ...DEFAULT_BRANDING, ...JSON.parse(raw) };
+    return JSON.parse(raw) as Partial<BrandingConfig>;
   } catch {
     return null;
   }
