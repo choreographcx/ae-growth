@@ -3,6 +3,7 @@ import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { MobileDrawer } from './MobileDrawer';
 import { BackToTop } from './BackToTop';
+import { DocumentTitle } from './DocumentTitle';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
@@ -35,6 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full bg-background">
+      <DocumentTitle />
       {!isMobile && <DashboardSidebar />}
       {isMobile && <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
       <div className="flex flex-1 flex-col min-w-0">
