@@ -72,14 +72,14 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
       {supporting.length > 0 && (
         <div className="mt-auto pt-3.5 border-t border-border/50 mt-3.5">
           <div className={cn(
-            "grid gap-x-4 gap-y-2",
+            "grid gap-x-3 gap-y-2",
             supporting.length === 1 ? "grid-cols-1" : "grid-cols-2"
           )}>
             {supporting.map((s, i) => (
               <div key={i} className="min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">{s.label}</p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[15px] font-semibold text-card-foreground leading-none">{s.formattedValue}</span>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1 truncate">{s.label}</p>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className="text-[15px] font-semibold text-card-foreground leading-none truncate">{s.formattedValue}</span>
                   {s.change !== undefined && <MiniChange value={s.change} />}
                 </div>
               </div>
