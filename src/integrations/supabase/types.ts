@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_branding: {
+        Row: {
+          accent_hex: string | null
+          client_id: string
+          created_at: string
+          font_family: string | null
+          id: string
+          logo_url: string | null
+          primary_hex: string | null
+          secondary_hex: string | null
+          theme_mode: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_hex?: string | null
+          client_id: string
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_hex?: string | null
+          secondary_hex?: string | null
+          theme_mode?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_hex?: string | null
+          client_id?: string
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_hex?: string | null
+          secondary_hex?: string | null
+          theme_mode?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_branding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_configs: {
         Row: {
           config: Json
@@ -35,6 +82,242 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      client_data_sources: {
+        Row: {
+          account_id: string | null
+          additional_config: Json
+          bq_dataset: string | null
+          bq_table_prefix: string | null
+          client_id: string
+          created_at: string
+          ga4_property_id: string | null
+          gcp_project_id: string | null
+          id: string
+          is_enabled: boolean
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          additional_config?: Json
+          bq_dataset?: string | null
+          bq_table_prefix?: string | null
+          client_id: string
+          created_at?: string
+          ga4_property_id?: string | null
+          gcp_project_id?: string | null
+          id?: string
+          is_enabled?: boolean
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          additional_config?: Json
+          bq_dataset?: string | null
+          bq_table_prefix?: string | null
+          client_id?: string
+          created_at?: string
+          ga4_property_id?: string | null
+          gcp_project_id?: string | null
+          id?: string
+          is_enabled?: boolean
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_data_sources_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_kpi_thresholds: {
+        Row: {
+          client_id: string
+          comparison_operator: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          metric_key: string
+          severity: string
+          threshold_value: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          comparison_operator: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          metric_key: string
+          severity?: string
+          threshold_value: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          comparison_operator?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          metric_key?: string
+          severity?: string
+          threshold_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_kpi_thresholds_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_platform_settings: {
+        Row: {
+          client_id: string
+          conversion_goal: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          is_enabled: boolean
+          monthly_budget: number | null
+          naming_convention: string | null
+          platform_name: string
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          conversion_goal?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_enabled?: boolean
+          monthly_budget?: number | null
+          naming_convention?: string | null
+          platform_name: string
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          conversion_goal?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_enabled?: boolean
+          monthly_budget?: number | null
+          naming_convention?: string | null
+          platform_name?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_platform_settings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_reporting_settings: {
+        Row: {
+          attribution_model: string | null
+          client_id: string
+          created_at: string
+          default_date_range: string | null
+          enable_anomaly_alerts: boolean
+          enable_pacing_alerts: boolean
+          id: string
+          primary_conversion_label: string | null
+          reporting_currency: string | null
+          reporting_timezone: string | null
+          secondary_conversion_label: string | null
+          settings: Json
+          updated_at: string
+          week_start_day: string | null
+        }
+        Insert: {
+          attribution_model?: string | null
+          client_id: string
+          created_at?: string
+          default_date_range?: string | null
+          enable_anomaly_alerts?: boolean
+          enable_pacing_alerts?: boolean
+          id?: string
+          primary_conversion_label?: string | null
+          reporting_currency?: string | null
+          reporting_timezone?: string | null
+          secondary_conversion_label?: string | null
+          settings?: Json
+          updated_at?: string
+          week_start_day?: string | null
+        }
+        Update: {
+          attribution_model?: string | null
+          client_id?: string
+          created_at?: string
+          default_date_range?: string | null
+          enable_anomaly_alerts?: boolean
+          enable_pacing_alerts?: boolean
+          id?: string
+          primary_conversion_label?: string | null
+          reporting_currency?: string | null
+          reporting_timezone?: string | null
+          secondary_conversion_label?: string | null
+          settings?: Json
+          updated_at?: string
+          week_start_day?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_reporting_settings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          slug?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
