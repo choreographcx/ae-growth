@@ -190,3 +190,25 @@ function MiniChange({ value }: { value: number }) {
     </span>
   );
 }
+
+function InfoTooltip({ text, compact }: { text: string; compact?: boolean }) {
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label="More info"
+            className="text-muted-foreground/70 hover:text-foreground transition-colors shrink-0"
+            onClick={e => e.stopPropagation()}
+          >
+            <Info size={compact ? 10 : 12} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+          {text}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
