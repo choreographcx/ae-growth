@@ -67,14 +67,16 @@ export default function OverviewPage() {
     const cur = totals;
     const prev = previousTotals;
 
+    const money = (v: number, d = 2) => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{v.toFixed(d)}</span>;
+    const moneyCompact = (v: number) => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span>;
+
     const groups: KPIGroupData[] = [
-      // 1. SPEND — adds ROAS as secondary signal
+      // 1. SPEND — Budget + Pacing (or ROAS if no budget configured)
       {
-        title: 'Spend',
-        icon: 'DollarSign',
+        title: 'Spend', icon: 'DollarSign',
         primary: {
           label: 'Total Spend', value: cur.spend,
-          formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(cur.spend)}</span>,
+          formattedValue: moneyCompact(cur.spend),
           change: pctChange(cur.spend, prev?.spend),
           trend: spendSeries.slice(-7).map(p => p.value),
         },
@@ -83,14 +85,12 @@ export default function OverviewPage() {
           { label: 'Pacing', formattedValue: `${Math.round((cur.spend / totalBudget) * 100)}%` },
         ] : [
           { label: 'ROAS', formattedValue: cur.roas > 0 ? `${cur.roas.toFixed(2)}x` : '—' },
-          { label: 'CPM', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.cpm.toFixed(2)}</span>, change: pctChange(cur.cpm, prev?.cpm) },
         ],
-        tooltip: lowRoas ? 'ROAS is below 1x — campaigns are spending more than they generate in tracked value.' : undefined,
+        tooltip: lowRoas ? 'ROAS is below 1x — campaigns spending more than they generate in tracked value.' : undefined,
       },
-      // 2. IMPRESSIONS — Reach + Frequency
+      // 2. IMPRESSIONS — CPM only (Reach lives in its own card)
       {
-        title: 'Impressions',
-        icon: 'Eye',
+        title: 'Impressions', icon: 'Eye',
         primary: {
           label: 'Impressions', value: cur.impressions,
           formattedValue: formatCompact(cur.impressions),
@@ -98,15 +98,12 @@ export default function OverviewPage() {
           trend: [],
         },
         supporting: [
-          { label: 'Reach', formattedValue: formatCompact(cur.reach) },
-          { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
+          { label: 'CPM', formattedValue: money(cur.cpm), change: pctChange(cur.cpm, prev?.cpm) },
         ],
-        tooltip: highFreq && ctrFalling ? 'Frequency is high (≥4) while CTR is declining — possible audience fatigue.' : undefined,
       },
-      // 3. CLICKS — adds LPV Rate
+      // 3. CLICKS — CTR + CPC
       {
-        title: 'Clicks',
-        icon: 'MousePointerClick',
+        title: 'Clicks', icon: 'MousePointerClick',
         primary: {
           label: 'Clicks', value: cur.clicks,
           formattedValue: formatCompact(cur.clicks),
@@ -115,15 +112,13 @@ export default function OverviewPage() {
         },
         supporting: [
           { label: 'CTR', formattedValue: `${cur.ctr.toFixed(2)}%`, change: pctChange(cur.ctr, prev?.ctr) },
-          { label: 'LPV Rate', formattedValue: `${cur.lpvRate.toFixed(1)}%` },
+          { label: 'CPC', formattedValue: money(cur.cpc), change: pctChange(cur.cpc, prev?.cpc) },
         ],
-        tooltip: weakLpvRate ? 'CTR is strong but LPV rate is weak — check landing page speed, redirects, or tracking.' : undefined,
       },
-      // 4. CONVERSIONS — primary KPI, fixed to lower funnel
+      // 4. CONVERSIONS — primary KPI; CPA + CVR + LF/UF breakdown
       {
-        title: 'Conversions · Primary KPI',
-        icon: 'Target',
-        tooltip: 'Lower-funnel actions only — leads, purchases, bookings, form submissions. Standardized across platforms.',
+        title: 'Conversions', icon: 'Target',
+        tooltip: 'Primary KPI uses lower-funnel actions — leads, purchases, sign-ups. Standardized across platforms.',
         primary: {
           label: 'Lower-Funnel Conversions', value: lf.conversions,
           formattedValue: formatCompact(lf.conversions),
@@ -131,16 +126,15 @@ export default function OverviewPage() {
           trend: lfConvSeries.slice(-7).map(p => p.value),
         },
         supporting: [
-          { label: 'CPA (LF)', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{lf.cpaLowerFunnel.toFixed(2)}</span>, change: pctChange(lf.cpaLowerFunnel, lfPrev?.cpaLowerFunnel) },
+          { label: 'CPA (LF)', formattedValue: money(lf.cpaLowerFunnel), change: pctChange(lf.cpaLowerFunnel, lfPrev?.cpaLowerFunnel) },
           { label: 'CVR (LF)', formattedValue: `${lf.cvrLowerFunnel.toFixed(2)}%` },
-          { label: 'All Conversions', formattedValue: formatCompact(cur.conversionsAll) },
+          { label: 'All Conv.', formattedValue: formatCompact(cur.conversionsAll) },
           { label: 'Upper Funnel', formattedValue: formatCompact(cur.conversionsUpperFunnel) },
         ],
       },
-      // 5. REACH
+      // 5. REACH — Frequency
       {
-        title: 'Reach',
-        icon: 'Users',
+        title: 'Reach', icon: 'Users',
         primary: {
           label: 'Reach', value: cur.reach,
           formattedValue: formatCompact(cur.reach),
@@ -149,14 +143,13 @@ export default function OverviewPage() {
         },
         supporting: [
           { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
-          { label: 'CPM', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.cpm.toFixed(2)}</span> },
         ],
-        tooltip: reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
+        tooltip: (highFreq && ctrFalling) ? 'Frequency is high (≥4) while CTR is declining — possible audience fatigue.'
+          : reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
       },
-      // 6. LANDING PAGE VIEWS
+      // 6. LANDING PAGE VIEWS — Cost per LPV + LPV Rate
       {
-        title: 'Landing Page Views',
-        icon: 'FileText',
+        title: 'Landing Page Views', icon: 'FileText',
         primary: {
           label: 'LPV', value: cur.landingPageViews,
           formattedValue: formatCompact(cur.landingPageViews),
@@ -164,10 +157,10 @@ export default function OverviewPage() {
           trend: [],
         },
         supporting: [
-          { label: 'Cost / LPV', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.costPerLPV.toFixed(2)}</span>, change: pctChange(cur.costPerLPV, prev?.costPerLPV) },
+          { label: 'Cost / LPV', formattedValue: money(cur.costPerLPV), change: pctChange(cur.costPerLPV, prev?.costPerLPV) },
           { label: 'LPV Rate', formattedValue: `${cur.lpvRate.toFixed(1)}%` },
         ],
-        tooltip: weakLpvRate ? 'LPV rate is low — significant click-to-page drop-off.' : undefined,
+        tooltip: weakLpvRate ? 'CTR is strong but LPV rate is weak — check page speed, redirects, or tracking.' : undefined,
       },
     ];
 
