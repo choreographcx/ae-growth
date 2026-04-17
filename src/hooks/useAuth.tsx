@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isApproved: boolean;
   profile: { email: string; full_name: string; is_approved: boolean } | null;
   signOut: () => Promise<void>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   isAdmin: false,
+  isSuperAdmin: false,
   isApproved: false,
   profile: null,
   signOut: async () => {},
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
 
@@ -44,7 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (rolesRes.data) {
-      setIsAdmin(rolesRes.data.some((r: any) => r.role === 'admin'));
+      const roles = rolesRes.data.map((r: any) => r.role);
+      setIsSuperAdmin(roles.includes('superadmin'));
+      setIsAdmin(roles.includes('admin') || roles.includes('superadmin'));
     }
 
     // Apply saved branding immediately so login/loading/pending screens
@@ -66,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setIsSuperAdmin(false);
         setIsApproved(false);
       }
       setLoading(false);
@@ -88,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isApproved, profile, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isSuperAdmin, isApproved, profile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
