@@ -32,7 +32,7 @@ const presets = [
 
 const objectives = ['Awareness', 'Traffic', 'Conversions', 'Lead Gen', 'Engagement'];
 
-function DateRangePicker({ compact = false }: { compact?: boolean }) {
+export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const { dateRange, setDateRange, showPreviousPeriod, setShowPreviousPeriod } = useDashboard();
   const [open, setOpen] = useState(false);
 
