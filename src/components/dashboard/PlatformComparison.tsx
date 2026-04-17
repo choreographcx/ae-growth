@@ -13,13 +13,45 @@ interface PlatformComparisonProps {
 
 function CurrencyValue({ amount, decimals = 0, currency }: { amount: number; decimals?: number; currency: string }) {
   const formatted = decimals > 0 ? amount.toFixed(decimals) : amount.toLocaleString();
-  return (
-    <span className="inline-flex items-baseline">
-      <CurrencySymbol currency={currency} />
-      {formatted}
-    </span>
-  );
+  return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatted}</span>;
 }
+
+const fmtCompact = (v: number): string => {
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (v >= 1e6) return `${fmt(v / 1e6)}M`;
+  if (v >= 1e3) return `${fmt(v / 1e3)}K`;
+  return Math.round(v).toLocaleString();
+};
+
+/* ─── Conditional formatting tints (soft semantic backgrounds) ───
+   Applied per-cell based on simple performance heuristics. */
+
+function spendVsConvTone(row: PlatformSummary, allSpend: number): 'positive' | 'negative' | undefined {
+  if (allSpend === 0 || row.spend === 0) return undefined;
+  const lf = row.conversionsLowerFunnel ?? 0;
+  // High spend + zero LF conversions = wasted spend
+  if (lf === 0 && row.spend / allSpend >= 0.05) return 'negative';
+  return undefined;
+}
+function roasTone(roas?: number): 'positive' | 'negative' | undefined {
+  if (roas == null || roas === 0) return undefined;
+  if (roas >= 2) return 'positive';
+  if (roas < 1) return 'negative';
+  return undefined;
+}
+function cpaTone(cpa: number, all: number[]): 'positive' | 'negative' | undefined {
+  const valid = all.filter(v => v > 0);
+  if (!valid.length || cpa === 0) return undefined;
+  const min = Math.min(...valid);
+  const max = Math.max(...valid);
+  if (cpa === min) return 'positive';
+  if (cpa === max && cpa > min * 1.5) return 'negative';
+  return undefined;
+}
+const toneClass: Record<'positive' | 'negative', string> = {
+  positive: 'bg-success/[0.08]',
+  negative: 'bg-destructive/[0.08]',
+};
 
 export function PlatformComparison({ data, className }: PlatformComparisonProps) {
   const isMobile = useIsMobile();
@@ -28,7 +60,14 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
   const [sortKey, setSortKey] = useState<keyof PlatformSummary>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const sorted = [...data].sort((a, b) => sortDir === 'desc' ? (b[sortKey] as number) - (a[sortKey] as number) : (a[sortKey] as number) - (b[sortKey] as number));
+  const sorted = [...data].sort((a, b) => {
+    const av = (a[sortKey] as number) ?? 0;
+    const bv = (b[sortKey] as number) ?? 0;
+    return sortDir === 'desc' ? bv - av : av - bv;
+  });
+
+  const totalSpend = data.reduce((s, p) => s + p.spend, 0);
+  const cpaList    = data.map(p => p.cpa).filter(v => v > 0);
 
   const handleSort = (key: keyof PlatformSummary) => {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -37,31 +76,33 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
   if (isMobile) return <MobilePlatformCards data={sorted} currency={currency} className={className} />;
 
-  const formatCompact = (v: number): string => {
-    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (v >= 1e6) return `${fmt(v / 1e6)}M`;
-    if (v >= 1e3) return `${fmt(v / 1e3)}K`;
-    return Math.round(v).toLocaleString();
+  type Col = {
+    key: keyof PlatformSummary;
+    label: string;
+    format: (v: any, row: PlatformSummary) => React.ReactNode;
+    align?: 'right';
+    tone?: (row: PlatformSummary) => 'positive' | 'negative' | undefined;
   };
 
-  const cols: { key: keyof PlatformSummary; label: string; format: (v: any) => React.ReactNode }[] = [
-    { key: 'label', label: 'Platform', format: v => v },
-    { key: 'spend', label: 'Spend', format: v => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span> },
-    { key: 'impressions', label: 'Impr.', format: v => formatCompact(v) },
-    { key: 'clicks', label: 'Clicks', format: v => formatCompact(v) },
-    { key: 'ctr', label: 'CTR', format: v => `${Number(v).toFixed(3)}%` },
-    { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
-    { key: 'conversions', label: 'Conv.', format: v => formatCompact(v) },
-    { key: 'cpa', label: 'CPA', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
-    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${Number(v).toFixed(2)}%` },
-    { key: 'shareOfSpend', label: '% Spend', format: v => `${Number(v).toFixed(2)}%` },
-    { key: 'shareOfConversions', label: '% Conv.', format: v => `${Number(v).toFixed(2)}%` },
+  const cols: Col[] = [
+    { key: 'label',                  label: 'Platform',     format: v => v },
+    { key: 'spend',                  label: 'Spend',        align: 'right', format: v => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(v)}</span>, tone: row => spendVsConvTone(row, totalSpend) },
+    { key: 'impressions',            label: 'Impr.',        align: 'right', format: v => fmtCompact(v) },
+    { key: 'clicks',                 label: 'Clicks',       align: 'right', format: v => fmtCompact(v) },
+    { key: 'ctr',                    label: 'CTR',          align: 'right', format: v => `${Number(v).toFixed(2)}%` },
+    { key: 'cpc',                    label: 'CPC',          align: 'right', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
+    { key: 'conversionsLowerFunnel', label: 'LF Conv.',     align: 'right', format: v => fmtCompact(Number(v) || 0) },
+    { key: 'cpa',                    label: 'CPA (LF)',     align: 'right', format: v => v > 0 ? <CurrencyValue amount={v} decimals={2} currency={currency} /> : '—', tone: row => cpaTone(row.cpa, cpaList) },
+    { key: 'roas',                   label: 'ROAS',         align: 'right', format: v => v != null && v > 0 ? `${Number(v).toFixed(2)}x` : '—', tone: row => roasTone(row.roas) },
+    { key: 'shareOfSpend',           label: '% Spend',      align: 'right', format: v => `${Number(v).toFixed(1)}%` },
+    { key: 'shareOfConversions',     label: '% LF Conv.',   align: 'right', format: v => `${Number(v).toFixed(1)}%` },
   ];
 
   return (
     <div className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden", className)}>
-      <div className="px-5 py-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-card-foreground">Platform Comparison</h3>
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-card-foreground">Platform Performance</h3>
+        <p className="text-[11px] text-muted-foreground">CPA &amp; conversions use lower-funnel actions.</p>
       </div>
       <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
@@ -69,14 +110,14 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
             <tr className="border-b border-border bg-muted/30">
               {cols.map(c => (
                 <th
-                  key={c.key}
+                  key={c.key as string}
                   className={cn(
                     "px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground select-none transition-colors",
-                    c.key === 'label' ? 'text-left' : 'text-right'
+                    c.align === 'right' ? 'text-right' : 'text-left'
                   )}
                   onClick={() => c.key !== 'label' && handleSort(c.key)}
                 >
-                  <div className={cn("flex items-center gap-1", c.key !== 'label' && 'justify-end')}>
+                  <div className={cn("flex items-center gap-1", c.align === 'right' && 'justify-end')}>
                     {c.label}
                     {sortKey === c.key && (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />)}
                   </div>
@@ -85,19 +126,26 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
             </tr>
           </thead>
           <tbody>
-            {sorted.map(row => (
-              <tr key={row.platform} className="border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors">
-                {cols.map(c => (
-                  <td
-                    key={c.key}
-                    className={cn(
-                      "px-4 py-3 whitespace-nowrap text-xs tabular-nums",
-                      c.key === 'label' ? 'font-semibold text-card-foreground text-left' : 'text-card-foreground text-right'
-                    )}
-                  >
-                    {c.format(row[c.key])}
-                  </td>
-                ))}
+            {sorted.map((row, rowIdx) => (
+              <tr key={row.platform} className={cn(
+                "border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors",
+                rowIdx % 2 === 1 && "bg-muted/[0.04]"
+              )}>
+                {cols.map(c => {
+                  const tone = c.tone?.(row);
+                  return (
+                    <td
+                      key={c.key as string}
+                      className={cn(
+                        "px-4 py-3 whitespace-nowrap text-xs tabular-nums",
+                        c.key === 'label' ? 'font-semibold text-card-foreground text-left' : 'text-card-foreground text-right',
+                        tone && toneClass[tone],
+                      )}
+                    >
+                      {c.format((row as any)[c.key], row)}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -107,13 +155,13 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
   );
 }
 
-/* ─── Mobile Platform Cards ─── */
+/* ─── Mobile cards (compact summary) ─── */
 
 function MobilePlatformCards({ data, currency, className }: { data: PlatformSummary[]; currency: string; className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-[13px] font-semibold text-foreground">Platform Comparison</h3>
+        <h3 className="text-[13px] font-semibold text-foreground">Platform Performance</h3>
         <span className="text-[10px] text-muted-foreground">{data.length} platforms</span>
       </div>
       {data.map(p => <MobilePlatformCard key={p.platform} platform={p} currency={currency} />)}
@@ -123,6 +171,7 @@ function MobilePlatformCards({ data, currency, className }: { data: PlatformSumm
 
 function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSummary; currency: string }) {
   const [expanded, setExpanded] = useState(false);
+  const lf = p.conversionsLowerFunnel ?? p.conversions;
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
       <div className="px-3 pt-3 pb-2">
@@ -132,46 +181,28 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
         </div>
         <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
           <div className="bg-card px-2 py-2 text-center">
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Conv.</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.conversions.toLocaleString()}</p>
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">LF Conv.</p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">{lf.toLocaleString()}</p>
           </div>
           <div className="bg-card px-2 py-2 text-center">
             <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">CPA</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none"><CurrencyValue amount={p.cpa} decimals={2} currency={currency} /></p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.cpa > 0 ? <CurrencyValue amount={p.cpa} decimals={2} currency={currency} /> : '—'}</p>
           </div>
           <div className="bg-card px-2 py-2 text-center">
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">CTR</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.ctr}%</p>
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">ROAS</p>
+            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.roas != null && p.roas > 0 ? `${p.roas.toFixed(2)}x` : '—'}</p>
           </div>
         </div>
       </div>
       {expanded && (
         <div className="px-3 pb-2 pt-1.5 border-t border-border/40">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">CPC</span>
-              <span className="text-[11px] font-semibold text-card-foreground"><CurrencyValue amount={p.cpc} decimals={2} currency={currency} /></span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">Clicks</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{p.clicks.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">Conv. Rate</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.conversionRate).toFixed(2)}%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">% Spend</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.shareOfSpend).toFixed(2)}%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">Impr.</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{p.impressions >= 1e6 ? `${(p.impressions / 1e6).toFixed(1)}M` : p.impressions.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">% Conv.</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.shareOfConversions).toFixed(2)}%</span>
-            </div>
+            <DRow label="CTR" value={`${p.ctr.toFixed(2)}%`} />
+            <DRow label="CPC" value={<CurrencyValue amount={p.cpc} decimals={2} currency={currency} />} />
+            <DRow label="Impr." value={fmtCompact(p.impressions)} />
+            <DRow label="Clicks" value={fmtCompact(p.clicks)} />
+            <DRow label="% Spend" value={`${p.shareOfSpend.toFixed(1)}%`} />
+            <DRow label="% LF Conv." value={`${p.shareOfConversions.toFixed(1)}%`} />
           </div>
         </div>
       )}
@@ -182,6 +213,15 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
         {expanded ? 'Less' : 'More'}
         {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
       </button>
+    </div>
+  );
+}
+
+function DRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-semibold text-card-foreground">{value}</span>
     </div>
   );
 }
