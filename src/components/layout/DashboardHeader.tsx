@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { overviewKPIGroups, overviewKPIGroupsRow2, platformSummaries, alerts } from '@/data/mockData';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
@@ -12,7 +11,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
-import { generateCampaigns } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
@@ -30,7 +28,7 @@ const presets = [
   { label: 'Last Year', from: startOfYear(subYears(new Date(), 1)), to: endOfYear(subYears(new Date(), 1)) },
 ];
 
-const objectives = ['Awareness', 'Traffic', 'Conversions', 'Lead Gen', 'Engagement'];
+
 
 export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const { dateRange, setDateRange, showPreviousPeriod, setShowPreviousPeriod } = useDashboard();
@@ -171,28 +169,19 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const {
-    enabledPlatforms, client,
+    client, data,
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
-    selectedObjectives, setSelectedObjectives,
-    dateRange,
   } = useDashboard();
   const isMobile = useIsMobile();
   const { signOut } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
 
-  const allCampaigns = useMemo(() => {
-    return enabledPlatforms.flatMap(p => generateCampaigns(p));
-  }, [enabledPlatforms]);
+  // Filter options come from the live BigQuery data so they reflect what's actually available.
+  const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
+  const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
 
-  const campaignNames = useMemo(() => [...new Set(allCampaigns.map(c => c.name))], [allCampaigns]);
-
-  const platformOptions = useMemo(
-    () => enabledPlatforms.map(k => client.platforms[k].label),
-    [enabledPlatforms, client.platforms]
-  );
-
-  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0 || selectedObjectives.length > 0;
+  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0;
 
   const handleExportPDF = useCallback(async () => {
     setIsExporting(true);
