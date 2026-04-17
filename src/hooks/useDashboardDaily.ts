@@ -10,21 +10,23 @@ export interface DashboardDailyRow {
   platform: string;
   campaign_id: string | null;
   campaign_name: string | null;
+  /** Optional dimensions for breakdowns. */
+  campaign_type?: string | null;
+  campaign_objective?: string | null;
+  audience_type?: string | null;
   impressions: number;
   clicks: number;
   cost: number;
-  /** Legacy single conversions value (kept for backwards compat). */
   conversions: number;
-  /** Total of all tracked conversion events (upper + lower funnel). */
   conversions_all: number;
-  /** Lower-funnel conversions only (leads, purchases, bookings, form submits). */
   conversions_lower_funnel: number;
-  /** Upper-funnel conversions only. */
   conversions_upper_funnel: number;
   conversion_value: number;
   reach: number;
   landing_page_views: number;
+  outbound_clicks?: number;
   video_views: number;
+  video_p100?: number;
 }
 
 export interface DashboardTotals {
@@ -35,16 +37,30 @@ export interface DashboardTotals {
   conversions: number;
   conversionsAll: number;
   conversionsLowerFunnel: number;
+  conversionsUpperFunnel: number;
+  conversionValue: number;
   reach: number;
   landingPageViews: number;
+  outboundClicks: number;
   videoViews: number;
+  videoP100: number;
+  // Derived rates (recomputed from sums, never averaged)
   ctr: number;
   cpc: number;
-  /** CPA computed against the active conversion mode. */
   cpa: number;
+  cpaAll: number;
+  cpaLowerFunnel: number;
   cpm: number;
   conversionRate: number;
+  conversionRateLowerFunnel: number;
   costPerLPV: number;
+  lpvRate: number;
+  cvrLowerFunnel: number;
+  frequency: number;
+  roas: number;
+  outboundCtr: number;
+  costPerVideoView: number;
+  videoCompletionRate: number;
 }
 
 interface DateBounds { start: Date; end: Date }
@@ -92,12 +108,11 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
 
 function safeDiv(n: number, d: number) { return d > 0 ? n / d : 0; }
 
-/** Return the conversion count for a row under the chosen mode, with sane fallbacks. */
+/** Return the conversion count for a row under the chosen mode. */
 export function pickConversions(r: DashboardDailyRow, mode: ConversionMode): number {
   if (mode === 'lower_funnel') {
     const v = +r.conversions_lower_funnel;
     if (v > 0) return v;
-    // Fallback: if lower-funnel column is empty for this row, fall back to legacy
     return +r.conversions || 0;
   }
   const v = +r.conversions_all;
@@ -112,11 +127,20 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     a.clicks += +r.clicks || 0;
     a.conversionsAll += +r.conversions_all || +r.conversions || 0;
     a.conversionsLowerFunnel += +r.conversions_lower_funnel || 0;
+    a.conversionsUpperFunnel += +r.conversions_upper_funnel || 0;
+    a.conversionValue += +r.conversion_value || 0;
     a.reach += +r.reach || 0;
     a.landingPageViews += +r.landing_page_views || 0;
+    a.outboundClicks += +r.outbound_clicks || 0;
     a.videoViews += +r.video_views || 0;
+    a.videoP100 += +r.video_p100 || 0;
     return a;
-  }, { spend: 0, impressions: 0, clicks: 0, conversionsAll: 0, conversionsLowerFunnel: 0, reach: 0, landingPageViews: 0, videoViews: 0 });
+  }, {
+    spend: 0, impressions: 0, clicks: 0,
+    conversionsAll: 0, conversionsLowerFunnel: 0, conversionsUpperFunnel: 0,
+    conversionValue: 0, reach: 0, landingPageViews: 0,
+    outboundClicks: 0, videoViews: 0, videoP100: 0,
+  });
 
   const conversions = mode === 'lower_funnel'
     ? (t.conversionsLowerFunnel > 0 ? t.conversionsLowerFunnel : t.conversionsAll)
@@ -128,9 +152,19 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     ctr: safeDiv(t.clicks, t.impressions) * 100,
     cpc: safeDiv(t.spend, t.clicks),
     cpa: safeDiv(t.spend, conversions),
+    cpaAll: safeDiv(t.spend, t.conversionsAll),
+    cpaLowerFunnel: safeDiv(t.spend, t.conversionsLowerFunnel),
     cpm: safeDiv(t.spend, t.impressions) * 1000,
     conversionRate: safeDiv(conversions, t.clicks) * 100,
+    conversionRateLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.clicks) * 100,
     costPerLPV: safeDiv(t.spend, t.landingPageViews),
+    lpvRate: safeDiv(t.landingPageViews, t.clicks) * 100,
+    cvrLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.landingPageViews) * 100,
+    frequency: safeDiv(t.impressions, t.reach),
+    roas: safeDiv(t.conversionValue, t.spend),
+    outboundCtr: safeDiv(t.outboundClicks, t.impressions) * 100,
+    costPerVideoView: safeDiv(t.spend, t.videoViews),
+    videoCompletionRate: safeDiv(t.videoP100, t.videoViews) * 100,
   };
 }
 
@@ -159,6 +193,9 @@ function buildPlatformSummaries(rows: DashboardDailyRow[], mode: ConversionMode)
       conversionRate: a.conversionRate,
       shareOfSpend: safeDiv(a.spend, totals.spend) * 100,
       shareOfConversions: safeDiv(a.conversions, totals.conversions) * 100,
+      roas: a.roas,
+      conversionsAll: a.conversionsAll,
+      conversionsLowerFunnel: a.conversionsLowerFunnel,
     });
   });
   return summaries.sort((x, y) => y.spend - x.spend);
@@ -193,6 +230,28 @@ function buildCtrSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
     .map(([date, { clicks, imps }]) => ({ date, value: imps > 0 ? +((clicks / imps) * 100).toFixed(2) : 0 }));
 }
 
+function buildRoasSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
+  const byDate = new Map<string, { spend: number; value: number }>();
+  for (const r of rows) {
+    const cur = byDate.get(r.date) || { spend: 0, value: 0 };
+    cur.spend += +r.cost || 0; cur.value += +r.conversion_value || 0;
+    byDate.set(r.date, cur);
+  }
+  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, { spend, value }]) => ({ date, value: spend > 0 ? +(value / spend).toFixed(2) : 0 }));
+}
+
+function buildFrequencySeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
+  const byDate = new Map<string, { imps: number; reach: number }>();
+  for (const r of rows) {
+    const cur = byDate.get(r.date) || { imps: 0, reach: 0 };
+    cur.imps += +r.impressions || 0; cur.reach += +r.reach || 0;
+    byDate.set(r.date, cur);
+  }
+  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, { imps, reach }]) => ({ date, value: reach > 0 ? +(imps / reach).toFixed(2) : 0 }));
+}
+
 export interface PlatformOption { key: PlatformKey; label: string; raw: string; }
 
 export interface UseDashboardDailyOptions {
@@ -217,7 +276,10 @@ interface UseDashboardDailyResult {
   availableCampaigns: string[];
 }
 
-export { aggregate as aggregateRows, buildTimeSeries, buildCpaSeries, buildCtrSeries };
+export {
+  aggregate as aggregateRows,
+  buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries, buildFrequencySeries,
+};
 
 export function useDashboardDaily(
   dateRangeLabel: string,
@@ -273,8 +335,8 @@ export function useDashboardDaily(
       const prevStart = subDays(prevEnd, days - 1);
 
       const [current, previous] = await Promise.all([
-        supabase.rpc('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
-        supabase.rpc('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
       ]);
       if (cancelled) return;
       if (current.error) {
@@ -295,7 +357,7 @@ export function useDashboardDaily(
     let cancelled = false;
     const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
     (async () => {
-      const { data, error: err } = await supabase.rpc('get_dashboard_daily', {
+      const { data, error: err } = await (supabase.rpc as any)('get_dashboard_daily', {
         p_start: fmt(range.start),
         p_end: fmt(range.end),
         p_platforms: platformsParam,
@@ -320,7 +382,6 @@ export function useDashboardDaily(
     );
   }, [filtersActive, prevRows, platformsParam, campaignsParam]);
 
-  // Default totals are conversion-mode 'all' — pages pick lower-funnel via their own aggregateRows() call.
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
     () => filteredPrevRows.length ? aggregate(filteredPrevRows, 'all') : null,
