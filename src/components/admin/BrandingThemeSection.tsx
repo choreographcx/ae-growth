@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useMemo, useRef, useCallback, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -7,30 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { Upload, Palette, Eye, Paintbrush, X } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface BrandingConfig {
-  logoUrl: string;
-  darkLogoUrl: string;
-  faviconUrl: string;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  sidebarStyle: 'dark' | 'light' | 'brand';
-  chartPalette: 'vibrant' | 'muted' | 'monochrome' | 'brand';
-  cardRadius: 'small' | 'medium' | 'large';
-}
-
-const DEFAULT_BRANDING: BrandingConfig = {
-  logoUrl: '',
-  darkLogoUrl: '',
-  faviconUrl: '',
-  primaryColor: '#0fa968',
-  secondaryColor: '#3b82f6',
-  accentColor: '#f59e0b',
-  sidebarStyle: 'dark',
-  chartPalette: 'vibrant',
-  cardRadius: 'medium',
-};
+import {
+  BrandingConfig,
+  DEFAULT_BRANDING,
+  applyBrandingToRoot,
+  cacheBranding,
+  hexToHsl as sharedHexToHsl,
+} from '@/lib/branding';
 
 const STATIC_PALETTES: Record<string, string[]> = {
   vibrant: ['#0fa968', '#3b82f6', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4'],
