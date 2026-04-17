@@ -25,9 +25,18 @@ export default function OverviewPage() {
   const { client, data } = useDashboard();
   const currency = client.currency;
   const {
-    loading, error, totals, previousTotals,
-    platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries,
+    loading, error, rows, previousRows, totals, previousTotals,
+    platformSummaries, spendSeries, cpaSeries: _ignoredCpa, ctrSeries,
   } = data;
+
+  // Overview is locked to LOWER FUNNEL conversions for cross-platform comparability.
+  const lfTotals = useMemo(() => aggregateRows(rows, 'lower_funnel'), [rows]);
+  const lfPrev = useMemo(() => previousRows.length ? aggregateRows(previousRows, 'lower_funnel') : null, [previousRows]);
+  const lfConversionsSeries = useMemo(
+    () => buildTimeSeries(rows, r => +r.conversions_lower_funnel || 0),
+    [rows]
+  );
+  const lfCpaSeries = useMemo(() => buildCpaSeries(rows, 'lower_funnel'), [rows]);
 
   const sortedAlerts = useMemo(() =>
     [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]),
@@ -38,6 +47,16 @@ export default function OverviewPage() {
     Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0),
     [client.platforms]
   );
+
+  const funnelSteps = useMemo(() => {
+    const lpv = lfTotals.landingPageViews || totals.landingPageViews;
+    return [
+      { label: 'Impressions',        value: totals.impressions, formattedValue: formatCompact(totals.impressions) },
+      { label: 'Clicks',             value: totals.clicks,      formattedValue: formatCompact(totals.clicks) },
+      { label: 'Landing Page Views', value: lpv,                formattedValue: formatCompact(lpv) },
+      { label: 'Conversions',        value: lfTotals.conversions, formattedValue: formatCompact(lfTotals.conversions) },
+    ].filter(s => s.value > 0 || s.label !== 'Landing Page Views');
+  }, [totals, lfTotals]);
 
   const allKPICards: KPIGroupData[] = useMemo(() => {
     const cur = totals;
@@ -89,15 +108,16 @@ export default function OverviewPage() {
       {
         title: 'Conversions',
         icon: 'Target',
+        tooltip: 'Includes only lower-funnel actions such as leads, purchases, bookings, and form submissions. Standardized across platforms.',
         primary: {
-          label: 'Conversions', value: cur.conversions,
-          formattedValue: formatCompact(cur.conversions),
-          change: pctChange(cur.conversions, prev?.conversions),
-          trend: conversionsSeries.slice(-7).map(p => p.value),
+          label: 'Conversions', value: lfTotals.conversions,
+          formattedValue: formatCompact(lfTotals.conversions),
+          change: pctChange(lfTotals.conversions, lfPrev?.conversions),
+          trend: lfConversionsSeries.slice(-7).map(p => p.value),
         },
         supporting: [
-          { label: 'CPA', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.cpa.toFixed(2)}</span>, change: pctChange(cur.cpa, prev?.cpa) },
-          { label: 'Conv. Rate', formattedValue: `${cur.conversionRate.toFixed(2)}%`, change: pctChange(cur.conversionRate, prev?.conversionRate) },
+          { label: 'CPA', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{lfTotals.cpa.toFixed(2)}</span>, change: pctChange(lfTotals.cpa, lfPrev?.cpa) },
+          { label: 'Conv. Rate', formattedValue: `${lfTotals.conversionRate.toFixed(2)}%`, change: pctChange(lfTotals.conversionRate, lfPrev?.conversionRate) },
         ],
       },
       {
@@ -129,7 +149,7 @@ export default function OverviewPage() {
     ];
 
     return applyCurrencyToKPIGroups(groups, currency, 26);
-  }, [totals, previousTotals, currency, totalBudget, spendSeries, conversionsSeries]);
+  }, [totals, previousTotals, lfTotals, lfPrev, lfConversionsSeries, currency, totalBudget, spendSeries]);
 
   return (
     <div className="space-y-5 md:space-y-7">
