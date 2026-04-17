@@ -219,10 +219,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <div className="h-3.5 w-px bg-border mx-1" />
               <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
               <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
-              <MultiSelectFilter label="Objectives" options={objectives} selected={selectedObjectives} onChange={setSelectedObjectives} />
               {hasFilters && (
                 <button
-                  onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); setSelectedObjectives([]); }}
+                  onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
                   className="text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
                 >
                   Clear
