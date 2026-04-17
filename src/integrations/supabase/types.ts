@@ -464,6 +464,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_dashboard_conversion_breakdown: {
+        Args: {
+          p_campaign_names?: string[]
+          p_end: string
+          p_platforms?: string[]
+          p_start: string
+        }
+        Returns: {
+          conversion_funnel_group: string
+          conversion_name: string
+          conversions_all: number
+          platform: string
+        }[]
+      }
       get_dashboard_daily:
         | {
             Args: { p_date: string }
@@ -497,6 +511,9 @@ export type Database = {
               clicks: number
               conversion_value: number
               conversions: number
+              conversions_all: number
+              conversions_lower_funnel: number
+              conversions_upper_funnel: number
               cost: number
               date: string
               impressions: number

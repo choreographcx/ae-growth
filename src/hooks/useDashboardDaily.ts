@@ -3,6 +3,8 @@ import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subY
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
 
+export type ConversionMode = 'all' | 'lower_funnel';
+
 export interface DashboardDailyRow {
   date: string;
   platform: string;
@@ -11,7 +13,14 @@ export interface DashboardDailyRow {
   impressions: number;
   clicks: number;
   cost: number;
+  /** Legacy single conversions value (kept for backwards compat). */
   conversions: number;
+  /** Total of all tracked conversion events (upper + lower funnel). */
+  conversions_all: number;
+  /** Lower-funnel conversions only (leads, purchases, bookings, form submits). */
+  conversions_lower_funnel: number;
+  /** Upper-funnel conversions only. */
+  conversions_upper_funnel: number;
   conversion_value: number;
   reach: number;
   landing_page_views: number;
@@ -22,12 +31,16 @@ export interface DashboardTotals {
   spend: number;
   impressions: number;
   clicks: number;
+  /** Conversions value selected by the active conversion mode. */
   conversions: number;
+  conversionsAll: number;
+  conversionsLowerFunnel: number;
   reach: number;
   landingPageViews: number;
   videoViews: number;
   ctr: number;
   cpc: number;
+  /** CPA computed against the active conversion mode. */
   cpa: number;
   cpm: number;
   conversionRate: number;
@@ -79,30 +92,50 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
 
 function safeDiv(n: number, d: number) { return d > 0 ? n / d : 0; }
 
-function aggregate(rows: DashboardDailyRow[]): DashboardTotals {
+/** Return the conversion count for a row under the chosen mode, with sane fallbacks. */
+export function pickConversions(r: DashboardDailyRow, mode: ConversionMode): number {
+  if (mode === 'lower_funnel') {
+    const v = +r.conversions_lower_funnel;
+    if (v > 0) return v;
+    // Fallback: if lower-funnel column is empty for this row, fall back to legacy
+    return +r.conversions || 0;
+  }
+  const v = +r.conversions_all;
+  if (v > 0) return v;
+  return +r.conversions || 0;
+}
+
+function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): DashboardTotals {
   const t = rows.reduce((a, r) => {
     a.spend += +r.cost || 0;
     a.impressions += +r.impressions || 0;
     a.clicks += +r.clicks || 0;
-    a.conversions += +r.conversions || 0;
+    a.conversionsAll += +r.conversions_all || +r.conversions || 0;
+    a.conversionsLowerFunnel += +r.conversions_lower_funnel || 0;
     a.reach += +r.reach || 0;
     a.landingPageViews += +r.landing_page_views || 0;
     a.videoViews += +r.video_views || 0;
     return a;
-  }, { spend: 0, impressions: 0, clicks: 0, conversions: 0, reach: 0, landingPageViews: 0, videoViews: 0 });
+  }, { spend: 0, impressions: 0, clicks: 0, conversionsAll: 0, conversionsLowerFunnel: 0, reach: 0, landingPageViews: 0, videoViews: 0 });
+
+  const conversions = mode === 'lower_funnel'
+    ? (t.conversionsLowerFunnel > 0 ? t.conversionsLowerFunnel : t.conversionsAll)
+    : t.conversionsAll;
+
   return {
     ...t,
+    conversions,
     ctr: safeDiv(t.clicks, t.impressions) * 100,
     cpc: safeDiv(t.spend, t.clicks),
-    cpa: safeDiv(t.spend, t.conversions),
+    cpa: safeDiv(t.spend, conversions),
     cpm: safeDiv(t.spend, t.impressions) * 1000,
-    conversionRate: safeDiv(t.conversions, t.clicks) * 100,
+    conversionRate: safeDiv(conversions, t.clicks) * 100,
     costPerLPV: safeDiv(t.spend, t.landingPageViews),
   };
 }
 
-function buildPlatformSummaries(rows: DashboardDailyRow[]): PlatformSummary[] {
-  const totals = aggregate(rows);
+function buildPlatformSummaries(rows: DashboardDailyRow[], mode: ConversionMode): PlatformSummary[] {
+  const totals = aggregate(rows, mode);
   const byPlatform = new Map<PlatformKey, DashboardDailyRow[]>();
   for (const r of rows) {
     const p = normalizePlatform(r.platform);
@@ -112,7 +145,7 @@ function buildPlatformSummaries(rows: DashboardDailyRow[]): PlatformSummary[] {
   }
   const summaries: PlatformSummary[] = [];
   byPlatform.forEach((rs, platform) => {
-    const a = aggregate(rs);
+    const a = aggregate(rs, mode);
     summaries.push({
       platform,
       label: PLATFORM_LABELS[platform],
@@ -137,11 +170,12 @@ function buildTimeSeries(rows: DashboardDailyRow[], picker: (r: DashboardDailyRo
   return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([date, value]) => ({ date, value }));
 }
 
-function buildCpaSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
+function buildCpaSeries(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): TimeSeriesPoint[] {
   const byDate = new Map<string, { spend: number; conv: number }>();
   for (const r of rows) {
     const cur = byDate.get(r.date) || { spend: 0, conv: 0 };
-    cur.spend += +r.cost || 0; cur.conv += +r.conversions || 0;
+    cur.spend += +r.cost || 0;
+    cur.conv += pickConversions(r, mode);
     byDate.set(r.date, cur);
   }
   return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
@@ -162,8 +196,8 @@ function buildCtrSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
 export interface PlatformOption { key: PlatformKey; label: string; raw: string; }
 
 export interface UseDashboardDailyOptions {
-  selectedPlatformLabels?: string[];   // display labels from header filter
-  selectedCampaigns?: string[];        // raw campaign_name strings
+  selectedPlatformLabels?: string[];
+  selectedCampaigns?: string[];
 }
 
 interface UseDashboardDailyResult {
@@ -179,12 +213,10 @@ interface UseDashboardDailyResult {
   cpaSeries: TimeSeriesPoint[];
   ctrSeries: TimeSeriesPoint[];
   range: DateBounds;
-  // Filter options derived from unfiltered current-period data
   availablePlatforms: PlatformOption[];
   availableCampaigns: string[];
 }
 
-// Exported helpers so platform-scoped pages can derive their own slices
 export { aggregate as aggregateRows, buildTimeSeries, buildCpaSeries, buildCtrSeries };
 
 export function useDashboardDaily(
@@ -194,14 +226,12 @@ export function useDashboardDaily(
   const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
-  // Unfiltered data drives BOTH the filter option lists AND any unfiltered request
   const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
   const [filteredRows, setFilteredRows] = useState<DashboardDailyRow[]>([]);
   const [prevRows, setPrevRows] = useState<DashboardDailyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Map UI labels -> raw BQ platform strings using whatever raw values appear in allRows
   const labelToRawPlatforms = useMemo(() => {
     const m = new Map<string, string[]>();
     for (const r of allRows) {
@@ -232,7 +262,6 @@ export function useDashboardDaily(
 
   const filtersActive = !!(platformsParam || campaignsParam);
 
-  // 1) Always fetch unfiltered current period (for filter options + unfiltered render)
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -261,7 +290,6 @@ export function useDashboardDaily(
     return () => { cancelled = true; };
   }, [range.start.getTime(), range.end.getTime()]);
 
-  // 2) When filters active, fetch a filtered slice; otherwise reuse allRows
   useEffect(() => {
     if (!filtersActive) { setFilteredRows([]); return; }
     let cancelled = false;
@@ -282,8 +310,6 @@ export function useDashboardDaily(
 
   const rows = filtersActive ? filteredRows : allRows;
 
-  // Previous-period totals: when filters active we approximate by filtering prevRows in-memory
-  // (BQ scan already paid for unfiltered prev period; saves a 4th RPC call)
   const filteredPrevRows = useMemo(() => {
     if (!filtersActive) return prevRows;
     const platSet = platformsParam ? new Set(platformsParam) : null;
@@ -294,19 +320,18 @@ export function useDashboardDaily(
     );
   }, [filtersActive, prevRows, platformsParam, campaignsParam]);
 
-  const totals = useMemo(() => aggregate(rows), [rows]);
+  // Default totals are conversion-mode 'all' — pages pick lower-funnel via their own aggregateRows() call.
+  const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
-    () => filteredPrevRows.length ? aggregate(filteredPrevRows) : null,
+    () => filteredPrevRows.length ? aggregate(filteredPrevRows, 'all') : null,
     [filteredPrevRows]
   );
-  const platformSummaries = useMemo(() => buildPlatformSummaries(rows), [rows]);
+  const platformSummaries = useMemo(() => buildPlatformSummaries(rows, 'lower_funnel'), [rows]);
   const spendSeries = useMemo(() => buildTimeSeries(rows, r => +r.cost || 0), [rows]);
-  const conversionsSeries = useMemo(() => buildTimeSeries(rows, r => +r.conversions || 0), [rows]);
-  const cpaSeries = useMemo(() => buildCpaSeries(rows), [rows]);
+  const conversionsSeries = useMemo(() => buildTimeSeries(rows, r => pickConversions(r, 'all')), [rows]);
+  const cpaSeries = useMemo(() => buildCpaSeries(rows, 'all'), [rows]);
   const ctrSeries = useMemo(() => buildCtrSeries(rows), [rows]);
 
-  // Filter option lists — derived from unfiltered current-period data so users can always
-  // see the full universe of platforms/campaigns regardless of current selection.
   const availablePlatforms = useMemo<PlatformOption[]>(() => {
     const seen = new Map<PlatformKey, PlatformOption>();
     for (const r of allRows) {
@@ -318,7 +343,6 @@ export function useDashboardDaily(
   }, [allRows]);
 
   const availableCampaigns = useMemo(() => {
-    // Honour platform filter when listing campaigns so the campaign list narrows naturally
     const platSet = platformsParam ? new Set(platformsParam) : null;
     const set = new Set<string>();
     for (const r of allRows) {

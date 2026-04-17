@@ -4,6 +4,7 @@ import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PerformanceTable } from '@/components/dashboard/PerformanceTable';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
+import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { alerts } from '@/data/mockData';
 import { useDashboard } from '@/context/DashboardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +12,7 @@ import { useState, useMemo } from 'react';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import {
   aggregateRows, buildTimeSeries, buildCpaSeries, buildCtrSeries,
-  normalizePlatform, pctChange, DashboardDailyRow,
+  normalizePlatform, pctChange, pickConversions, DashboardDailyRow, ConversionMode,
 } from '@/hooks/useDashboardDaily';
 import { Loader2 } from 'lucide-react';
 
@@ -32,7 +33,7 @@ function formatCompact(n: number): string {
 }
 
 /** Build platform-scoped campaign rows from raw daily rows. */
-function buildCampaigns(rows: DashboardDailyRow[], platform: PlatformKey): CampaignRow[] {
+function buildCampaigns(rows: DashboardDailyRow[], platform: PlatformKey, mode: ConversionMode): CampaignRow[] {
   const byCampaign = new Map<string, DashboardDailyRow[]>();
   for (const r of rows) {
     const name = r.campaign_name || '(unnamed)';
@@ -42,7 +43,7 @@ function buildCampaigns(rows: DashboardDailyRow[], platform: PlatformKey): Campa
   }
   const out: CampaignRow[] = [];
   byCampaign.forEach((rs, key) => {
-    const a = aggregateRows(rs);
+    const a = aggregateRows(rs, mode);
     const name = rs[0].campaign_name || '(unnamed)';
     const id = rs[0].campaign_id || key;
     out.push({
@@ -71,7 +72,10 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
   const platformCfg = client.platforms[platformKey];
   const budget = platformCfg?.budget || 0;
   const currency = client.currency;
-  const { loading, error, rows, previousRows } = data;
+  const { loading, error, rows, previousRows, range } = data;
+
+  // Default platform pages to ALL conversions; user can toggle to lower-funnel only.
+  const [conversionMode, setConversionMode] = useState<ConversionMode>('all');
 
   // Restrict to this platform
   const scopedRows = useMemo(
@@ -83,18 +87,28 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
     [previousRows, platformKey]
   );
 
-  const totals = useMemo(() => aggregateRows(scopedRows), [scopedRows]);
+  const totals = useMemo(() => aggregateRows(scopedRows, conversionMode), [scopedRows, conversionMode]);
   const prevTotals = useMemo(
-    () => scopedPrevRows.length ? aggregateRows(scopedPrevRows) : null,
-    [scopedPrevRows]
+    () => scopedPrevRows.length ? aggregateRows(scopedPrevRows, conversionMode) : null,
+    [scopedPrevRows, conversionMode]
   );
 
   const spendSeries = useMemo(() => buildTimeSeries(scopedRows, r => +r.cost || 0), [scopedRows]);
-  const convSeries = useMemo(() => buildTimeSeries(scopedRows, r => +r.conversions || 0), [scopedRows]);
-  const cpaSeries = useMemo(() => buildCpaSeries(scopedRows), [scopedRows]);
+  const convSeries = useMemo(
+    () => buildTimeSeries(scopedRows, r => pickConversions(r, conversionMode)),
+    [scopedRows, conversionMode]
+  );
+  const cpaSeries = useMemo(() => buildCpaSeries(scopedRows, conversionMode), [scopedRows, conversionMode]);
   const ctrSeries = useMemo(() => buildCtrSeries(scopedRows), [scopedRows]);
 
-  const campaigns = useMemo(() => buildCampaigns(scopedRows, platformKey), [scopedRows, platformKey]);
+  const campaigns = useMemo(
+    () => buildCampaigns(scopedRows, platformKey, conversionMode),
+    [scopedRows, platformKey, conversionMode]
+  );
+
+  const conversionsTooltip = conversionMode === 'all'
+    ? 'Includes all tracked conversion events for this platform (both upper and lower funnel).'
+    : 'Lower-funnel actions only — leads, purchases, bookings, and form submissions.';
 
   const kpiGroups = useMemo<KPIGroupData[]>(() => {
     const cur = totals;
@@ -147,6 +161,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       {
         title: 'Conversions',
         icon: 'Target',
+        tooltip: conversionsTooltip,
         primary: {
           label: 'Conversions', value: cur.conversions,
           formattedValue: formatCompact(cur.conversions),
@@ -160,7 +175,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       },
     ];
     return applyCurrencyToKPIGroups(groups, currency, 26);
-  }, [totals, prevTotals, currency, budget, spendSeries, convSeries]);
+  }, [totals, prevTotals, currency, budget, spendSeries, convSeries, conversionsTooltip]);
 
   const platformAlerts = alerts.filter(a => a.platform === platformKey);
   const [activeTab, setActiveTab] = useState(tabs?.[0]?.key || 'all');
@@ -169,13 +184,23 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
     <div className="space-y-6 md:space-y-10">
       <SectionHeader
         title={title}
-        action={tabs && tabs.length > 1 ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              {tabs.map(t => <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>)}
-            </TabsList>
-          </Tabs>
-        ) : undefined}
+        action={
+          <div className="flex items-center gap-2">
+            <Tabs value={conversionMode} onValueChange={v => setConversionMode(v as ConversionMode)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs px-3">All Conversions</TabsTrigger>
+                <TabsTrigger value="lower_funnel" className="text-xs px-3">Lower Funnel</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            {tabs && tabs.length > 1 && (
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                  {tabs.map(t => <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>)}
+                </TabsList>
+              </Tabs>
+            )}
+          </div>
+        }
       />
 
       {error && (
@@ -208,6 +233,16 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
           <TrendChartCard title="CPA" data={cpaSeries} currency={currency} color="hsl(var(--chart-4))" />
           <TrendChartCard title="CTR" data={ctrSeries} valueSuffix="%" color="hsl(var(--chart-2))" />
         </div>
+      </div>
+
+      {/* Conversion Breakdown */}
+      <div className="space-y-3 md:space-y-4">
+        <SectionHeader title="Conversion Breakdown" />
+        <ConversionBreakdownCard
+          platform={platformKey}
+          start={range.start}
+          end={range.end}
+        />
       </div>
 
       {/* Campaign Table */}
