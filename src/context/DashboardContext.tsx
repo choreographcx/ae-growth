@@ -4,6 +4,9 @@ import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
+import { useDashboardDaily, UseDashboardDailyOptions } from '@/hooks/useDashboardDaily';
+
+type DashboardData = ReturnType<typeof useDashboardDaily>;
 
 interface DashboardContextType {
   client: ClientProfile;
@@ -27,6 +30,8 @@ interface DashboardContextType {
   isSaving: boolean;
   configLoaded: boolean;
   lastSavedAt: string | null;
+  /** Live BigQuery dashboard data, filtered by date + platform + campaign selections. */
+  data: DashboardData;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -45,7 +50,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [configLoaded, setConfigLoaded] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
-  // Load config from Supabase on mount
+  // Single source of truth for dashboard data — shared with header and pages
+  const data = useDashboardDaily(dateRange, {
+    selectedPlatformLabels: selectedPlatforms,
+    selectedCampaigns,
+  });
+
   useEffect(() => {
     const loadConfig = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -61,7 +71,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (data?.config) {
-        // Merge with defaults to handle new fields
         const saved = data.config as Record<string, any>;
         setClient(prev => ({ ...prev, ...saved }));
         if (data.updated_at) {
@@ -76,8 +85,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     loadConfig();
   }, []);
 
-  // Apply branding (colors, sidebar style, favicon, radius) and cache it
-  // for unauthenticated pages whenever the client config changes.
   useEffect(() => {
     const branding = (client as any).branding;
     if (branding) {
@@ -146,11 +153,22 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedCampaigns, setSelectedCampaigns,
       selectedObjectives, setSelectedObjectives,
       saveConfig, isSaving, configLoaded, lastSavedAt,
+      data,
     }}>
       {children}
     </DashboardContext.Provider>
   );
 }
+
+const fallbackData: DashboardData = {
+  loading: false, error: null, rows: [],
+  totals: { spend: 0, impressions: 0, clicks: 0, conversions: 0, reach: 0, landingPageViews: 0, videoViews: 0, ctr: 0, cpc: 0, cpa: 0, cpm: 0, conversionRate: 0, costPerLPV: 0 },
+  previousTotals: null,
+  platformSummaries: [],
+  spendSeries: [], conversionsSeries: [], cpaSeries: [], ctrSeries: [],
+  range: { start: new Date(), end: new Date() },
+  availablePlatforms: [], availableCampaigns: [],
+};
 
 const fallback: DashboardContextType = {
   client: defaultClient,
@@ -174,6 +192,7 @@ const fallback: DashboardContextType = {
   isSaving: false,
   configLoaded: false,
   lastSavedAt: null,
+  data: fallbackData,
 };
 
 export function useDashboard() {

@@ -4,8 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
 
 export interface DashboardDailyRow {
-  date: string;            // ISO yyyy-mm-dd
-  platform: string;        // raw platform string from BQ
+  date: string;
+  platform: string;
+  campaign_id: string | null;
+  campaign_name: string | null;
   impressions: number;
   clicks: number;
   cost: number;
@@ -24,17 +26,16 @@ export interface DashboardTotals {
   reach: number;
   landingPageViews: number;
   videoViews: number;
-  ctr: number;             // %
+  ctr: number;
   cpc: number;
   cpa: number;
   cpm: number;
-  conversionRate: number;  // %
+  conversionRate: number;
   costPerLPV: number;
 }
 
 interface DateBounds { start: Date; end: Date }
 
-/** Parse the dateRange string in DashboardContext into concrete start/end dates. */
 function resolveDateRange(label: string): DateBounds {
   const today = new Date();
   switch (label) {
@@ -47,7 +48,6 @@ function resolveDateRange(label: string): DateBounds {
     case 'This Year':     return { start: startOfYear(today), end: today };
     case 'Last Year':     return { start: startOfYear(subYears(today, 1)), end: endOfYear(subYears(today, 1)) };
   }
-  // Custom format: "MMM d – MMM d, yyyy"
   const parts = label.split('–').map(s => s.trim());
   if (parts.length === 2) {
     const yearMatch = parts[1].match(/(\d{4})$/);
@@ -60,8 +60,7 @@ function resolveDateRange(label: string): DateBounds {
   return { start: subDays(today, 30), end: today };
 }
 
-/** Map raw BigQuery platform strings to our canonical PlatformKey. */
-function normalizePlatform(raw: string): PlatformKey | null {
+export function normalizePlatform(raw: string): PlatformKey | null {
   const k = (raw || '').toLowerCase().replace(/[\s_-]/g, '');
   if (k.includes('meta') || k.includes('facebook') || k.includes('instagram')) return 'meta';
   if (k.includes('google')) return 'google';
@@ -134,24 +133,18 @@ function buildPlatformSummaries(rows: DashboardDailyRow[]): PlatformSummary[] {
 
 function buildTimeSeries(rows: DashboardDailyRow[], picker: (r: DashboardDailyRow) => number): TimeSeriesPoint[] {
   const byDate = new Map<string, number>();
-  for (const r of rows) {
-    byDate.set(r.date, (byDate.get(r.date) || 0) + (picker(r) || 0));
-  }
-  return Array.from(byDate.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, value]) => ({ date, value }));
+  for (const r of rows) byDate.set(r.date, (byDate.get(r.date) || 0) + (picker(r) || 0));
+  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([date, value]) => ({ date, value }));
 }
 
 function buildCpaSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
   const byDate = new Map<string, { spend: number; conv: number }>();
   for (const r of rows) {
     const cur = byDate.get(r.date) || { spend: 0, conv: 0 };
-    cur.spend += +r.cost || 0;
-    cur.conv += +r.conversions || 0;
+    cur.spend += +r.cost || 0; cur.conv += +r.conversions || 0;
     byDate.set(r.date, cur);
   }
-  return Array.from(byDate.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
+  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
     .map(([date, { spend, conv }]) => ({ date, value: conv > 0 ? +(spend / conv).toFixed(2) : 0 }));
 }
 
@@ -159,13 +152,18 @@ function buildCtrSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
   const byDate = new Map<string, { clicks: number; imps: number }>();
   for (const r of rows) {
     const cur = byDate.get(r.date) || { clicks: 0, imps: 0 };
-    cur.clicks += +r.clicks || 0;
-    cur.imps += +r.impressions || 0;
+    cur.clicks += +r.clicks || 0; cur.imps += +r.impressions || 0;
     byDate.set(r.date, cur);
   }
-  return Array.from(byDate.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
+  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
     .map(([date, { clicks, imps }]) => ({ date, value: imps > 0 ? +((clicks / imps) * 100).toFixed(2) : 0 }));
+}
+
+export interface PlatformOption { key: PlatformKey; label: string; raw: string; }
+
+export interface UseDashboardDailyOptions {
+  selectedPlatformLabels?: string[];   // display labels from header filter
+  selectedCampaigns?: string[];        // raw campaign_name strings
 }
 
 interface UseDashboardDailyResult {
@@ -180,40 +178,78 @@ interface UseDashboardDailyResult {
   cpaSeries: TimeSeriesPoint[];
   ctrSeries: TimeSeriesPoint[];
   range: DateBounds;
+  // Filter options derived from unfiltered current-period data
+  availablePlatforms: PlatformOption[];
+  availableCampaigns: string[];
 }
 
-export function useDashboardDaily(dateRangeLabel: string): UseDashboardDailyResult {
+export function useDashboardDaily(
+  dateRangeLabel: string,
+  options: UseDashboardDailyOptions = {}
+): UseDashboardDailyResult {
+  const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
-  const [rows, setRows] = useState<DashboardDailyRow[]>([]);
+
+  // Unfiltered data drives BOTH the filter option lists AND any unfiltered request
+  const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
+  const [filteredRows, setFilteredRows] = useState<DashboardDailyRow[]>([]);
   const [prevRows, setPrevRows] = useState<DashboardDailyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Map UI labels -> raw BQ platform strings using whatever raw values appear in allRows
+  const labelToRawPlatforms = useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const r of allRows) {
+      const k = normalizePlatform(r.platform);
+      if (!k) continue;
+      const lbl = PLATFORM_LABELS[k];
+      const arr = m.get(lbl) || [];
+      if (!arr.includes(r.platform)) arr.push(r.platform);
+      m.set(lbl, arr);
+    }
+    return m;
+  }, [allRows]);
+
+  const platformsParam = useMemo(() => {
+    if (!selectedPlatformLabels.length) return null;
+    const raws: string[] = [];
+    for (const lbl of selectedPlatformLabels) {
+      const arr = labelToRawPlatforms.get(lbl);
+      if (arr) raws.push(...arr);
+    }
+    return raws.length ? raws : ['__no_match__'];
+  }, [selectedPlatformLabels, labelToRawPlatforms]);
+
+  const campaignsParam = useMemo(
+    () => (selectedCampaigns.length ? selectedCampaigns : null),
+    [selectedCampaigns]
+  );
+
+  const filtersActive = !!(platformsParam || campaignsParam);
+
+  // 1) Always fetch unfiltered current period (for filter options + unfiltered render)
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       setLoading(true);
       setError(null);
-
+      const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
       const days = Math.max(1, differenceInCalendarDays(range.end, range.start) + 1);
       const prevEnd = subDays(range.start, 1);
       const prevStart = subDays(prevEnd, days - 1);
-
-      const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
 
       const [current, previous] = await Promise.all([
         supabase.rpc('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
         supabase.rpc('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
       ]);
-
       if (cancelled) return;
-
       if (current.error) {
         setError(current.error.message);
-        setRows([]); setPrevRows([]); setLoading(false);
+        setAllRows([]); setPrevRows([]); setLoading(false);
         return;
       }
-      setRows((current.data as DashboardDailyRow[]) || []);
+      setAllRows((current.data as DashboardDailyRow[]) || []);
       setPrevRows(previous.error ? [] : ((previous.data as DashboardDailyRow[]) || []));
       setLoading(false);
     };
@@ -221,18 +257,81 @@ export function useDashboardDaily(dateRangeLabel: string): UseDashboardDailyResu
     return () => { cancelled = true; };
   }, [range.start.getTime(), range.end.getTime()]);
 
+  // 2) When filters active, fetch a filtered slice; otherwise reuse allRows
+  useEffect(() => {
+    if (!filtersActive) { setFilteredRows([]); return; }
+    let cancelled = false;
+    const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
+    (async () => {
+      const { data, error: err } = await supabase.rpc('get_dashboard_daily', {
+        p_start: fmt(range.start),
+        p_end: fmt(range.end),
+        p_platforms: platformsParam,
+        p_campaign_names: campaignsParam,
+      });
+      if (cancelled) return;
+      if (err) { setError(err.message); setFilteredRows([]); return; }
+      setFilteredRows((data as DashboardDailyRow[]) || []);
+    })();
+    return () => { cancelled = true; };
+  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam]);
+
+  const rows = filtersActive ? filteredRows : allRows;
+
+  // Previous-period totals: when filters active we approximate by filtering prevRows in-memory
+  // (BQ scan already paid for unfiltered prev period; saves a 4th RPC call)
+  const filteredPrevRows = useMemo(() => {
+    if (!filtersActive) return prevRows;
+    const platSet = platformsParam ? new Set(platformsParam) : null;
+    const campSet = campaignsParam ? new Set(campaignsParam) : null;
+    return prevRows.filter(r =>
+      (!platSet || platSet.has(r.platform)) &&
+      (!campSet || (r.campaign_name && campSet.has(r.campaign_name)))
+    );
+  }, [filtersActive, prevRows, platformsParam, campaignsParam]);
+
   const totals = useMemo(() => aggregate(rows), [rows]);
-  const previousTotals = useMemo(() => prevRows.length ? aggregate(prevRows) : null, [prevRows]);
+  const previousTotals = useMemo(
+    () => filteredPrevRows.length ? aggregate(filteredPrevRows) : null,
+    [filteredPrevRows]
+  );
   const platformSummaries = useMemo(() => buildPlatformSummaries(rows), [rows]);
   const spendSeries = useMemo(() => buildTimeSeries(rows, r => +r.cost || 0), [rows]);
   const conversionsSeries = useMemo(() => buildTimeSeries(rows, r => +r.conversions || 0), [rows]);
   const cpaSeries = useMemo(() => buildCpaSeries(rows), [rows]);
   const ctrSeries = useMemo(() => buildCtrSeries(rows), [rows]);
 
-  return { loading, error, rows, totals, previousTotals, platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range };
+  // Filter option lists — derived from unfiltered current-period data so users can always
+  // see the full universe of platforms/campaigns regardless of current selection.
+  const availablePlatforms = useMemo<PlatformOption[]>(() => {
+    const seen = new Map<PlatformKey, PlatformOption>();
+    for (const r of allRows) {
+      const k = normalizePlatform(r.platform);
+      if (!k || seen.has(k)) continue;
+      seen.set(k, { key: k, label: PLATFORM_LABELS[k], raw: r.platform });
+    }
+    return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label));
+  }, [allRows]);
+
+  const availableCampaigns = useMemo(() => {
+    // Honour platform filter when listing campaigns so the campaign list narrows naturally
+    const platSet = platformsParam ? new Set(platformsParam) : null;
+    const set = new Set<string>();
+    for (const r of allRows) {
+      if (!r.campaign_name) continue;
+      if (platSet && !platSet.has(r.platform)) continue;
+      set.add(r.campaign_name);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allRows, platformsParam]);
+
+  return {
+    loading, error, rows, totals, previousTotals,
+    platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
+    availablePlatforms, availableCampaigns,
+  };
 }
 
-/** Percent change helper for KPI deltas. */
 export function pctChange(current: number, previous: number | null | undefined): number {
   if (previous == null || previous === 0) return 0;
   return +(((current - previous) / previous) * 100).toFixed(1);

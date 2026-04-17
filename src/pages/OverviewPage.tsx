@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
-import { useDashboardDaily, pctChange } from '@/hooks/useDashboardDaily';
+import { pctChange } from '@/hooks/useDashboardDaily';
 import { Loader2 } from 'lucide-react';
 
 const severityOrder = { error: 0, warning: 1, success: 2, info: 3 };
@@ -22,13 +22,12 @@ function formatCompact(n: number): string {
 }
 
 export default function OverviewPage() {
-  const { client, dateRange } = useDashboard();
+  const { client, data } = useDashboard();
   const currency = client.currency;
-
   const {
     loading, error, totals, previousTotals,
     platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries,
-  } = useDashboardDaily(dateRange);
+  } = data;
 
   const sortedAlerts = useMemo(() =>
     [...alerts].sort((a, b) => severityOrder[a.type] - severityOrder[b.type]),
