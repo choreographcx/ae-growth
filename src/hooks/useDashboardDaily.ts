@@ -79,7 +79,7 @@ export function normalizePlatform(raw: string): PlatformKey | null {
   if (k.includes('google')) return 'google';
   if (k.includes('tiktok')) return 'tiktok';
   if (k.includes('snap')) return 'snapchat';
-  if (k === 'x' || k.includes('twitter')) return 'x';
+  if (k === 'x' || k.includes('xads') || k.includes('twitter')) return 'x';
   if (k.includes('linkedin')) return 'linkedin';
   if (k.includes('programmatic') || k.includes('dv360') || k.includes('display')) return 'programmatic';
   return null;
