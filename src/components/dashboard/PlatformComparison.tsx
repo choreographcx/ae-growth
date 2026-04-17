@@ -37,14 +37,20 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
   if (isMobile) return <MobilePlatformCards data={sorted} currency={currency} className={className} />;
 
+  const formatCompact = (v: number): string => {
+    if (v >= 1e6) return `${(v / 1e6).toFixed(2)}M`;
+    if (v >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
+    return Math.round(v).toLocaleString();
+  };
+
   const cols: { key: keyof PlatformSummary; label: string; format: (v: any) => React.ReactNode }[] = [
     { key: 'label', label: 'Platform', format: v => v },
-    { key: 'spend', label: 'Spend', format: v => <CurrencyValue amount={v} currency={currency} /> },
-    { key: 'impressions', label: 'Impr.', format: v => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v.toLocaleString() },
-    { key: 'clicks', label: 'Clicks', format: v => v.toLocaleString() },
-    { key: 'ctr', label: 'CTR', format: v => `${v}%` },
+    { key: 'spend', label: 'Spend', format: v => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span> },
+    { key: 'impressions', label: 'Impr.', format: v => Math.round(v).toLocaleString() },
+    { key: 'clicks', label: 'Clicks', format: v => formatCompact(v) },
+    { key: 'ctr', label: 'CTR', format: v => `${Number(v).toFixed(3)}%` },
     { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
-    { key: 'conversions', label: 'Conv.', format: v => v.toLocaleString() },
+    { key: 'conversions', label: 'Conv.', format: v => formatCompact(v) },
     { key: 'cpa', label: 'CPA', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
     { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%` },
     { key: 'shareOfSpend', label: '% Spend', format: v => `${v}%` },
