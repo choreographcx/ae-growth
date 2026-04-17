@@ -52,9 +52,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
     { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
     { key: 'conversions', label: 'Conv.', format: v => formatCompact(v) },
     { key: 'cpa', label: 'CPA', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
-    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%` },
-    { key: 'shareOfSpend', label: '% Spend', format: v => `${v}%` },
-    { key: 'shareOfConversions', label: '% Conv.', format: v => `${v}%` },
+    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${Number(v).toFixed(2)}%` },
+    { key: 'shareOfSpend', label: '% Spend', format: v => `${Number(v).toFixed(2)}%` },
+    { key: 'shareOfConversions', label: '% Conv.', format: v => `${Number(v).toFixed(2)}%` },
   ];
 
   return (
