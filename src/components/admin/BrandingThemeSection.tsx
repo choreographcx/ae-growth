@@ -471,3 +471,4 @@ function ColorInput({ label, value, onChange, required }: {
 
 export { DEFAULT_BRANDING };
 export type { BrandingConfig };
+// Re-exported from @/lib/branding for backwards compatibility — prefer importing from there.
