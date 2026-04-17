@@ -41,7 +41,7 @@ const PERMISSIONS = [
 ];
 
 export function UserManagement() {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, isSuperAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -55,7 +55,7 @@ export function UserManagement() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
 
-  const isSuperUser = user?.email === 'rachel.montague@wppmedia.com';
+  const isSuperUser = isSuperAdmin;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -343,7 +343,7 @@ export function UserManagement() {
                         <button
                           onClick={() => handleDelete(u)}
                           className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                          disabled={u.email === 'rachel.montague@wppmedia.com'}
+                          disabled={u.roles.includes('superadmin')}
                           title="Delete"
                         >
                           <Trash2 size={13} />
