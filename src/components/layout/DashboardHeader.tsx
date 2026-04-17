@@ -252,11 +252,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           )}
         </div>
       </div>
-      {isMobile && (
-        <div className="flex items-center gap-1.5 pb-2">
-          <DateRangePicker compact />
-        </div>
-      )}
     </header>
   );
 }
