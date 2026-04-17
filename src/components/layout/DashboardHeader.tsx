@@ -32,7 +32,7 @@ const presets = [
 
 const objectives = ['Awareness', 'Traffic', 'Conversions', 'Lead Gen', 'Engagement'];
 
-function DateRangePicker({ compact = false }: { compact?: boolean }) {
+export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const { dateRange, setDateRange, showPreviousPeriod, setShowPreviousPeriod } = useDashboard();
   const [open, setOpen] = useState(false);
 
@@ -252,11 +252,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           )}
         </div>
       </div>
-      {isMobile && (
-        <div className="flex items-center gap-1.5 pb-2">
-          <DateRangePicker compact />
-        </div>
-      )}
     </header>
   );
 }

@@ -1,8 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, Activity, X } from 'lucide-react';
+import { LayoutDashboard, Settings, Activity, X, CalendarIcon } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
 import { cn } from '@/lib/utils';
+import { DateRangePicker } from './DashboardHeader';
 
 function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number }) {
   if (entry.type === 'lucide') {
@@ -43,6 +44,13 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
           <button onClick={onClose} className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-muted">
             <X size={20} />
           </button>
+        </div>
+        <div className="px-3 py-3 border-b border-sidebar-border">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-sidebar-muted uppercase tracking-wider mb-2">
+            <CalendarIcon size={11} />
+            Date Range
+          </div>
+          <DateRangePicker compact />
         </div>
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
           {navItems.map(item => {
