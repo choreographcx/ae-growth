@@ -17,37 +17,52 @@ export type Database = {
       client_branding: {
         Row: {
           accent_hex: string | null
+          card_radius: string
+          chart_palette: string
           client_id: string
           created_at: string
+          dark_logo_url: string | null
+          favicon_url: string | null
           font_family: string | null
           id: string
           logo_url: string | null
           primary_hex: string | null
           secondary_hex: string | null
+          sidebar_style: string
           theme_mode: string | null
           updated_at: string
         }
         Insert: {
           accent_hex?: string | null
+          card_radius?: string
+          chart_palette?: string
           client_id: string
           created_at?: string
+          dark_logo_url?: string | null
+          favicon_url?: string | null
           font_family?: string | null
           id?: string
           logo_url?: string | null
           primary_hex?: string | null
           secondary_hex?: string | null
+          sidebar_style?: string
           theme_mode?: string | null
           updated_at?: string
         }
         Update: {
           accent_hex?: string | null
+          card_radius?: string
+          chart_palette?: string
           client_id?: string
           created_at?: string
+          dark_logo_url?: string | null
+          favicon_url?: string | null
           font_family?: string | null
           id?: string
           logo_url?: string | null
           primary_hex?: string | null
           secondary_hex?: string | null
+          sidebar_style?: string
           theme_mode?: string | null
           updated_at?: string
         }
@@ -143,33 +158,48 @@ export type Database = {
           client_id: string
           comparison_operator: string
           created_at: string
+          description: string | null
           id: string
+          is_default: boolean
           is_enabled: boolean
           metric_key: string
+          name: string | null
+          scope: string
           severity: string
           threshold_value: number
+          unit: string
           updated_at: string
         }
         Insert: {
           client_id: string
           comparison_operator: string
           created_at?: string
+          description?: string | null
           id?: string
+          is_default?: boolean
           is_enabled?: boolean
           metric_key: string
+          name?: string | null
+          scope?: string
           severity?: string
           threshold_value: number
+          unit?: string
           updated_at?: string
         }
         Update: {
           client_id?: string
           comparison_operator?: string
           created_at?: string
+          description?: string | null
           id?: string
+          is_default?: boolean
           is_enabled?: boolean
           metric_key?: string
+          name?: string | null
+          scope?: string
           severity?: string
           threshold_value?: number
+          unit?: string
           updated_at?: string
         }
         Relationships: [
@@ -184,42 +214,69 @@ export type Database = {
       }
       client_platform_settings: {
         Row: {
+          account_ids: string[]
+          budget_type: string
           client_id: string
           conversion_goal: string | null
+          conversion_source: string
           created_at: string
           currency: string | null
+          excluded_campaign_filter: string | null
           id: string
+          include_in_diagnostics: boolean
+          include_in_overview: boolean
           is_enabled: boolean
           monthly_budget: number | null
           naming_convention: string | null
+          notes: string | null
           platform_name: string
+          primary_kpi: string
           settings: Json
+          source_label: string | null
           updated_at: string
         }
         Insert: {
+          account_ids?: string[]
+          budget_type?: string
           client_id: string
           conversion_goal?: string | null
+          conversion_source?: string
           created_at?: string
           currency?: string | null
+          excluded_campaign_filter?: string | null
           id?: string
+          include_in_diagnostics?: boolean
+          include_in_overview?: boolean
           is_enabled?: boolean
           monthly_budget?: number | null
           naming_convention?: string | null
+          notes?: string | null
           platform_name: string
+          primary_kpi?: string
           settings?: Json
+          source_label?: string | null
           updated_at?: string
         }
         Update: {
+          account_ids?: string[]
+          budget_type?: string
           client_id?: string
           conversion_goal?: string | null
+          conversion_source?: string
           created_at?: string
           currency?: string | null
+          excluded_campaign_filter?: string | null
           id?: string
+          include_in_diagnostics?: boolean
+          include_in_overview?: boolean
           is_enabled?: boolean
           monthly_budget?: number | null
           naming_convention?: string | null
+          notes?: string | null
           platform_name?: string
+          primary_kpi?: string
           settings?: Json
+          source_label?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -236,11 +293,18 @@ export type Database = {
         Row: {
           attribution_model: string | null
           client_id: string
+          conversion_notes: string | null
+          counting_method: string
           created_at: string
           default_date_range: string | null
           enable_anomaly_alerts: boolean
           enable_pacing_alerts: boolean
+          ga4_property_id: string | null
+          ga4_stream_id: string | null
+          gtm_container_id: string | null
           id: string
+          lookback_window: string
+          micro_conversions: string[]
           primary_conversion_label: string | null
           reporting_currency: string | null
           reporting_timezone: string | null
@@ -252,11 +316,18 @@ export type Database = {
         Insert: {
           attribution_model?: string | null
           client_id: string
+          conversion_notes?: string | null
+          counting_method?: string
           created_at?: string
           default_date_range?: string | null
           enable_anomaly_alerts?: boolean
           enable_pacing_alerts?: boolean
+          ga4_property_id?: string | null
+          ga4_stream_id?: string | null
+          gtm_container_id?: string | null
           id?: string
+          lookback_window?: string
+          micro_conversions?: string[]
           primary_conversion_label?: string | null
           reporting_currency?: string | null
           reporting_timezone?: string | null
@@ -268,11 +339,18 @@ export type Database = {
         Update: {
           attribution_model?: string | null
           client_id?: string
+          conversion_notes?: string | null
+          counting_method?: string
           created_at?: string
           default_date_range?: string | null
           enable_anomaly_alerts?: boolean
           enable_pacing_alerts?: boolean
+          ga4_property_id?: string | null
+          ga4_stream_id?: string | null
+          gtm_container_id?: string | null
           id?: string
+          lookback_window?: string
+          micro_conversions?: string[]
           primary_conversion_label?: string | null
           reporting_currency?: string | null
           reporting_timezone?: string | null
@@ -293,31 +371,43 @@ export type Database = {
       }
       clients: {
         Row: {
+          code: string | null
           created_at: string
+          currency: string
           id: string
           name: string
           owner_user_id: string
           slug: string
           status: string
+          timezone: string
           updated_at: string
+          website_domain: string | null
         }
         Insert: {
+          code?: string | null
           created_at?: string
+          currency?: string
           id?: string
           name: string
           owner_user_id: string
           slug: string
           status?: string
+          timezone?: string
           updated_at?: string
+          website_domain?: string | null
         }
         Update: {
+          code?: string | null
           created_at?: string
+          currency?: string
           id?: string
           name?: string
           owner_user_id?: string
           slug?: string
           status?: string
+          timezone?: string
           updated_at?: string
+          website_domain?: string | null
         }
         Relationships: []
       }
@@ -374,6 +464,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_or_create_active_client: {
+        Args: never
+        Returns: {
+          code: string | null
+          created_at: string
+          currency: string
+          id: string
+          name: string
+          owner_user_id: string
+          slug: string
+          status: string
+          timezone: string
+          updated_at: string
+          website_domain: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "clients"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_profile_is_approved: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
