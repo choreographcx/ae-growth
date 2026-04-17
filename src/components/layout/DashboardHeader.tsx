@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -173,7 +172,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
   } = useDashboard();
-  const isMobile = useIsMobile();
   const { signOut } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
 
@@ -197,13 +195,16 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
-      <div className={`flex items-center justify-between gap-2 ${isMobile ? 'h-12' : 'h-12'}`}>
+      <div className="flex h-12 items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          {isMobile && (
-            <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0">
-              <Menu size={18} />
-            </button>
-          )}
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            onClick={onMenuClick}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0 lg:hidden"
+          >
+            <Menu size={18} />
+          </button>
           {(client as any).branding?.logoUrl && (
             <img
               src={(client as any).branding.logoUrl}
@@ -212,32 +213,29 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             />
           )}
         </div>
-        <div className="flex items-center gap-1.5">
-          {!isMobile && (
-            <>
-              <DateRangePicker />
-              <div className="h-3.5 w-px bg-border mx-1" />
-              <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
-              <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
-              {hasFilters && (
-                <button
-                  onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
-                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
-                >
-                  Clear
-                </button>
-              )}
-              <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={isExporting}>
-                {isExporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
-                {isExporting ? 'Exporting…' : 'Export PDF'}
-              </Button>
-              <div className="h-3.5 w-px bg-border mx-1" />
-              <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
-                <LogOut size={12} /> Sign out
-              </Button>
-            </>
+        <div className="hidden items-center gap-1.5 lg:flex">
+          <DateRangePicker />
+          <div className="h-3.5 w-px bg-border mx-1" />
+          <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+          <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
+              className="text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
+            >
+              Clear
+            </button>
           )}
+          <div className="h-3.5 w-px bg-border mx-1" />
+          <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={isExporting}>
+            {isExporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+            {isExporting ? 'Exporting…' : 'Export PDF'}
+          </Button>
+          <div className="h-3.5 w-px bg-border mx-1" />
+          <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
+            <LogOut size={12} /> Sign out
+          </Button>
         </div>
       </div>
     </header>
