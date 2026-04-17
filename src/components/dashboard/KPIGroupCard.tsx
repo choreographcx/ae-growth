@@ -33,10 +33,16 @@ interface KPIGroupCardProps {
 }
 
 export function KPIGroupCard({ data, className }: KPIGroupCardProps) {
-  const isMobile = useIsMobile();
-
-  if (isMobile) return <MobileKPICard data={data} className={className} />;
-  return <DesktopKPICard data={data} className={className} />;
+  return (
+    <>
+      <div className={cn("lg:hidden", className)}>
+        <MobileKPICard data={data} />
+      </div>
+      <div className={cn("hidden lg:flex", className)}>
+        <DesktopKPICard data={data} className="w-full" />
+      </div>
+    </>
+  );
 }
 
 /* ─── Desktop Card ─── */
