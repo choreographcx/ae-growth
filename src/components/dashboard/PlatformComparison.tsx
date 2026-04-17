@@ -39,14 +39,14 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
   const formatCompact = (v: number): string => {
     if (v >= 1e6) return `${(v / 1e6).toFixed(2)}M`;
-    if (v >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
+    if (v >= 1e3) return `${(v / 1e3).toFixed(2)}K`;
     return Math.round(v).toLocaleString();
   };
 
   const cols: { key: keyof PlatformSummary; label: string; format: (v: any) => React.ReactNode }[] = [
     { key: 'label', label: 'Platform', format: v => v },
     { key: 'spend', label: 'Spend', format: v => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span> },
-    { key: 'impressions', label: 'Impr.', format: v => Math.round(v).toLocaleString() },
+    { key: 'impressions', label: 'Impr.', format: v => formatCompact(v) },
     { key: 'clicks', label: 'Clicks', format: v => formatCompact(v) },
     { key: 'ctr', label: 'CTR', format: v => `${Number(v).toFixed(3)}%` },
     { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
