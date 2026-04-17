@@ -160,9 +160,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const emptyTotals = {
+  spend: 0, impressions: 0, clicks: 0,
+  conversions: 0, conversionsAll: 0, conversionsLowerFunnel: 0, conversionsUpperFunnel: 0,
+  conversionValue: 0, reach: 0, landingPageViews: 0, outboundClicks: 0,
+  videoViews: 0, videoP100: 0,
+  ctr: 0, cpc: 0, cpa: 0, cpaAll: 0, cpaLowerFunnel: 0, cpm: 0,
+  conversionRate: 0, conversionRateLowerFunnel: 0,
+  costPerLPV: 0, lpvRate: 0, cvrLowerFunnel: 0,
+  frequency: 0, roas: 0, outboundCtr: 0,
+  costPerVideoView: 0, videoCompletionRate: 0,
+};
+
 const fallbackData: DashboardData = {
   loading: false, error: null, rows: [], previousRows: [],
-  totals: { spend: 0, impressions: 0, clicks: 0, conversions: 0, conversionsAll: 0, conversionsLowerFunnel: 0, reach: 0, landingPageViews: 0, videoViews: 0, ctr: 0, cpc: 0, cpa: 0, cpm: 0, conversionRate: 0, costPerLPV: 0 },
+  totals: emptyTotals,
   previousTotals: null,
   platformSummaries: [],
   spendSeries: [], conversionsSeries: [], cpaSeries: [], ctrSeries: [],
