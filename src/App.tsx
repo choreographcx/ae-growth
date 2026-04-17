@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { DashboardProvider } from "@/context/DashboardContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
+import { loadCachedBranding } from "@/lib/branding";
 import OverviewPage from "./pages/OverviewPage";
 import MetaPage from "./pages/MetaPage";
 import GoogleAdsPage from "./pages/GoogleAdsPage";
@@ -37,9 +38,17 @@ function ProtectedRoutes() {
   }
 
   if (!isApproved) {
+    const branding = loadCachedBranding();
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="bg-card rounded-2xl border border-border shadow-lg p-8 max-w-md text-center">
+          {branding?.logoUrl && (
+            <img
+              src={branding.logoUrl}
+              alt="Logo"
+              className="h-10 w-auto object-contain mx-auto mb-4"
+            />
+          )}
           <h2 className="text-xl font-bold text-card-foreground mb-2">Account Pending Approval</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Your account is awaiting approval from an administrator. You'll be able to access the dashboard once approved.
