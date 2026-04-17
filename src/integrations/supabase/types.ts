@@ -464,6 +464,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_dashboard_daily: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          clicks: number
+          conversion_value: number
+          conversions: number
+          cost: number
+          date: string
+          impressions: number
+          landing_page_views: number
+          platform: string
+          reach: number
+          video_views: number
+        }[]
+      }
       get_or_create_active_client: {
         Args: never
         Returns: {
