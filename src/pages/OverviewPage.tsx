@@ -179,14 +179,14 @@ export default function OverviewPage() {
         <SectionHeader title="Trends" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
           <TrendChartCard title="Spend Over Time" data={spendSeries} currency={currency} color="hsl(var(--chart-1))" />
-          <TrendChartCard title="Conversions Over Time" data={conversionsSeries} color="hsl(var(--chart-3))" />
-          <TrendChartCard title="CPA Over Time" data={cpaSeries} currency={currency} color="hsl(var(--chart-4))" />
+          <TrendChartCard title="Conversions Over Time" data={lfConversionsSeries} color="hsl(var(--chart-3))" />
+          <TrendChartCard title="CPA Over Time" data={lfCpaSeries} currency={currency} color="hsl(var(--chart-4))" />
           <TrendChartCard title="CTR Over Time" data={ctrSeries} valueSuffix="%" color="hsl(var(--chart-2))" />
         </div>
       </div>
 
-      {/* Conversion Funnel */}
-      <FunnelCard />
+      {/* Conversion Funnel — uses lower-funnel conversions for the final step */}
+      <FunnelCard steps={funnelSteps} />
 
       {/* Platform Comparison */}
       <div className="space-y-2.5 md:space-y-3 print-break-before">
