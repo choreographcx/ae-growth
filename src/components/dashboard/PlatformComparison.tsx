@@ -38,8 +38,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
   if (isMobile) return <MobilePlatformCards data={sorted} currency={currency} className={className} />;
 
   const formatCompact = (v: number): string => {
-    if (v >= 1e6) return `${(v / 1e6).toFixed(2)}M`;
-    if (v >= 1e3) return `${(v / 1e3).toFixed(2)}K`;
+    const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (v >= 1e6) return `${fmt(v / 1e6)}M`;
+    if (v >= 1e3) return `${fmt(v / 1e3)}K`;
     return Math.round(v).toLocaleString();
   };
 
