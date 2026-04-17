@@ -198,16 +198,6 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Diagnostics & Insights — moved up, derived from live data */}
-      {insights.length > 0 && (
-        <div className="space-y-2.5 md:space-y-3">
-          <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
-            {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
-          </div>
-        </div>
-      )}
-
       {/* Primary KPI cards (3×2) */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
@@ -241,6 +231,16 @@ export default function OverviewPage() {
         <SectionHeader title="Platform Performance" />
         <PlatformComparison data={platformSummaries} />
       </div>
+
+      {/* Diagnostics & Insights — bottom of page */}
+      {insights.length > 0 && (
+        <div className="space-y-2.5 md:space-y-3">
+          <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
+            {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
