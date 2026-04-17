@@ -170,6 +170,7 @@ interface UseDashboardDailyResult {
   loading: boolean;
   error: string | null;
   rows: DashboardDailyRow[];
+  previousRows: DashboardDailyRow[];
   totals: DashboardTotals;
   previousTotals: DashboardTotals | null;
   platformSummaries: PlatformSummary[];
@@ -182,6 +183,9 @@ interface UseDashboardDailyResult {
   availablePlatforms: PlatformOption[];
   availableCampaigns: string[];
 }
+
+// Exported helpers so platform-scoped pages can derive their own slices
+export { aggregate as aggregateRows, buildTimeSeries, buildCpaSeries, buildCtrSeries };
 
 export function useDashboardDaily(
   dateRangeLabel: string,
