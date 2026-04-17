@@ -3,7 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Paid Media Dashboard</title>
+    <script>
+      (() => {
+        const fallbackTitle = 'Paid Media Dashboard';
+
+        try {
+          const cachedName = window.localStorage.getItem('app:clientName')?.trim();
+          const title = cachedName ? `${cachedName} Paid Media Dashboard` : fallbackTitle;
+          const titleElement = document.createElement('title');
+          titleElement.textContent = title;
+          document.head.appendChild(titleElement);
+        } catch {
+          const titleElement = document.createElement('title');
+          titleElement.textContent = fallbackTitle;
+          document.head.appendChild(titleElement);
+        }
+      })();
+    </script>
     <meta name="description" content="Paid Media Dashboard">
     <meta name="author" content="Lovable" />
 
