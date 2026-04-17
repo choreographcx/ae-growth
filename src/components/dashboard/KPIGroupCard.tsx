@@ -101,30 +101,30 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
 
   return (
     <div className={cn(
-      "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm",
+      "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm min-w-0 overflow-hidden",
       className
     )}>
       <div className="flex items-center gap-1.5 min-w-0">
         {isCurrencyIcon && (
-          <div className={cn("flex items-center justify-center w-5 h-5 rounded", colorClass)}>
+          <div className={cn("flex items-center justify-center w-5 h-5 rounded shrink-0", colorClass)}>
             <CurrencySymbol currency={client.currency} size={11} className="text-emerald-600" />
           </div>
         )}
         {IconComp && (
-          <div className={cn("flex items-center justify-center w-5 h-5 rounded", colorClass)}>
+          <div className={cn("flex items-center justify-center w-5 h-5 rounded shrink-0", colorClass)}>
             <IconComp size={11} />
           </div>
         )}
-        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none">{data.title}</p>
+        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none truncate flex-1 min-w-0">{data.title}</p>
         <MobileChange value={primary.change} />
       </div>
-      <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5">{primary.formattedValue}</p>
+      <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5 truncate">{primary.formattedValue}</p>
       {supporting.length > 0 && (
-        <div className="flex items-baseline gap-3 mt-1 pt-1 border-t border-border/30">
+        <div className="flex items-baseline gap-2 mt-1 pt-1 border-t border-border/30 min-w-0 overflow-hidden">
           {supporting.map((s, i) => (
-            <div key={i} className="flex items-baseline gap-0.5">
-              <span className="text-[9px] text-muted-foreground">{s.label}</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{s.formattedValue}</span>
+            <div key={i} className="flex items-baseline gap-0.5 min-w-0 truncate">
+              <span className="text-[9px] text-muted-foreground shrink-0">{s.label}</span>
+              <span className="text-[11px] font-semibold text-card-foreground truncate">{s.formattedValue}</span>
             </div>
           ))}
         </div>
