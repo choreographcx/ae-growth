@@ -506,8 +506,11 @@ export type Database = {
               p_start: string
             }
             Returns: {
+              audience_type: string
               campaign_id: string
               campaign_name: string
+              campaign_objective: string
+              campaign_type: string
               clicks: number
               conversion_value: number
               conversions: number
@@ -518,8 +521,10 @@ export type Database = {
               date: string
               impressions: number
               landing_page_views: number
+              outbound_clicks: number
               platform: string
               reach: number
+              video_p100: number
               video_views: number
             }[]
           }
