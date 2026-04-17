@@ -13,9 +13,7 @@ export default function MetaPage() {
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
-      primary: { label: 'Spend', value: cur.spend, formattedValue: moneyKpi(cur.spend, currency, 0).props.children
-        ? <span className="inline-flex items-baseline">{moneyKpi(cur.spend, currency, 0)}</span>
-        : moneyKpi(cur.spend, currency, 0), change: pctChange(cur.spend, prev?.spend), trend: [] },
+      primary: { label: 'Spend', value: cur.spend, formattedValue: moneyKpi(cur.spend, currency, 0), change: pctChange(cur.spend, prev?.spend), trend: [] },
       supporting: [
         { label: 'CPM', formattedValue: moneyKpi(cur.cpm, currency) },
         { label: 'CPC', formattedValue: moneyKpi(cur.cpc, currency) },
