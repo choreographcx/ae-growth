@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Ta
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const iconMap: Record<string, LucideIcon> = {
   DollarSign,
