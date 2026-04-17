@@ -139,7 +139,7 @@ export default function AuthPage() {
 
           {isSignUp && (
             <p className="mt-4 text-[11px] text-muted-foreground text-center">
-              @wppmedia.com accounts are automatically approved with no email verification required.
+              New accounts may require approval before access is granted.
             </p>
           )}
         </div>
