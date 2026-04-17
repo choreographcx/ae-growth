@@ -60,7 +60,10 @@ function DesktopKPICard({ data, className }: KPIGroupCardProps) {
       className
     )}>
       <div className="flex items-start justify-between mb-1">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{data.title}</p>
+        <div className="flex items-center gap-1 min-w-0">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">{data.title}</p>
+          {data.tooltip && <InfoTooltip text={data.tooltip} />}
+        </div>
         {isCurrencyIcon && (
           <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg", colorClass)}>
             <CurrencySymbol currency={client.currency} size={16} className="text-emerald-600" />
@@ -123,6 +126,7 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
           </div>
         )}
         <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none truncate flex-1 min-w-0">{data.title}</p>
+        {data.tooltip && <InfoTooltip text={data.tooltip} compact />}
         <MobileChange value={primary.change} />
       </div>
       <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5 truncate">{primary.formattedValue}</p>
