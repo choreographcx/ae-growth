@@ -3,6 +3,7 @@ import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
 
 interface DashboardContextType {
   client: ClientProfile;
@@ -74,6 +75,16 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     loadConfig();
   }, []);
+
+  // Apply branding (colors, sidebar style, favicon, radius) and cache it
+  // for unauthenticated pages whenever the client config changes.
+  useEffect(() => {
+    const branding = (client as any).branding;
+    if (branding) {
+      applyBrandingToRoot(branding);
+      cacheBranding(branding);
+    }
+  }, [client]);
 
   const togglePlatform = (key: PlatformKey) => {
     setClient(prev => ({

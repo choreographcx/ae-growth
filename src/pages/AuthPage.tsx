@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
+import { loadCachedBranding } from '@/lib/branding';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,6 +14,7 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const branding = loadCachedBranding();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +56,13 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         <div className="bg-card rounded-2xl border border-border shadow-lg p-8">
           <div className="text-center mb-8">
+            {branding?.logoUrl && (
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="h-10 w-auto object-contain mx-auto mb-4"
+              />
+            )}
             <h1 className="text-2xl font-bold text-card-foreground">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </h1>
