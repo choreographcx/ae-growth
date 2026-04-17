@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Ta
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const iconMap: Record<string, LucideIcon> = {
   DollarSign,
@@ -33,10 +33,16 @@ interface KPIGroupCardProps {
 }
 
 export function KPIGroupCard({ data, className }: KPIGroupCardProps) {
-  const isMobile = useIsMobile();
-
-  if (isMobile) return <MobileKPICard data={data} className={className} />;
-  return <DesktopKPICard data={data} className={className} />;
+  return (
+    <>
+      <div className={cn("lg:hidden", className)}>
+        <MobileKPICard data={data} />
+      </div>
+      <div className={cn("hidden lg:flex", className)}>
+        <DesktopKPICard data={data} className="w-full" />
+      </div>
+    </>
+  );
 }
 
 /* ─── Desktop Card ─── */
@@ -120,10 +126,13 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
       </div>
       <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5 truncate">{primary.formattedValue}</p>
       {supporting.length > 0 && (
-        <div className="flex items-baseline gap-2 mt-1 pt-1 border-t border-border/30 min-w-0 overflow-hidden">
+        <div className={cn(
+          "mt-1 pt-1 border-t border-border/30 grid gap-x-2 gap-y-0.5 min-w-0",
+          supporting.length === 1 ? "grid-cols-1" : "grid-cols-2"
+        )}>
           {supporting.map((s, i) => (
-            <div key={i} className="flex items-baseline gap-0.5 min-w-0 truncate">
-              <span className="text-[9px] text-muted-foreground shrink-0">{s.label}</span>
+            <div key={i} className="min-w-0 flex flex-col leading-tight">
+              <span className="text-[8px] text-muted-foreground uppercase tracking-wider truncate">{s.label}</span>
               <span className="text-[11px] font-semibold text-card-foreground truncate">{s.formattedValue}</span>
             </div>
           ))}
