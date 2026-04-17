@@ -52,9 +52,9 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
     { key: 'cpc', label: 'CPC', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
     { key: 'conversions', label: 'Conv.', format: v => formatCompact(v) },
     { key: 'cpa', label: 'CPA', format: v => <CurrencyValue amount={v} decimals={2} currency={currency} /> },
-    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${v}%` },
-    { key: 'shareOfSpend', label: '% Spend', format: v => `${v}%` },
-    { key: 'shareOfConversions', label: '% Conv.', format: v => `${v}%` },
+    { key: 'conversionRate', label: 'Conv. Rate', format: v => `${Number(v).toFixed(2)}%` },
+    { key: 'shareOfSpend', label: '% Spend', format: v => `${Number(v).toFixed(2)}%` },
+    { key: 'shareOfConversions', label: '% Conv.', format: v => `${Number(v).toFixed(2)}%` },
   ];
 
   return (
@@ -157,11 +157,11 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground">Conv. Rate</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{p.conversionRate}%</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.conversionRate).toFixed(2)}%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground">% Spend</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{p.shareOfSpend}%</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.shareOfSpend).toFixed(2)}%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground">Impr.</span>
@@ -169,7 +169,7 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground">% Conv.</span>
-              <span className="text-[11px] font-semibold text-card-foreground">{p.shareOfConversions}%</span>
+              <span className="text-[11px] font-semibold text-card-foreground">{Number(p.shareOfConversions).toFixed(2)}%</span>
             </div>
           </div>
         </div>
