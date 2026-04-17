@@ -330,7 +330,7 @@ export function useDashboardDaily(
   }, [allRows, platformsParam]);
 
   return {
-    loading, error, rows, totals, previousTotals,
+    loading, error, rows, previousRows: filteredPrevRows, totals, previousTotals,
     platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
     availablePlatforms, availableCampaigns,
   };
