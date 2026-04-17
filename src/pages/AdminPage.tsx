@@ -71,20 +71,18 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <SectionHeader title="Admin / Settings" subtitle="Configure your paid media dashboard" />
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1">
             <Button size="sm" variant="ghost" onClick={() => toast.info('JSON exported to clipboard')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Download size={12} /> Export</Button>
             <Button size="sm" variant="ghost" onClick={() => toast.info('Import dialog opened')} className="gap-1.5 h-8 text-xs text-muted-foreground"><Upload size={12} /> Import</Button>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <Clock size={10} />
-              <span>Last saved: {lastSavedAt ?? 'Never'}</span>
-            </div>
+          <div className="hidden md:flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Clock size={10} />
+            <span>Last saved: {lastSavedAt ?? 'Never'}</span>
           </div>
+          <Button size="sm" onClick={saveConfig} disabled={isSaving} className="gap-1.5 h-8 text-xs"><Save size={12} /> {isSaving ? 'Saving…' : 'Save'}</Button>
         </div>
       </div>
 
