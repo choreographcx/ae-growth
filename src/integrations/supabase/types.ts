@@ -464,28 +464,48 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_dashboard_daily: {
-        Args: {
-          p_campaign_names?: string[]
-          p_end: string
-          p_platforms?: string[]
-          p_start: string
-        }
-        Returns: {
-          campaign_id: string
-          campaign_name: string
-          clicks: number
-          conversion_value: number
-          conversions: number
-          cost: number
-          date: string
-          impressions: number
-          landing_page_views: number
-          platform: string
-          reach: number
-          video_views: number
-        }[]
-      }
+      get_dashboard_daily:
+        | {
+            Args: { p_date: string }
+            Returns: {
+              clicks: number
+              conversion_value: number
+              conversions: number
+              cost: number
+              cost_usd: number
+              cpc_usd: number
+              cpm_usd: number
+              ctr: number
+              cvr: number
+              date: string
+              impressions: number
+              landing_page_views: number
+              outbound_clicks: number
+              reach: number
+            }[]
+          }
+        | {
+            Args: {
+              p_campaign_names?: string[]
+              p_end: string
+              p_platforms?: string[]
+              p_start: string
+            }
+            Returns: {
+              campaign_id: string
+              campaign_name: string
+              clicks: number
+              conversion_value: number
+              conversions: number
+              cost: number
+              date: string
+              impressions: number
+              landing_page_views: number
+              platform: string
+              reach: number
+              video_views: number
+            }[]
+          }
       get_or_create_active_client: {
         Args: never
         Returns: {
