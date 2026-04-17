@@ -1,8 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, Activity, X } from 'lucide-react';
+import { LayoutDashboard, Settings, Activity, X, CalendarIcon } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
 import { cn } from '@/lib/utils';
+import { DateRangePicker } from './DashboardHeader';
 
 function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number }) {
   if (entry.type === 'lucide') {
