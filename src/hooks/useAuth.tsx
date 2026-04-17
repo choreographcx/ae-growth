@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
 
 interface AuthContextType {
   user: User | null;
@@ -31,9 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
 
   const fetchUserData = async (userId: string) => {
-    const [profileRes, rolesRes] = await Promise.all([
+    const [profileRes, rolesRes, configRes] = await Promise.all([
       supabase.from('profiles').select('email, full_name, is_approved').eq('user_id', userId).single(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
+      supabase.from('client_configs').select('config').eq('user_id', userId).maybeSingle(),
     ]);
 
     if (profileRes.data) {
@@ -43,6 +45,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (rolesRes.data) {
       setIsAdmin(rolesRes.data.some((r: any) => r.role === 'admin'));
+    }
+
+    // Apply saved branding immediately so login/loading/pending screens
+    // and the dashboard all use the user's configured theme — never defaults.
+    const branding = (configRes.data?.config as any)?.branding;
+    if (branding) {
+      applyBrandingToRoot(branding);
+      cacheBranding(branding);
     }
   };
 
