@@ -3,6 +3,7 @@ import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
 
 interface DashboardContextType {
   client: ClientProfile;
