@@ -63,11 +63,15 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } | nul
  */
 export function applyBrandingToRoot(branding: Partial<BrandingConfig> | undefined | null) {
   if (typeof document === 'undefined') return;
-  const b = { ...DEFAULT_BRANDING, ...(branding ?? {}) };
+  if (!branding) return;
   const root = document.documentElement;
 
-  if (isValidHex(b.primaryColor)) {
-    const hsl = hexToHsl(b.primaryColor);
+  // Only override values that are explicitly provided in the saved branding.
+  // We never apply DEFAULT_BRANDING here — the user wants their saved theme
+  // to load, and any absent values should fall back to the CSS variables
+  // already defined in index.css (not to a hardcoded default green).
+  if (isValidHex(branding.primaryColor)) {
+    const hsl = hexToHsl(branding.primaryColor);
     if (hsl) {
       const val = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
       root.style.setProperty('--primary', val);
@@ -78,44 +82,45 @@ export function applyBrandingToRoot(branding: Partial<BrandingConfig> | undefine
     }
   }
 
-  if (isValidHex(b.accentColor)) {
-    const hsl = hexToHsl(b.accentColor);
+  if (isValidHex(branding.accentColor)) {
+    const hsl = hexToHsl(branding.accentColor);
     if (hsl) {
       root.style.setProperty('--warning', `${hsl.h} ${hsl.s}% ${hsl.l}%`);
     }
   }
 
-  // Card radius
-  const radiusMap = { small: '0.375rem', medium: '0.75rem', large: '1rem' };
-  root.style.setProperty('--radius', radiusMap[b.cardRadius] || '0.75rem');
-
-  // Sidebar style
-  if (b.sidebarStyle === 'light') {
-    root.style.setProperty('--sidebar-background', '0 0% 100%');
-    root.style.setProperty('--sidebar-foreground', '222 47% 11%');
-    root.style.setProperty('--sidebar-border', '214 32% 91%');
-  } else if (b.sidebarStyle === 'brand' && isValidHex(b.primaryColor)) {
-    const hsl = hexToHsl(b.primaryColor);
-    if (hsl) {
-      root.style.setProperty('--sidebar-background', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 20, 8)}%`);
-      root.style.setProperty('--sidebar-foreground', '210 40% 96%');
-      root.style.setProperty('--sidebar-border', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 15, 12)}%`);
-    }
-  } else {
-    root.style.setProperty('--sidebar-background', '222 47% 11%');
-    root.style.setProperty('--sidebar-foreground', '210 40% 96%');
-    root.style.setProperty('--sidebar-border', '217 33% 17%');
+  if (branding.cardRadius) {
+    const radiusMap = { small: '0.375rem', medium: '0.75rem', large: '1rem' };
+    root.style.setProperty('--radius', radiusMap[branding.cardRadius] || '0.75rem');
   }
 
-  // Favicon
-  if (b.faviconUrl) {
+  if (branding.sidebarStyle) {
+    if (branding.sidebarStyle === 'light') {
+      root.style.setProperty('--sidebar-background', '0 0% 100%');
+      root.style.setProperty('--sidebar-foreground', '222 47% 11%');
+      root.style.setProperty('--sidebar-border', '214 32% 91%');
+    } else if (branding.sidebarStyle === 'brand' && isValidHex(branding.primaryColor)) {
+      const hsl = hexToHsl(branding.primaryColor);
+      if (hsl) {
+        root.style.setProperty('--sidebar-background', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 20, 8)}%`);
+        root.style.setProperty('--sidebar-foreground', '210 40% 96%');
+        root.style.setProperty('--sidebar-border', `${hsl.h} ${hsl.s}% ${Math.max(hsl.l - 15, 12)}%`);
+      }
+    } else if (branding.sidebarStyle === 'dark') {
+      root.style.setProperty('--sidebar-background', '222 47% 11%');
+      root.style.setProperty('--sidebar-foreground', '210 40% 96%');
+      root.style.setProperty('--sidebar-border', '217 33% 17%');
+    }
+  }
+
+  if (branding.faviconUrl) {
     let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
     if (!link) {
       link = document.createElement('link');
       link.rel = 'icon';
       document.head.appendChild(link);
     }
-    link.href = b.faviconUrl;
+    link.href = branding.faviconUrl;
   }
 }
 
