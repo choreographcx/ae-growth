@@ -153,4 +153,38 @@ export function loadCachedBranding(): Partial<BrandingConfig> | null {
 export function bootstrapBranding() {
   const cached = loadCachedBranding();
   if (cached) applyBrandingToRoot(cached);
+  applyCachedTitle();
 }
+
+const TITLE_KEY = 'app:clientName';
+
+export function cacheClientName(name: string | undefined | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!name) window.localStorage.removeItem(TITLE_KEY);
+    else window.localStorage.setItem(TITLE_KEY, name);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function loadCachedClientName(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(TITLE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function applyClientNameToTitle(name: string | undefined | null) {
+  if (typeof document === 'undefined') return;
+  const trimmed = (name || '').trim();
+  document.title = trimmed ? `${trimmed} Paid Media Dashboard` : 'Paid Media Dashboard';
+}
+
+export function applyCachedTitle() {
+  const cached = loadCachedClientName();
+  if (cached) applyClientNameToTitle(cached);
+}
+
