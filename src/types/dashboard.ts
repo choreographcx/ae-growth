@@ -87,6 +87,8 @@ export interface KPIPair {
 export interface KPIGroupData {
   title: string;
   icon?: string;
+  /** Optional tooltip text shown via an info icon next to the title. */
+  tooltip?: string;
   primary: KPIMetric;
   supporting: { label: string; formattedValue: React.ReactNode; change?: number }[];
 }

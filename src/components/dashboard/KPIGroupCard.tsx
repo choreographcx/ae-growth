@@ -1,5 +1,6 @@
 import { KPIGroupData } from '@/types/dashboard';
-import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, Play, UserCheck, type LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, DollarSign, Eye, MousePointerClick, Target, Users, FileText, Play, UserCheck, Info, type LucideIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
