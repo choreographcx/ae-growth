@@ -1,50 +1,79 @@
-import { PlatformPageTemplate } from '@/components/dashboard/PlatformPageTemplate';
+import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
+import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
+import { useMemo } from 'react';
+import { useDashboard } from '@/context/DashboardContext';
+import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { KPIGroupData } from '@/types/dashboard';
 
 export default function ProgrammaticPage() {
+  const { data } = useDashboard();
+  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'programmatic'), [data.rows]);
+
+  const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
+    {
+      title: 'Spend', icon: 'DollarSign',
+      primary: { label: 'Spend', value: cur.spend, formattedValue: moneyKpi(cur.spend, currency, 0), change: pctChange(cur.spend, prev?.spend), trend: [] },
+      supporting: [
+        { label: 'CPM', formattedValue: moneyKpi(cur.cpm, currency) },
+        { label: 'CPC', formattedValue: moneyKpi(cur.cpc, currency) },
+      ],
+    },
+    {
+      title: 'Upper-Funnel Reach', icon: 'Eye',
+      tooltip: 'Programmatic is primarily upper-funnel — focus on reach efficiency and viewable impressions.',
+      primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
+      supporting: [
+        { label: 'Impressions', formattedValue: formatCompact(cur.impressions) },
+        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
+      ],
+    },
+    {
+      title: 'Video Performance', icon: 'Play',
+      primary: { label: 'Video Views', value: cur.videoViews, formattedValue: formatCompact(cur.videoViews), change: pctChange(cur.videoViews, prev?.videoViews), trend: [] },
+      supporting: [
+        { label: 'Completion', formattedValue: `${cur.videoCompletionRate.toFixed(1)}%` },
+        { label: 'Cost / View', formattedValue: moneyKpi(cur.costPerVideoView, currency, 3) },
+      ],
+    },
+    {
+      title: 'Conversion Contribution', icon: 'Target',
+      tooltip: 'Conversions assisted by programmatic — typically lower than direct response platforms.',
+      primary: { label: 'All Conversions', value: cur.conversionsAll, formattedValue: formatCompact(cur.conversionsAll), change: pctChange(cur.conversionsAll, prev?.conversionsAll), trend: [] },
+      supporting: [
+        { label: 'LF Conv.', formattedValue: formatCompact(cur.conversionsLowerFunnel) },
+        { label: 'Upper Funnel', formattedValue: formatCompact(cur.conversionsUpperFunnel) },
+      ],
+    },
+  ];
+
   return (
-    <PlatformPageTemplate
+    <PlatformPageShell
       platformKey="programmatic"
       title="Programmatic"
-      extraSections={
-        <>
-          <SectionHeader title="Media Type Split" />
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { type: 'Display', spend: '$2,100', pct: '32%' },
-              { type: 'Video', spend: '$1,800', pct: '28%' },
-              { type: 'CTV', spend: '$1,200', pct: '19%' },
-              { type: 'Audio', spend: '$680', pct: '10%' },
-              { type: 'Native', spend: '$700', pct: '11%' },
-            ].map(m => (
-              <div key={m.type} className="bg-card rounded-xl border border-border p-4 shadow-sm text-center">
-                <p className="text-xs text-muted-foreground">{m.type}</p>
-                <p className="text-lg font-bold text-card-foreground mt-1">{m.spend}</p>
-                <p className="text-xs text-muted-foreground">{m.pct} of spend</p>
-              </div>
-            ))}
+      buildKpiCards={buildKpis}
+      midExtras={() => (
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <SectionHeader title="Campaign Type" subtitle="Display, Video, CTV, Audio breakdown via campaign_type." />
+            <DimensionBreakdownTable
+              rows={scoped}
+              pick={r => r.campaign_type}
+              title="By Campaign Type"
+              hideIfAllUnspecified
+            />
           </div>
-
-          <SectionHeader title="Inventory Quality" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-              <p className="text-xs text-muted-foreground">Viewability Rate</p>
-              <p className="text-2xl font-bold text-card-foreground">72.4%</p>
-              <p className="text-xs text-success mt-1">Above threshold</p>
-            </div>
-            <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-              <p className="text-xs text-muted-foreground">Brand Safety Score</p>
-              <p className="text-2xl font-bold text-card-foreground">96%</p>
-              <p className="text-xs text-success mt-1">Excellent</p>
-            </div>
-            <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-              <p className="text-xs text-muted-foreground">Invalid Traffic</p>
-              <p className="text-2xl font-bold text-card-foreground">1.2%</p>
-              <p className="text-xs text-success mt-1">Low</p>
-            </div>
+          <div className="space-y-3">
+            <SectionHeader title="Campaign Objective" />
+            <DimensionBreakdownTable
+              rows={scoped}
+              pick={r => r.campaign_objective}
+              title="By Objective"
+              hideIfAllUnspecified
+            />
           </div>
-        </>
-      }
+        </div>
+      )}
     />
   );
 }
