@@ -45,6 +45,13 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
             <X size={20} />
           </button>
         </div>
+        <div className="px-3 py-3 border-b border-sidebar-border">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-sidebar-muted uppercase tracking-wider mb-2">
+            <CalendarIcon size={11} />
+            Date Range
+          </div>
+          <DateRangePicker compact />
+        </div>
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
           {navItems.map(item => {
             const isActive = location.pathname === item.to;
