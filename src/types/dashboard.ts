@@ -126,6 +126,10 @@ export interface PlatformSummary {
   conversionRate: number;
   shareOfSpend: number;
   shareOfConversions: number;
+  /** Optional, only populated by useDashboardDaily — used for executive comparisons. */
+  roas?: number;
+  conversionsAll?: number;
+  conversionsLowerFunnel?: number;
 }
 
 export interface BudgetPacing {
