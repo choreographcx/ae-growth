@@ -465,8 +465,15 @@ export type Database = {
     }
     Functions: {
       get_dashboard_daily: {
-        Args: { p_end: string; p_start: string }
+        Args: {
+          p_campaign_names?: string[]
+          p_end: string
+          p_platforms?: string[]
+          p_start: string
+        }
         Returns: {
+          campaign_id: string
+          campaign_name: string
           clicks: number
           conversion_value: number
           conversions: number
