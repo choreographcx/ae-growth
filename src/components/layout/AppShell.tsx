@@ -4,7 +4,6 @@ import { DashboardHeader } from './DashboardHeader';
 import { MobileDrawer } from './MobileDrawer';
 import { BackToTop } from './BackToTop';
 import { DocumentTitle } from './DocumentTitle';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 
@@ -31,14 +30,17 @@ function PrintReportHeader() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen w-full bg-background">
       <DocumentTitle />
-      {!isMobile && <DashboardSidebar />}
-      {isMobile && <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
+      <div className="hidden lg:block">
+        <DashboardSidebar />
+      </div>
+      <div className="lg:hidden">
+        <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      </div>
       <div className="flex flex-1 flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setDrawerOpen(true)} />
         <main id="dashboard-main-content" className="flex-1 p-3 md:p-6 lg:p-8 overflow-auto">
@@ -48,7 +50,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </main>
       </div>
-      {!isMobile && <BackToTop />}
+      <div className="hidden lg:block">
+        <BackToTop />
+      </div>
     </div>
   );
 }
