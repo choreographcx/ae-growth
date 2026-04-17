@@ -100,8 +100,8 @@ export function PlatformPageShell({
         </div>
       )}
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
+      {/* KPIs — 3-col grid matches the Overview layout (Impressions+CPM together, Reach+Frequency together, etc.) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
       </div>
 
