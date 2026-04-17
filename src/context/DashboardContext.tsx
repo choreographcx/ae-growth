@@ -162,7 +162,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
 const fallbackData: DashboardData = {
   loading: false, error: null, rows: [], previousRows: [],
-  totals: { spend: 0, impressions: 0, clicks: 0, conversions: 0, reach: 0, landingPageViews: 0, videoViews: 0, ctr: 0, cpc: 0, cpa: 0, cpm: 0, conversionRate: 0, costPerLPV: 0 },
+  totals: { spend: 0, impressions: 0, clicks: 0, conversions: 0, conversionsAll: 0, conversionsLowerFunnel: 0, reach: 0, landingPageViews: 0, videoViews: 0, ctr: 0, cpc: 0, cpa: 0, cpm: 0, conversionRate: 0, costPerLPV: 0 },
   previousTotals: null,
   platformSummaries: [],
   spendSeries: [], conversionsSeries: [], cpaSeries: [], ctrSeries: [],
