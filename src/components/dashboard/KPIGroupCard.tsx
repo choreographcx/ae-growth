@@ -126,10 +126,13 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
       </div>
       <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5 truncate">{primary.formattedValue}</p>
       {supporting.length > 0 && (
-        <div className="flex items-baseline gap-2 mt-1 pt-1 border-t border-border/30 min-w-0 overflow-hidden">
+        <div className={cn(
+          "mt-1 pt-1 border-t border-border/30 grid gap-x-2 gap-y-0.5 min-w-0",
+          supporting.length === 1 ? "grid-cols-1" : "grid-cols-2"
+        )}>
           {supporting.map((s, i) => (
-            <div key={i} className="flex items-baseline gap-0.5 min-w-0 truncate">
-              <span className="text-[9px] text-muted-foreground shrink-0">{s.label}</span>
+            <div key={i} className="min-w-0 flex flex-col leading-tight">
+              <span className="text-[8px] text-muted-foreground uppercase tracking-wider truncate">{s.label}</span>
               <span className="text-[11px] font-semibold text-card-foreground truncate">{s.formattedValue}</span>
             </div>
           ))}
