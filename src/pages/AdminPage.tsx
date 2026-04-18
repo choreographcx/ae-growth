@@ -292,12 +292,6 @@ function ModularPlatformCard({
   };
   const suppressionList = suppressionMap[p.key] ?? [];
   const [suppressionDraft, setSuppressionDraft] = useState<string>(suppressionList.join('\n'));
-  // Keep local draft in sync if external value changes (e.g. on initial load).
-  // We only resync when the canonical list reference changes via JSON equality.
-  const canonicalJoined = suppressionList.join('\n');
-  if (suppressionDraft !== canonicalJoined && document.activeElement?.getAttribute('data-suppression-platform') !== p.key) {
-    // No-op: allow uncontrolled drift while user is editing this card.
-  }
 
   const commitSuppression = (raw: string) => {
     const names = Array.from(new Set(
