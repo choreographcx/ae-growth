@@ -166,21 +166,7 @@ export default function OverviewPage() {
     return applyCurrencyToKPIGroups(groups, currency, 26);
   }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, lowRoas, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
 
-  // Secondary business-performance strip
-  const secondaryStats = useMemo(() => [
-    { label: 'ROAS',           value: totals.roas > 0 ? `${totals.roas.toFixed(2)}x` : '—',
-      tone: (totals.roas >= 2 ? 'positive' : totals.roas > 0 && totals.roas < 1 ? 'negative' : 'neutral') as 'positive' | 'negative' | 'neutral',
-      tooltip: 'Return on ad spend — sum(conversion_value) / sum(cost_usd).' },
-    { label: 'CPA (LF)',       value: <MoneyValue amount={totals.cpaLowerFunnel} />,
-      tooltip: 'Cost per lower-funnel conversion. Standardized across platforms.' },
-    { label: 'CVR (LF)',       value: `${totals.cvrLowerFunnel.toFixed(2)}%`,
-      tooltip: 'Lower-funnel conversion rate from landing page views.' },
-    { label: 'Cost per LPV',   value: <MoneyValue amount={totals.costPerLPV} />,
-      tooltip: 'Average cost to drive one landing page view.' },
-    { label: 'Frequency',      value: totals.frequency > 0 ? totals.frequency.toFixed(2) : '—',
-      tone: (totals.frequency >= 4 ? 'negative' : 'neutral') as 'negative' | 'neutral',
-      tooltip: 'Average impressions per reached user. >4 may indicate fatigue.' },
-  ], [totals]);
+
 
   return (
     <div className="space-y-5 md:space-y-7">
