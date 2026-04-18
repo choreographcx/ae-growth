@@ -50,6 +50,11 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
   const [showLower, setShowLower] = useState(true);
   const [showUpper, setShowUpper] = useState(true);
 
+  const platformCampaigns = useMemo(() => {
+    if (!campaigns?.length) return undefined;
+    return campaigns;
+  }, [campaigns]);
+
   const suppressSet = useMemo(
     () => new Set((suppressNames || []).map(n => n.trim().toLowerCase())),
     [suppressNames]
@@ -60,7 +65,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
     const k = funnelKind(r.conversion_funnel_group);
     if (k === 'lower') return showLower;
     if (k === 'upper') return showUpper;
-    return showLower || showUpper; // "other" visible if anything is visible
+    return showLower || showUpper;
   }), [rows, showLower, showUpper, suppressSet]);
 
   const sorted = useMemo(
