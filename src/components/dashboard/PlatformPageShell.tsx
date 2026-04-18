@@ -146,7 +146,7 @@ export function PlatformPageShell({
 
       {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
-          <SectionHeader title="Conversion Breakdown" subtitle="Grouped by tracked conversion event and funnel stage." />
+          <SectionHeader title="Conversion Breakdown" />
           <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
         </div>
       )}

@@ -37,18 +37,14 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
 
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-card-foreground">Conversion Breakdown</h3>
-          <p className="text-[11px] text-muted-foreground mt-0.5">All tracked conversion events for this platform.</p>
-        </div>
-        {!loading && !error && total > 0 && (
+      {!loading && !error && total > 0 && (
+        <div className="px-5 py-4 border-b border-border flex items-center justify-end gap-3">
           <div className="text-right">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
             <p className="text-sm font-semibold tabular-nums">{Math.round(total).toLocaleString()}</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {error && (
         <div className="px-5 py-4 text-xs text-destructive">Failed to load breakdown: {error}</div>
@@ -78,10 +74,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between pt-2 border-t border-border/60">
-                    <div>
-                      <p className="text-[12px] text-muted-foreground">Conversions</p>
-                      <p className="text-[18px] font-bold text-card-foreground tabular-nums">{Math.round(r.conversions_all).toLocaleString()}</p>
-                    </div>
+                    <p className="text-[18px] font-bold text-card-foreground tabular-nums">{Math.round(r.conversions_all).toLocaleString()}</p>
                     <div className="text-right">
                       <p className="text-[12px] text-muted-foreground">% of Total</p>
                       <p className="text-[14px] font-semibold tabular-nums text-card-foreground">{pct.toFixed(1)}%</p>
