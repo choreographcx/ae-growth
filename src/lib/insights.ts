@@ -26,7 +26,6 @@ const DEFAULTS = {
   highFrequency: 4,
   weakLpvRate: 30, // %
   strongCtr: 1.5,  // %
-  strongRoas: 2,
   contributionGap: 1.5, // platform's spend share / conv share > 1.5 = inefficient
 };
 
@@ -94,14 +93,8 @@ export function generateInsights({
     }
   }
 
-  // 5. Strong ROAS — efficiency win
-  if (totals.roas >= DEFAULTS.strongRoas) {
-    out.push({
-      id: next(), type: 'success', timestamp: ts(),
-      title: 'Healthy return on ad spend',
-      description: `Blended ROAS is ${totals.roas.toFixed(2)}x. Consider scaling top performers.`,
-    });
-  }
+
+
 
   // 6. Lead platform — single platform driving majority of lower-funnel conversions
   if (totalLF > 0) {

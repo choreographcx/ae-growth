@@ -52,11 +52,7 @@ export function PlatformContributionCard({ platforms, className }: Props) {
 
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
-      <div className="px-5 py-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-card-foreground">Platform Contribution</h3>
-      </div>
-
-      <div className="px-5 py-4 space-y-5">
+      <div className="px-5 py-5 space-y-5">
         <ContributionRow title="% of Spend"                 segs={spendSegs} totalIsZero={totalSpend === 0} />
         <ContributionRow title="% of Lower-Funnel Conv."     segs={lfSegs}    totalIsZero={totalLF === 0} />
 

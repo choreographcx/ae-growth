@@ -14,9 +14,7 @@ export default function TikTokPage() {
     {
       title: 'Spend', icon: 'DollarSign',
       primary: { label: 'Spend', value: cur.spend, formattedValue: moneyKpi(cur.spend, currency, 0), change: pctChange(cur.spend, prev?.spend), trend: [] },
-      supporting: [
-        { label: 'ROAS', formattedValue: cur.roas > 0 ? `${cur.roas.toFixed(2)}x` : '—' },
-      ],
+      supporting: [],
     },
     {
       title: 'Impressions', icon: 'Eye',
