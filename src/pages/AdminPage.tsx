@@ -164,6 +164,8 @@ export default function AdminPage() {
                 updatePlatform={updatePlatform}
                 formatBudgetNumber={formatBudgetNumber}
                 parseBudgetString={parseBudgetString}
+                client={client}
+                updateClient={updateClient}
               />
             ))}
           </div>
