@@ -52,23 +52,9 @@ export function PlatformContributionCard({ platforms, className }: Props) {
 
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-card-foreground">Platform Contribution</h3>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Where the budget goes vs where the lower-funnel conversions come from.</p>
-        </div>
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            Spend
-            <span className="font-semibold text-card-foreground tabular-nums">
-              <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(totalSpend)}</span>
-            </span>
-          </span>
-          <span className="inline-flex items-center gap-1">
-            LF Conv.
-            <span className="font-semibold text-card-foreground tabular-nums">{fmtCompact(totalLF)}</span>
-          </span>
-        </div>
+      <div className="px-5 py-4 border-b border-border">
+        <h3 className="text-sm font-semibold text-card-foreground">Platform Contribution</h3>
+        <p className="text-[11px] text-muted-foreground mt-0.5">Where the budget goes vs where the lower-funnel conversions come from.</p>
       </div>
 
       <div className="px-5 py-4 space-y-5">
