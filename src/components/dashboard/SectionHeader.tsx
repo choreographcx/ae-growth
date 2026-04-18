@@ -14,20 +14,26 @@ interface SectionHeaderProps {
 export function SectionHeader({
   title, subtitle, action, className, showMobileDatePicker = false,
 }: SectionHeaderProps) {
+  // On mobile, when both an action (extra filters) and the date picker are present,
+  // stack the action below the date picker. On desktop they sit inline.
   return (
-    <div className={cn("flex items-center justify-between gap-2", className)}>
-      <div className="min-w-0">
-        <h2 className="text-lg font-semibold text-foreground truncate">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {action}
+    <div className={cn("flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2", className)}>
+      <div className="flex items-start justify-between gap-2 lg:contents">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold text-foreground truncate">{title}</h2>
+          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
+        </div>
         {showMobileDatePicker && (
-          <div className="lg:hidden flex items-center min-w-0 max-w-[180px]">
+          <div className="lg:hidden flex items-center min-w-0 max-w-[180px] shrink-0">
             <DateRangePicker compact />
           </div>
         )}
       </div>
+      {action && (
+        <div className="flex items-center gap-2 lg:shrink-0 lg:order-last">
+          {action}
+        </div>
+      )}
     </div>
   );
 }
