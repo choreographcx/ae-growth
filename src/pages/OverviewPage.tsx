@@ -2,7 +2,6 @@ import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PlatformComparison } from '@/components/dashboard/PlatformComparison';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
-import { SecondaryKPIStrip, MoneyValue } from '@/components/dashboard/SecondaryKPIStrip';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
