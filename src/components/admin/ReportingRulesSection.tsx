@@ -79,7 +79,7 @@ interface Props {
   updateClient: (u: Partial<ClientProfile>) => void;
 }
 
-type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels' | 'suppression';
+type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels';
 
 /** Default Meta duplicate conversion event names to suppress out of the box. */
 export const DEFAULT_META_SUPPRESSION: string[] = [
