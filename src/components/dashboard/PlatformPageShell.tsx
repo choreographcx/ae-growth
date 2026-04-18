@@ -38,6 +38,8 @@ interface PlatformPageShellProps {
   bottomExtras?: React.ReactNode;
   /** If true, hide the conversion breakdown table. */
   hideConversionBreakdown?: boolean;
+  /** Optional campaign scoping for the conversion breakdown query. */
+  conversionBreakdownCampaigns?: string[];
   /** If true, show wasted-spend warning when applicable. */
   warnOnWastedSpend?: boolean;
   /** Optional row-level filter applied AFTER platform scoping (e.g. publisher_platform). */
@@ -51,9 +53,9 @@ interface PlatformPageShellProps {
 export function PlatformPageShell({
   platformKey, title, titleAction, emptyOnZeroSpend, buildKpiCards,
   topExtras, midExtras, bottomExtras,
-  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
+  hideConversionBreakdown, conversionBreakdownCampaigns, warnOnWastedSpend, extraRowFilter,
 }: PlatformPageShellProps) {
-  const { client, data } = useDashboard();
+  const { client, data, selectedCampaigns } = useDashboard();
   const currency = client.currency;
   const { loading, error, rows, previousRows, range, platformSummaries } = data;
 
@@ -154,6 +156,7 @@ export function PlatformPageShell({
             platform={platformKey}
             start={range.start}
             end={range.end}
+            campaigns={conversionBreakdownCampaigns ?? (selectedCampaigns.length ? selectedCampaigns : undefined)}
           />
         </div>
       )}

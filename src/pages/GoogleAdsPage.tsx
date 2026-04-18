@@ -8,10 +8,9 @@ import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDash
 import { KPIGroupData } from '@/types/dashboard';
 
 export default function GoogleAdsPage() {
-  const { data } = useDashboard();
+  const { data, selectedCampaigns } = useDashboard();
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
-  // All Google rows (unfiltered) — used to build the available campaign-type options.
   const googleRows = useMemo(
     () => data.rows.filter(r => normalizePlatform(r.platform) === 'google'),
     [data.rows]
@@ -26,13 +25,20 @@ export default function GoogleAdsPage() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [googleRows]);
 
-  // Filter applied to BOTH the KPI/trend data (via PlatformPageShell) and the breakdown tables below.
   const typeFilter = useCallback((r: DashboardDailyRow) => {
     if (!selectedTypes.length) return true;
     return selectedTypes.includes((r.campaign_type || '').trim());
   }, [selectedTypes]);
 
   const scoped = useMemo(() => googleRows.filter(typeFilter), [googleRows, typeFilter]);
+  const filteredCampaigns = useMemo(() => {
+    if (!selectedTypes.length) return undefined;
+    const set = new Set<string>();
+    for (const r of scoped) {
+      if (r.campaign_name) set.add(r.campaign_name);
+    }
+    return Array.from(set);
+  }, [scoped, selectedTypes.length]);
 
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
@@ -90,6 +96,7 @@ export default function GoogleAdsPage() {
       buildKpiCards={buildKpis}
       warnOnWastedSpend
       extraRowFilter={typeFilter}
+      conversionBreakdownCampaigns={filteredCampaigns ?? (selectedCampaigns.length ? selectedCampaigns : undefined)}
       titleAction={
         availableTypes.length > 0 ? (
           <MultiSelectFilter
