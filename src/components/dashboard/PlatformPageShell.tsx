@@ -147,7 +147,12 @@ export function PlatformPageShell({
       {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" />
-          <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
+          <ConversionBreakdownCard
+            platform={platformKey}
+            start={range.start}
+            end={range.end}
+            suppressNames={platformKey === 'meta' ? META_DUPLICATE_CONVERSIONS : undefined}
+          />
         </div>
       )}
 
