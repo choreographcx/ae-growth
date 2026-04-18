@@ -259,6 +259,8 @@ export interface PlatformOption { key: PlatformKey; label: string; raw: string; 
 export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
+  routePlatformKey?: PlatformKey | null;
+  includePreviousPeriod?: boolean;
   /** Per-platform-key list of conversion event names to exclude from totals. */
   suppressedConversions?: Partial<Record<PlatformKey, string[]>>;
 }
@@ -314,14 +316,24 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [], suppressedConversions } = options;
+  const {
+    selectedPlatformLabels = [],
+    selectedCampaigns = [],
+    routePlatformKey = null,
+    includePreviousPeriod = false,
+    suppressedConversions,
+  } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
-  const [filteredRows, setFilteredRows] = useState<DashboardDailyRow[]>([]);
   const [prevRows, setPrevRows] = useState<DashboardDailyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const effectivePlatformLabels = useMemo(
+    () => (routePlatformKey ? [PLATFORM_LABELS[routePlatformKey]] : selectedPlatformLabels),
+    [routePlatformKey, selectedPlatformLabels]
+  );
 
   const campaignsParam = useMemo(
     () => (selectedCampaigns.length ? selectedCampaigns : null),
@@ -329,49 +341,20 @@ export function useDashboardDaily(
   );
 
   const requestedPlatformKeys = useMemo(() => {
-    const keys = selectedPlatformLabels
+    const keys = effectivePlatformLabels
       .map(label => Object.entries(PLATFORM_LABELS).find(([, value]) => value === label)?.[0] as PlatformKey | undefined)
       .filter(Boolean) as PlatformKey[];
     return Array.from(new Set(keys));
-  }, [selectedPlatformLabels]);
+  }, [effectivePlatformLabels]);
 
-  const rawPlatformValues = useMemo(() => {
-    if (!requestedPlatformKeys.length) return allRows.map(r => r.platform).filter(Boolean);
-    return requestedPlatformKeys;
-  }, [allRows, requestedPlatformKeys]);
-
-  const labelToRawPlatforms = useMemo(() => {
-    const m = new Map<string, string[]>();
-    for (const r of allRows) {
-      const k = normalizePlatform(r.platform);
-      if (!k) continue;
-      const lbl = PLATFORM_LABELS[k];
-      const arr = m.get(lbl) || [];
-      if (!arr.includes(r.platform)) arr.push(r.platform);
-      m.set(lbl, arr);
-    }
-    for (const key of requestedPlatformKeys) {
-      const label = PLATFORM_LABELS[key];
-      if (!m.has(label)) m.set(label, [key]);
-    }
-    return m;
-  }, [allRows, requestedPlatformKeys]);
-
-  const platformsParam = useMemo(() => {
-    if (!selectedPlatformLabels.length) return null;
-    const raws: string[] = [];
-    for (const lbl of selectedPlatformLabels) {
-      const arr = labelToRawPlatforms.get(lbl);
-      if (arr) raws.push(...arr);
-    }
-    return raws.length ? Array.from(new Set(raws)) : ['__no_match__'];
-  }, [selectedPlatformLabels, labelToRawPlatforms]);
-
-  const filtersActive = !!(platformsParam || campaignsParam);
+  const platformsParam = useMemo(
+    () => (requestedPlatformKeys.length ? requestedPlatformKeys : null),
+    [requestedPlatformKeys]
+  );
 
   const suppressionPayload = useMemo(
-    () => buildSuppressionPayload(suppressedConversions, rawPlatformValues),
-    [suppressedConversions, rawPlatformValues]
+    () => buildSuppressionPayload(suppressedConversions, requestedPlatformKeys),
+    [suppressedConversions, requestedPlatformKeys]
   );
   const suppressionKey = useMemo(
     () => (suppressionPayload ? JSON.stringify(suppressionPayload) : ''),
@@ -387,7 +370,7 @@ export function useDashboardDaily(
       const days = Math.max(1, differenceInCalendarDays(range.end, range.start) + 1);
       const prevEnd = subDays(range.start, 1);
       const prevStart = subDays(prevEnd, days - 1);
-      const shouldLoadPrevious = days <= 120;
+      const shouldLoadPrevious = includePreviousPeriod && days <= 120;
 
       const currentPromise = (supabase.rpc as any)('get_dashboard_daily', {
         p_start: fmt(range.start),
@@ -412,60 +395,23 @@ export function useDashboardDaily(
       if (current.error) {
         setError(current.error.message);
         setAllRows([]);
-        setFilteredRows([]);
         setPrevRows([]);
         setLoading(false);
         return;
       }
 
-      const currentRows = (current.data as DashboardDailyRow[]) || [];
-      const previousRows = previous.error ? [] : (((previous.data as DashboardDailyRow[]) || []) as DashboardDailyRow[]);
-
-      if (filtersActive) {
-        setAllRows([]);
-        setFilteredRows(currentRows);
-      } else {
-        setAllRows(currentRows);
-        setFilteredRows([]);
-      }
-      setPrevRows(previousRows);
+      setAllRows((current.data as DashboardDailyRow[]) || []);
+      setPrevRows(previous.error ? [] : (((previous.data as DashboardDailyRow[]) || []) as DashboardDailyRow[]));
       setLoading(false);
     };
     run();
-    return () => { cancelled = true; };
-  }, [range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam, suppressionKey, filtersActive]);
+    return () => {
+      cancelled = true;
+    };
+  }, [range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam, suppressionKey, includePreviousPeriod]);
 
-  useEffect(() => {
-    if (!filtersActive) { setFilteredRows([]); return; }
-    if (allRows.length === 0) return;
-    let cancelled = false;
-    const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-    (async () => {
-      const { data, error: err } = await (supabase.rpc as any)('get_dashboard_daily', {
-        p_start: fmt(range.start),
-        p_end: fmt(range.end),
-        p_platforms: platformsParam,
-        p_campaign_names: campaignsParam,
-        p_suppressed_conversions: suppressionPayload,
-      });
-      if (cancelled) return;
-      if (err) { setError(err.message); setFilteredRows([]); return; }
-      setFilteredRows((data as DashboardDailyRow[]) || []);
-    })();
-    return () => { cancelled = true; };
-  }, [filtersActive, allRows.length, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam, suppressionKey]);
-
-  const rows = filtersActive ? filteredRows : allRows;
-
-  const filteredPrevRows = useMemo(() => {
-    if (!filtersActive) return prevRows;
-    const platSet = platformsParam ? new Set(platformsParam) : null;
-    const campSet = campaignsParam ? new Set(campaignsParam) : null;
-    return prevRows.filter(r =>
-      (!platSet || platSet.has(r.platform)) &&
-      (!campSet || (r.campaign_name && campSet.has(r.campaign_name)))
-    );
-  }, [filtersActive, prevRows, platformsParam, campaignsParam]);
+  const rows = allRows;
+  const filteredPrevRows = prevRows;
 
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
@@ -489,20 +435,29 @@ export function useDashboardDaily(
   }, [allRows]);
 
   const availableCampaigns = useMemo(() => {
-    const platSet = platformsParam ? new Set(platformsParam) : null;
     const set = new Set<string>();
     for (const r of allRows) {
       if (!r.campaign_name) continue;
-      if (platSet && !platSet.has(r.platform)) continue;
       set.add(r.campaign_name);
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allRows, platformsParam]);
+  }, [allRows]);
 
   return {
-    loading, error, rows, previousRows: filteredPrevRows, totals, previousTotals,
-    platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
-    availablePlatforms, availableCampaigns,
+    loading,
+    error,
+    rows,
+    previousRows: filteredPrevRows,
+    totals,
+    previousTotals,
+    platformSummaries,
+    spendSeries,
+    conversionsSeries,
+    cpaSeries,
+    ctrSeries,
+    range,
+    availablePlatforms,
+    availableCampaigns,
   };
 }
 

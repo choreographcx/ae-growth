@@ -253,16 +253,3 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     </header>
   );
 }
-          <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={isExporting}>
-            {isExporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
-            {isExporting ? 'Exporting…' : 'Export PDF'}
-          </Button>
-          <div className="h-3.5 w-px bg-border mx-1" />
-          <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
-            <LogOut size={12} /> Sign out
-          </Button>
-        </div>
-      </div>
-    </header>
-  );
-}
