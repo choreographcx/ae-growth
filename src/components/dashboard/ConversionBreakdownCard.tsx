@@ -12,6 +12,8 @@ interface Props {
   end: Date;
   campaigns?: string[];
   className?: string;
+  /** Conversion event names to hide (e.g. duplicates of other events). Case-insensitive. */
+  suppressNames?: string[];
 }
 
 const FUNNEL_BADGE: Record<string, string> = {
