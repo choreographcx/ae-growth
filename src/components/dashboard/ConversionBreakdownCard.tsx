@@ -35,19 +35,25 @@ function funnelKind(group: string): 'lower' | 'upper' | 'other' {
   return 'other';
 }
 
-export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
+export function ConversionBreakdownCard({ platform, start, end, campaigns, className, suppressNames }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
 
   const [showLower, setShowLower] = useState(true);
   const [showUpper, setShowUpper] = useState(true);
 
+  const suppressSet = useMemo(
+    () => new Set((suppressNames || []).map(n => n.trim().toLowerCase())),
+    [suppressNames]
+  );
+
   const filtered = useMemo(() => rows.filter(r => {
+    if (suppressSet.has((r.conversion_name || '').trim().toLowerCase())) return false;
     const k = funnelKind(r.conversion_funnel_group);
     if (k === 'lower') return showLower;
     if (k === 'upper') return showUpper;
     return showLower || showUpper; // "other" visible if anything is visible
-  }), [rows, showLower, showUpper]);
+  }), [rows, showLower, showUpper, suppressSet]);
 
   const sorted = useMemo(
     () => [...filtered].sort((a, b) => b.conversions_all - a.conversions_all),
