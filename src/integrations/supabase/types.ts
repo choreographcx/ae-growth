@@ -464,36 +464,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_dashboard_conversion_breakdown:
-        | {
-            Args: {
-              p_campaign_names?: string[]
-              p_end: string
-              p_platforms?: string[]
-              p_start: string
-            }
-            Returns: {
-              conversion_funnel_group: string
-              conversion_name: string
-              conversions_all: number
-              platform: string
-            }[]
-          }
-        | {
-            Args: {
-              p_campaign_names?: string[]
-              p_end: string
-              p_platforms?: string[]
-              p_start: string
-              p_suppressed_conversions?: Json
-            }
-            Returns: {
-              conversion_funnel_group: string
-              conversion_name: string
-              conversions_all: number
-              platform: string
-            }[]
-          }
+      get_dashboard_conversion_breakdown: {
+        Args: {
+          p_campaign_names?: string[]
+          p_end: string
+          p_platforms?: string[]
+          p_start: string
+        }
+        Returns: {
+          conversion_funnel_group: string
+          conversion_name: string
+          conversions_all: number
+          platform: string
+        }[]
+      }
       get_dashboard_daily:
         | {
             Args: { p_date: string }
@@ -520,38 +504,6 @@ export type Database = {
               p_end: string
               p_platforms?: string[]
               p_start: string
-            }
-            Returns: {
-              audience_type: string
-              campaign_id: string
-              campaign_name: string
-              campaign_objective: string
-              campaign_type: string
-              clicks: number
-              conversion_value: number
-              conversions: number
-              conversions_all: number
-              conversions_lower_funnel: number
-              conversions_upper_funnel: number
-              cost: number
-              date: string
-              impressions: number
-              landing_page_views: number
-              outbound_clicks: number
-              platform: string
-              publisher_platform: string
-              reach: number
-              video_p100: number
-              video_views: number
-            }[]
-          }
-        | {
-            Args: {
-              p_campaign_names?: string[]
-              p_end: string
-              p_platforms?: string[]
-              p_start: string
-              p_suppressed_conversions?: Json
             }
             Returns: {
               audience_type: string

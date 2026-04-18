@@ -18,9 +18,6 @@ function formatCompact(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
-// Conversion suppression is now applied at the data source via the RPCs;
-// the breakdown card no longer needs a client-side suppress list.
-
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
   title: string;
@@ -38,8 +35,6 @@ interface PlatformPageShellProps {
   bottomExtras?: React.ReactNode;
   /** If true, hide the conversion breakdown table. */
   hideConversionBreakdown?: boolean;
-  /** Optional campaign scoping for the conversion breakdown query. */
-  conversionBreakdownCampaigns?: string[];
   /** If true, show wasted-spend warning when applicable. */
   warnOnWastedSpend?: boolean;
   /** Optional row-level filter applied AFTER platform scoping (e.g. publisher_platform). */
@@ -53,9 +48,9 @@ interface PlatformPageShellProps {
 export function PlatformPageShell({
   platformKey, title, titleAction, emptyOnZeroSpend, buildKpiCards,
   topExtras, midExtras, bottomExtras,
-  hideConversionBreakdown, conversionBreakdownCampaigns, warnOnWastedSpend, extraRowFilter,
+  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
 }: PlatformPageShellProps) {
-  const { client, data, selectedCampaigns } = useDashboard();
+  const { client, data } = useDashboard();
   const currency = client.currency;
   const { loading, error, rows, previousRows, range, platformSummaries } = data;
 
@@ -152,12 +147,7 @@ export function PlatformPageShell({
       {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" />
-          <ConversionBreakdownCard
-            platform={platformKey}
-            start={range.start}
-            end={range.end}
-            campaigns={conversionBreakdownCampaigns ?? (selectedCampaigns.length ? selectedCampaigns : undefined)}
-          />
+          <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
         </div>
       )}
 

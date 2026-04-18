@@ -20,7 +20,7 @@ import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/componen
 import { platformIconEntries } from '@/lib/platformIcons';
 import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
-import { ReportingRulesSection, DEFAULT_CONVERSION_SUPPRESSION, DEFAULT_META_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
+import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
 import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
 
@@ -164,8 +164,6 @@ export default function AdminPage() {
                 updatePlatform={updatePlatform}
                 formatBudgetNumber={formatBudgetNumber}
                 parseBudgetString={parseBudgetString}
-                client={client}
-                updateClient={updateClient}
               />
             ))}
           </div>
@@ -268,8 +266,6 @@ function ModularPlatformCard({
   updatePlatform,
   formatBudgetNumber,
   parseBudgetString,
-  client,
-  updateClient,
 }: {
   platform: typeof allPlatforms[0];
   cfg: ClientProfile['platforms'][PlatformKey];
@@ -278,44 +274,9 @@ function ModularPlatformCard({
   updatePlatform: (key: PlatformKey, updates: Partial<ClientProfile['platforms'][PlatformKey]>) => void;
   formatBudgetNumber: (n: number) => string;
   parseBudgetString: (s: string) => number;
-  client: ClientProfile;
-  updateClient: (updates: Partial<ClientProfile>) => void;
 }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const hasIds = cfg.accountIds.filter(Boolean).length > 0;
-
-  // Conversion suppression list (per platform). Stored under client.reporting.conversionSuppression.
-  const reporting = (client as any).reporting ?? {};
-  const suppressionMap: Record<PlatformKey, string[]> = {
-    ...DEFAULT_CONVERSION_SUPPRESSION,
-    ...(reporting.conversionSuppression ?? {}),
-  };
-  const suppressionList = suppressionMap[p.key] ?? [];
-  const [suppressionDraft, setSuppressionDraft] = useState<string>(suppressionList.join('\n'));
-
-  const commitSuppression = (raw: string) => {
-    const names = Array.from(new Set(
-      raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
-    ));
-    updateClient({
-      reporting: {
-        ...reporting,
-        conversionSuppression: { ...suppressionMap, [p.key]: names },
-      },
-    } as any);
-  };
-
-  const resetMetaSuppression = () => {
-    const next = [...DEFAULT_META_SUPPRESSION];
-    setSuppressionDraft(next.join('\n'));
-    updateClient({
-      reporting: {
-        ...reporting,
-        conversionSuppression: { ...suppressionMap, meta: next },
-      },
-    } as any);
-  };
-
 
   const iconEntry = platformIconEntries[p.key];
   const PlatformIcon = iconEntry.type === 'custom'
@@ -518,38 +479,6 @@ function ModularPlatformCard({
                   rows={2}
                 />
               </div>
-
-              {p.key === 'meta' && (
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      Conversion Suppression
-                      <span className="ml-1.5 text-muted-foreground/70 normal-case tracking-normal">
-                        ({suppressionList.length} event{suppressionList.length === 1 ? '' : 's'})
-                      </span>
-                    </Label>
-                    <button
-                      type="button"
-                      onClick={resetMetaSuppression}
-                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Reset defaults
-                    </button>
-                  </div>
-                  <textarea
-                    value={suppressionDraft}
-                    onChange={e => setSuppressionDraft(e.target.value)}
-                    onBlur={e => commitSuppression(e.target.value)}
-                    placeholder="One conversion event name per line, e.g.&#10;omni_purchase&#10;onsite_web_lead"
-                    className="mt-1 w-full border border-input rounded-lg p-2 text-[11px] font-mono bg-background text-foreground resize-y focus:ring-1 focus:ring-ring focus:border-ring outline-none transition-colors"
-                    rows={8}
-                    spellCheck={false}
-                  />
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    These conversion events are excluded from all Meta totals, KPIs, trends, and breakdowns. Case-insensitive. Changes save when you leave the field, then click Save.
-                  </p>
-                </div>
-              )}
             </div>
           )}
         </div>

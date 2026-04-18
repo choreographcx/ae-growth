@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from 'react';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocation } from 'react-router-dom';
 
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear } from 'date-fns';
 import { useDashboard } from '@/context/DashboardContext';
@@ -11,7 +10,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
-import { isPlatformRoute } from '@/lib/routePlatform';
 import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
@@ -175,14 +173,13 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     selectedCampaigns, setSelectedCampaigns,
   } = useDashboard();
   const { signOut } = useAuth();
-  const location = useLocation();
-  const onPlatformRoute = isPlatformRoute(location.pathname);
   const [isExporting, setIsExporting] = useState(false);
 
+  // Filter options come from the live BigQuery data so they reflect what's actually available.
   const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
   const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
 
-  const hasFilters = selectedCampaigns.length > 0 || (!onPlatformRoute && selectedPlatforms.length > 0);
+  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0;
 
   const handleExportPDF = useCallback(async () => {
     setIsExporting(true);
@@ -226,9 +223,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         <div className="hidden items-center gap-1.5 lg:flex">
           <DateRangePicker />
           <div className="h-3.5 w-px bg-border mx-1" />
-          {!onPlatformRoute && (
-            <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
-          )}
+          <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
           <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
           {hasFilters && (
             <button

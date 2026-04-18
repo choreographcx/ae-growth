@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey } from '@/types/dashboard';
-import { normalizePlatform, buildSuppressionPayload } from './useDashboardDaily';
+import { normalizePlatform } from './useDashboardDaily';
 
 export interface ConversionBreakdownRow {
   platform: string;
@@ -16,8 +16,6 @@ interface Options {
   end: Date;
   platform?: PlatformKey | null;
   campaigns?: string[];
-  /** Per-platform-key list of conversion event names to exclude. */
-  suppressedConversions?: Partial<Record<PlatformKey, string[]>>;
 }
 
 interface Result {
@@ -30,22 +28,10 @@ interface Result {
  * Fetches per-conversion-name breakdown for a given platform + date range.
  * Powers the "Conversion Breakdown" section on platform pages.
  */
-export function useConversionBreakdown({ start, end, platform, campaigns, suppressedConversions }: Options): Result {
+export function useConversionBreakdown({ start, end, platform, campaigns }: Options): Result {
   const [rows, setRows] = useState<ConversionBreakdownRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Build a stable payload — we don't know the raw platform values here, so we
-  // pass canonical keys; the SQL match is case-insensitive and most ad sources
-  // use the canonical key as the raw value.
-  const suppressionPayload = useMemo(
-    () => buildSuppressionPayload(suppressedConversions, []),
-    [suppressedConversions]
-  );
-  const suppressionKey = useMemo(
-    () => (suppressionPayload ? JSON.stringify(suppressionPayload) : ''),
-    [suppressionPayload]
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -53,25 +39,27 @@ export function useConversionBreakdown({ start, end, platform, campaigns, suppre
       setLoading(true);
       setError(null);
       const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-      const platformParam = platform ? [platform] : null;
-      const { data, error: err } = await (supabase.rpc as any)('get_dashboard_conversion_breakdown', {
+      const { data, error: err } = await supabase.rpc('get_dashboard_conversion_breakdown', {
         p_start: fmt(start),
         p_end: fmt(end),
-        p_platforms: platformParam,
+        p_platforms: null,
         p_campaign_names: campaigns?.length ? campaigns : null,
-        p_suppressed_conversions: suppressionPayload,
       });
       if (cancelled) return;
       if (err) {
         setError(err.message);
         setRows([]);
       } else {
-        setRows(((data as ConversionBreakdownRow[]) || []).filter(r => !platform || normalizePlatform(r.platform) === platform));
+        const all = (data as ConversionBreakdownRow[]) || [];
+        const filtered = platform
+          ? all.filter(r => normalizePlatform(r.platform) === platform)
+          : all;
+        setRows(filtered);
       }
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [start.getTime(), end.getTime(), platform, JSON.stringify(campaigns || []), suppressionKey]);
+  }, [start.getTime(), end.getTime(), platform, JSON.stringify(campaigns || [])]);
 
   return { loading, error, rows };
 }
