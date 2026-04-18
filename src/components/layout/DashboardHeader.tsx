@@ -63,15 +63,133 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const fromFormat = range.from.getFullYear() === range.to.getFullYear() ? 'MMM d' : 'MMM d, yyyy';
   const displayText = `${format(range.from, fromFormat)} – ${format(range.to, 'MMM d, yyyy')}`;
 
+  const [activeField, setActiveField] = useState<'from' | 'to'>('from');
+
+  if (compact) {
+    // Mobile-styled picker: pill tabs at top, two-month vertical calendar, Cancel/Set at bottom.
+    return (
+      <Popover open={open} onOpenChange={handleOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="justify-start text-left font-normal gap-1.5 h-7 text-[11px] px-2 flex-1 min-w-0"
+          >
+            <CalendarIcon size={12} className="shrink-0 text-muted-foreground" />
+            <span className="truncate">{displayText}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[92vw] max-w-[380px] p-0 rounded-2xl overflow-hidden bg-card"
+          align="end"
+          sideOffset={8}
+        >
+          {/* Pill tabs: Start / End */}
+          <div className="px-4 pt-4 pb-2">
+            <div className="flex rounded-full border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => { setActiveField('from'); setCalendarMonth(draftRange.from); }}
+                className={cn(
+                  "flex-1 py-2 px-3 text-center transition-colors",
+                  activeField === 'from' ? "bg-primary/10" : "bg-transparent"
+                )}
+              >
+                <div className={cn(
+                  "text-xs font-medium",
+                  activeField === 'from' ? "text-primary" : "text-foreground"
+                )}>Start</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  {format(draftRange.from, 'MMM d, yyyy')}
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveField('to'); setCalendarMonth(draftRange.to); }}
+                className={cn(
+                  "flex-1 py-2 px-3 text-center border-l border-border transition-colors",
+                  activeField === 'to' ? "bg-primary/10" : "bg-transparent"
+                )}
+              >
+                <div className={cn(
+                  "text-xs font-medium",
+                  activeField === 'to' ? "text-primary" : "text-foreground"
+                )}>End</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  {format(draftRange.to, 'MMM d, yyyy')}
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Calendar */}
+          <div className="px-2">
+            <Calendar
+              mode="range"
+              selected={{ from: draftRange.from, to: draftRange.to }}
+              month={calendarMonth}
+              onMonthChange={setCalendarMonth}
+              onSelect={(r) => {
+                if (!r) return;
+                if (activeField === 'from' && r.from) {
+                  // Picking the start: keep end if still after, else reset end to from.
+                  const newFrom = r.from;
+                  const newTo = draftRange.to >= newFrom ? draftRange.to : newFrom;
+                  setDraftRange({ from: newFrom, to: newTo });
+                  setActiveField('to');
+                } else if (activeField === 'to' && (r.to || r.from)) {
+                  const candidate = r.to ?? r.from!;
+                  if (candidate >= draftRange.from) {
+                    setDraftRange(prev => ({ ...prev, to: candidate }));
+                  } else {
+                    setDraftRange({ from: candidate, to: draftRange.from });
+                  }
+                }
+              }}
+              numberOfMonths={1}
+              className="p-2 pointer-events-auto"
+            />
+          </div>
+
+          {/* Compare to previous period */}
+          <div className="px-4 pb-2 flex items-center gap-2">
+            <Checkbox
+              id="prev-period-mobile"
+              checked={showPreviousPeriod}
+              onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
+            />
+            <label htmlFor="prev-period-mobile" className="text-[11px] text-muted-foreground cursor-pointer select-none">
+              Compare to previous period
+            </label>
+          </div>
+
+          {/* Footer actions */}
+          <div className="border-t border-border px-4 py-2.5 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-muted-foreground"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleApply}
+              className="text-sm font-semibold text-primary"
+            >
+              Set
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn(
-            "justify-start text-left font-normal gap-1.5",
-            compact ? "h-7 text-[11px] px-2 flex-1 min-w-0" : "h-8 text-xs w-[240px]"
-          )}
+          className="justify-start text-left font-normal gap-1.5 h-8 text-xs w-[240px]"
         >
           <CalendarIcon size={12} className="shrink-0 text-muted-foreground" />
           <span className="truncate">{displayText}</span>
@@ -108,40 +226,38 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
           <div className="p-2 flex flex-col">
-            {!compact && (
-              <div className="flex items-center gap-2 px-3 pb-2">
-                <div className="flex-1">
-                  <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Start Date</label>
-                  <input
-                    type="date"
-                    value={format(draftRange.from, 'yyyy-MM-dd')}
-                    onChange={(e) => {
-                      const d = new Date(e.target.value + 'T00:00:00');
-                      if (!isNaN(d.getTime())) {
-                        setDraftRange(prev => ({ ...prev, from: d }));
-                        setCalendarMonth(d);
-                      }
-                    }}
-                    className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">End Date</label>
-                  <input
-                    type="date"
-                    value={format(draftRange.to, 'yyyy-MM-dd')}
-                    onChange={(e) => {
-                      const d = new Date(e.target.value + 'T00:00:00');
-                      if (!isNaN(d.getTime())) {
-                        setDraftRange(prev => ({ ...prev, to: d }));
-                        setCalendarMonth(subMonths(d, 1));
-                      }
-                    }}
-                    className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
+            <div className="flex items-center gap-2 px-3 pb-2">
+              <div className="flex-1">
+                <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">Start Date</label>
+                <input
+                  type="date"
+                  value={format(draftRange.from, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const d = new Date(e.target.value + 'T00:00:00');
+                    if (!isNaN(d.getTime())) {
+                      setDraftRange(prev => ({ ...prev, from: d }));
+                      setCalendarMonth(d);
+                    }
+                  }}
+                  className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
               </div>
-            )}
+              <div className="flex-1">
+                <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1 block">End Date</label>
+                <input
+                  type="date"
+                  value={format(draftRange.to, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const d = new Date(e.target.value + 'T00:00:00');
+                    if (!isNaN(d.getTime())) {
+                      setDraftRange(prev => ({ ...prev, to: d }));
+                      setCalendarMonth(subMonths(d, 1));
+                    }
+                  }}
+                  className="w-full h-7 text-xs border border-border rounded-md px-2 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
             <Calendar
               mode="range"
               selected={{ from: draftRange.from, to: draftRange.to }}
@@ -154,7 +270,7 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
                   setDraftRange(prev => ({ ...prev, from: r.from! }));
                 }
               }}
-              numberOfMonths={compact ? 1 : 2}
+              numberOfMonths={2}
               className={cn("p-3 pointer-events-auto")}
             />
             <div className="border-t border-border px-3 py-2 flex items-center justify-end gap-2">
