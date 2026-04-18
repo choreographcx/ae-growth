@@ -95,10 +95,10 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
                 )}
               >
                 <div className={cn(
-                  "text-xs font-medium",
+                  "text-sm font-medium",
                   activeField === 'from' ? "text-primary" : "text-foreground"
                 )}>Start</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
+                <div className="text-sm text-muted-foreground mt-0.5">
                   {format(draftRange.from, 'MMM d, yyyy')}
                 </div>
               </button>
@@ -111,10 +111,10 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
                 )}
               >
                 <div className={cn(
-                  "text-xs font-medium",
+                  "text-sm font-medium",
                   activeField === 'to' ? "text-primary" : "text-foreground"
                 )}>End</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
+                <div className="text-sm text-muted-foreground mt-0.5">
                   {format(draftRange.to, 'MMM d, yyyy')}
                 </div>
               </button>
