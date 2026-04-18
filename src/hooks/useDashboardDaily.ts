@@ -408,13 +408,14 @@ export function useDashboardDaily(
         p_end: fmt(range.end),
         p_platforms: platformsParam,
         p_campaign_names: campaignsParam,
+        p_suppressed_conversions: suppressionPayload,
       });
       if (cancelled) return;
       if (err) { setError(err.message); setFilteredRows([]); return; }
       setFilteredRows((data as DashboardDailyRow[]) || []);
     })();
     return () => { cancelled = true; };
-  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam]);
+  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam, suppressionKey]);
 
   const rows = filtersActive ? filteredRows : allRows;
 
