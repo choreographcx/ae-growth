@@ -73,7 +73,6 @@ export default function SnapchatPage() {
       platformKey="snapchat"
       title="Snapchat Ads"
       buildKpiCards={buildKpis}
-      warnOnWastedSpend
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">
