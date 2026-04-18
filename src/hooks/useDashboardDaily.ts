@@ -259,7 +259,34 @@ export interface PlatformOption { key: PlatformKey; label: string; raw: string; 
 export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
+  /** Per-platform-key list of conversion event names to exclude from totals. */
+  suppressedConversions?: Partial<Record<PlatformKey, string[]>>;
 }
+
+/**
+ * Build the JSON payload sent to the RPC for conversion suppression.
+ * Source rows use raw platform values (meta, facebook, instagram, …) — we
+ * expand each PlatformKey-keyed list to every known raw value that maps to it,
+ * AND keep the canonical key itself as a fallback. SQL match is case-insensitive.
+ */
+function buildSuppressionPayload(
+  suppressed: Partial<Record<PlatformKey, string[]>> | undefined,
+  rawPlatforms: string[]
+): Record<string, string[]> | null {
+  if (!suppressed) return null;
+  const out: Record<string, string[]> = {};
+  for (const [key, names] of Object.entries(suppressed)) {
+    if (!names || names.length === 0) continue;
+    const k = key as PlatformKey;
+    out[k] = names;
+    for (const raw of rawPlatforms) {
+      if (normalizePlatform(raw) === k) out[raw.toLowerCase()] = names;
+    }
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+export { buildSuppressionPayload };
 
 interface UseDashboardDailyResult {
   loading: boolean;
