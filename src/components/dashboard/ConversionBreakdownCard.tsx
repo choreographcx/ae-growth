@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { PlatformKey } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useDashboard } from '@/context/DashboardContext';
+import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
