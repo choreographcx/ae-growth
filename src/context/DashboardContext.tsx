@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
+import { getRoutePlatform } from '@/lib/routePlatform';
 import { useDashboardDaily, UseDashboardDailyOptions } from '@/hooks/useDashboardDaily';
 import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
 
@@ -42,6 +44,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [dateRange, setDateRange] = useState('Last 30 Days');
   const [showPreviousPeriod, setShowPreviousPeriod] = useState(false);
   const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const location = useLocation();
+  const routePlatformKey = useMemo(() => getRoutePlatform(location.pathname), [location.pathname]);
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
@@ -51,7 +55,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [configLoaded, setConfigLoaded] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
-  // Resolve per-platform conversion suppression list from client config.
   const suppressedConversions = useMemo(() => {
     const reporting = (client as any)?.reporting ?? {};
     const configured = reporting.conversionSuppression as
@@ -60,10 +63,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     return { ...DEFAULT_CONVERSION_SUPPRESSION, ...(configured ?? {}) };
   }, [client]);
 
-  // Single source of truth for dashboard data — shared with header and pages
   const data = useDashboardDaily(dateRange, {
     selectedPlatformLabels: selectedPlatforms,
     selectedCampaigns,
+    routePlatformKey,
+    includePreviousPeriod: showPreviousPeriod,
     suppressedConversions,
   });
 
