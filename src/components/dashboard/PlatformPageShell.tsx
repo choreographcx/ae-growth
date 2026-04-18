@@ -73,7 +73,7 @@ export function PlatformPageShell({
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <SectionHeader title={title} subtitle="Platform-level performance with all conversion layers visible." />
+      <SectionHeader title={title} />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
