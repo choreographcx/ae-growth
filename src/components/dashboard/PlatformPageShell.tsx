@@ -18,6 +18,22 @@ function formatCompact(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
+/** Meta conversion event names that duplicate other tracked events; hidden from the breakdown. */
+const META_DUPLICATE_CONVERSIONS = [
+  'omni_initiated_checkout',
+  'offsite_conversion.fb_pixel_initiate_checkout',
+  'onsite_web_initiate_checkout',
+  'onsite_conversion.lead_grouped',
+  'offsite_search_add_meta_leads',
+  'offsite_content_view_add_meta_leads',
+  'offsite_complete_registration_add_meta_leads',
+  'onsite_web_app_purchase',
+  'offsite_conversion.fb_pixel_purchase',
+  'omni_purchase',
+  'web_in_store_purchase',
+  'onsite_web_purchase',
+];
+
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
   title: string;
@@ -147,7 +163,12 @@ export function PlatformPageShell({
       {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" />
-          <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
+          <ConversionBreakdownCard
+            platform={platformKey}
+            start={range.start}
+            end={range.end}
+            suppressNames={platformKey === 'meta' ? META_DUPLICATE_CONVERSIONS : undefined}
+          />
         </div>
       )}
 
