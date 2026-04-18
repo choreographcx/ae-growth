@@ -103,13 +103,13 @@ export default function MetaPage() {
       extraRowFilter={extraRowFilter}
       titleAction={
         <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
-          <MetaIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
           <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
             <Checkbox
               checked={enabled.facebook}
               onCheckedChange={() => toggle('facebook')}
               aria-label="Show Facebook"
             />
+            <Facebook className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             Facebook
           </label>
           <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
@@ -118,6 +118,7 @@ export default function MetaPage() {
               onCheckedChange={() => toggle('instagram')}
               aria-label="Show Instagram"
             />
+            <Instagram className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             Instagram
           </label>
         </div>
