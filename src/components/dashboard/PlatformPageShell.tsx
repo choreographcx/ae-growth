@@ -157,11 +157,19 @@ function PlatformInsights({ platformKey, totals, prevTotals, platformSummaries }
 }) {
   const insights = useMemo(() => {
     const scoped = platformSummaries.filter(p => p.platform === platformKey);
-    return sortInsights(generateInsights({
+    const label = scoped[0]?.label;
+    const raw = sortInsights(generateInsights({
       totals: totals as any,
       previousTotals: prevTotals as any,
       platforms: scoped,
     }));
+    // Strip the "<Platform>: " prefix from titles since context is implicit on a platform page.
+    if (!label) return raw;
+    const prefix = `${label}: `;
+    return raw.map(a => a.title.startsWith(prefix)
+      ? { ...a, title: a.title.slice(prefix.length).replace(/^./, c => c.toUpperCase()) }
+      : a
+    );
   }, [platformKey, totals, prevTotals, platformSummaries]);
 
   if (!insights.length) return null;
