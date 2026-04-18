@@ -1,14 +1,48 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Facebook, Instagram } from 'lucide-react';
+
+type SubPlatform = 'facebook' | 'instagram';
+
+function matchSub(raw: string | null | undefined, sub: SubPlatform): boolean {
+  const v = (raw || '').toLowerCase();
+  if (sub === 'facebook') return v.includes('facebook') || v === 'fb';
+  return v.includes('instagram') || v === 'ig';
+}
 
 export default function MetaPage() {
   const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'meta'), [data.rows]);
+  const [enabled, setEnabled] = useState<Record<SubPlatform, boolean>>({ facebook: true, instagram: true });
+
+  const toggle = (key: SubPlatform) => setEnabled(prev => {
+    const next = { ...prev, [key]: !prev[key] };
+    // Prevent both being unchecked — re-enable the other one.
+    if (!next.facebook && !next.instagram) return prev;
+    return next;
+  });
+
+  const bothActive = enabled.facebook && enabled.instagram;
+
+  const extraRowFilter = useCallback((r: DashboardDailyRow) => {
+    if (bothActive) return true;
+    const sub = (r.publisher_platform || '').toLowerCase();
+    // If publisher_platform is missing on a row, only include it when both are on.
+    if (!sub) return false;
+    if (enabled.facebook && matchSub(sub, 'facebook')) return true;
+    if (enabled.instagram && matchSub(sub, 'instagram')) return true;
+    return false;
+  }, [bothActive, enabled.facebook, enabled.instagram]);
+
+  const scoped = useMemo(
+    () => data.rows.filter(r => normalizePlatform(r.platform) === 'meta').filter(extraRowFilter),
+    [data.rows, extraRowFilter]
+  );
 
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
@@ -66,6 +100,29 @@ export default function MetaPage() {
       title="Meta Ads"
       buildKpiCards={buildKpis}
       warnOnWastedSpend
+      extraRowFilter={extraRowFilter}
+      titleAction={
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
+            <Checkbox
+              checked={enabled.facebook}
+              onCheckedChange={() => toggle('facebook')}
+              aria-label="Show Facebook"
+            />
+            <Facebook className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            Facebook
+          </label>
+          <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
+            <Checkbox
+              checked={enabled.instagram}
+              onCheckedChange={() => toggle('instagram')}
+              aria-label="Show Instagram"
+            />
+            <Instagram className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            Instagram
+          </label>
+        </div>
+      }
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">

@@ -21,6 +21,8 @@ function formatCompact(n: number): string {
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
   title: string;
+  /** Optional content rendered to the right of the title (e.g. sub-platform filter). */
+  titleAction?: React.ReactNode;
   /** When true, render the full-empty state on zero spend. */
   emptyOnZeroSpend?: boolean;
   /** Build the KPI cards for this platform from its scoped totals. */
@@ -35,6 +37,8 @@ interface PlatformPageShellProps {
   hideConversionBreakdown?: boolean;
   /** If true, show wasted-spend warning when applicable. */
   warnOnWastedSpend?: boolean;
+  /** Optional row-level filter applied AFTER platform scoping (e.g. publisher_platform). */
+  extraRowFilter?: (r: import('@/hooks/useDashboardDaily').DashboardDailyRow) => boolean;
 }
 
 /**
@@ -42,16 +46,22 @@ interface PlatformPageShellProps {
  * conversion split, conversion breakdown, and slots for bespoke sections.
  */
 export function PlatformPageShell({
-  platformKey, title, emptyOnZeroSpend, buildKpiCards,
+  platformKey, title, titleAction, emptyOnZeroSpend, buildKpiCards,
   topExtras, midExtras, bottomExtras,
-  hideConversionBreakdown, warnOnWastedSpend,
+  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
 }: PlatformPageShellProps) {
   const { client, data } = useDashboard();
   const currency = client.currency;
   const { loading, error, rows, previousRows, range, platformSummaries } = data;
 
-  const scoped     = useMemo(() => rows.filter(r => normalizePlatform(r.platform) === platformKey), [rows, platformKey]);
-  const scopedPrev = useMemo(() => previousRows.filter(r => normalizePlatform(r.platform) === platformKey), [previousRows, platformKey]);
+  const scoped     = useMemo(() => {
+    const base = rows.filter(r => normalizePlatform(r.platform) === platformKey);
+    return extraRowFilter ? base.filter(extraRowFilter) : base;
+  }, [rows, platformKey, extraRowFilter]);
+  const scopedPrev = useMemo(() => {
+    const base = previousRows.filter(r => normalizePlatform(r.platform) === platformKey);
+    return extraRowFilter ? base.filter(extraRowFilter) : base;
+  }, [previousRows, platformKey, extraRowFilter]);
 
   const totals     = useMemo(() => aggregateRows(scoped, 'all'), [scoped]);
   const prevTotals = useMemo(() => scopedPrev.length ? aggregateRows(scopedPrev, 'all') : null, [scopedPrev]);
@@ -81,7 +91,7 @@ export function PlatformPageShell({
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <SectionHeader title={title} />
+      <SectionHeader title={title} action={titleAction} />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">

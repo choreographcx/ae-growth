@@ -8,6 +8,8 @@ export type ConversionMode = 'all' | 'lower_funnel';
 export interface DashboardDailyRow {
   date: string;
   platform: string;
+  /** Sub-platform (e.g. "facebook" / "instagram" for Meta). May be empty. */
+  publisher_platform?: string | null;
   campaign_id: string | null;
   campaign_name: string | null;
   /** Optional dimensions for breakdowns. */
