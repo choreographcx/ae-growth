@@ -287,6 +287,9 @@ function ConversionSuppressionPanel({
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
 /* ─── Metric Mapping ─── */
 function MetricMappingPanel({ client, updateClient }: Props) {
