@@ -131,6 +131,36 @@ export function PlatformPageShell({
       )}
 
       {bottomExtras}
+
+      {/* Insights — bottom of page */}
+      <PlatformInsights platformKey={platformKey} totals={totals} prevTotals={prevTotals} platformSummaries={platformSummaries} />
+    </div>
+  );
+}
+
+function PlatformInsights({ platformKey, totals, prevTotals, platformSummaries }: {
+  platformKey: PlatformKey;
+  totals: ReturnType<typeof aggregateRows>;
+  prevTotals: ReturnType<typeof aggregateRows> | null;
+  platformSummaries: ReturnType<typeof useDashboard>['data']['platformSummaries'];
+}) {
+  const insights = useMemo(() => {
+    const scoped = platformSummaries.filter(p => p.platform === platformKey);
+    return sortInsights(generateInsights({
+      totals: totals as any,
+      previousTotals: prevTotals as any,
+      platforms: scoped,
+    }));
+  }, [platformKey, totals, prevTotals, platformSummaries]);
+
+  if (!insights.length) return null;
+
+  return (
+    <div className="space-y-2.5 md:space-y-3">
+      <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
+        {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
+      </div>
     </div>
   );
 }
