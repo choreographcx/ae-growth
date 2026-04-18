@@ -6,7 +6,7 @@ import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 import { Checkbox } from '@/components/ui/checkbox';
-import MetaIcon from '@/assets/platforms/meta.svg?react';
+import { Facebook, Instagram } from 'lucide-react';
 
 type SubPlatform = 'facebook' | 'instagram';
 
