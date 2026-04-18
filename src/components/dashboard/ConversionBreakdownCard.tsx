@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { PlatformKey } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface Props {
   platform: PlatformKey;
@@ -26,58 +25,23 @@ function badgeClass(group: string) {
   return 'bg-muted text-muted-foreground border-border';
 }
 
-function funnelKind(group: string): 'lower' | 'upper' | 'other' {
-  const g = (group || '').toLowerCase();
-  if (g.includes('lower')) return 'lower';
-  if (g.includes('upper')) return 'upper';
-  return 'other';
-}
-
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
 
-  const [showLower, setShowLower] = useState(true);
-  const [showUpper, setShowUpper] = useState(true);
-
-  const filtered = useMemo(() => rows.filter(r => {
-    const k = funnelKind(r.conversion_funnel_group);
-    if (k === 'lower') return showLower;
-    if (k === 'upper') return showUpper;
-    return showLower || showUpper; // "other" visible if anything is visible
-  }), [rows, showLower, showUpper]);
-
   const sorted = useMemo(
-    () => [...filtered].sort((a, b) => b.conversions_all - a.conversions_all),
-    [filtered]
+    () => [...rows].sort((a, b) => b.conversions_all - a.conversions_all),
+    [rows]
   );
   const total = useMemo(() => sorted.reduce((s, r) => s + (r.conversions_all || 0), 0), [sorted]);
 
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
-      {!loading && !error && rows.length > 0 && (
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3 flex-wrap">
-          <div>
+      {!loading && !error && total > 0 && (
+        <div className="px-5 py-4 border-b border-border flex items-center justify-end gap-3">
+          <div className="text-right">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
             <p className="text-sm font-semibold tabular-nums">{Math.round(total).toLocaleString()}</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer select-none">
-              <Checkbox
-                checked={showUpper}
-                onCheckedChange={(v) => setShowUpper(!!v)}
-                disabled={!showLower}
-              />
-              Upper Funnel
-            </label>
-            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer select-none">
-              <Checkbox
-                checked={showLower}
-                onCheckedChange={(v) => setShowLower(!!v)}
-                disabled={!showUpper}
-              />
-              Lower Funnel
-            </label>
           </div>
         </div>
       )}
@@ -92,7 +56,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
       )}
       {!loading && !error && sorted.length === 0 && (
         <div className="px-5 py-6 text-xs text-muted-foreground">
-          No conversion events to display for the selected funnel filter.
+          No conversion events recorded for this platform in the selected period.
         </div>
       )}
 
