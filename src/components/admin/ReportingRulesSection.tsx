@@ -79,10 +79,10 @@ interface Props {
   updateClient: (u: Partial<ClientProfile>) => void;
 }
 
-type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels' | 'suppression';
+type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels';
 
 /** Default Meta duplicate conversion event names to suppress out of the box. */
-const DEFAULT_META_SUPPRESSION: string[] = [
+export const DEFAULT_META_SUPPRESSION: string[] = [
   'omni_initiated_checkout',
   'offsite_conversion.fb_pixel_initiate_checkout',
   'onsite_web_initiate_checkout',
@@ -97,6 +97,8 @@ const DEFAULT_META_SUPPRESSION: string[] = [
   'onsite_web_purchase',
   'omni_landing_page_view',
   'offsite_conversion.fb_pixel_add_payment_info',
+  'web_app_in_store_purchase',
+  'onsite_web_lead',
 ];
 
 export const DEFAULT_CONVERSION_SUPPRESSION: Record<PlatformKey, string[]> = {
@@ -117,19 +119,12 @@ export function ReportingRulesSection({ client, updateClient }: Props) {
   const delimiter = reporting.delimiter ?? '|';
   const dimensionOrder: string[] = reporting.dimensionOrder ?? TAXONOMY_DIMENSIONS;
 
-  const suppression: Record<PlatformKey, string[]> = {
-    ...DEFAULT_CONVERSION_SUPPRESSION,
-    ...(reporting.conversionSuppression ?? {}),
-  };
-  const suppressionCount = Object.values(suppression).reduce((s, arr) => s + (arr?.length || 0), 0);
-
   const tabs: { key: TabKey; label: string; count?: number }[] = [
     { key: 'mapping', label: 'Metric Mapping', count: client.metricMappings.length },
     { key: 'naming', label: 'Naming Normalization' },
     { key: 'aliases', label: 'Alias Manager', count: aliases.length },
     { key: 'taxonomy', label: 'Taxonomy Dictionary', count: tokens.length },
     { key: 'labels', label: 'Label Overrides', count: labelOverrides.filter(l => l.active).length },
-    { key: 'suppression', label: 'Conversion Suppression', count: suppressionCount },
   ];
 
   return (
@@ -170,126 +165,10 @@ export function ReportingRulesSection({ client, updateClient }: Props) {
       {activeTab === 'aliases' && <AliasManagerPanel aliases={aliases} onChange={v => updateReporting({ aliases: v })} />}
       {activeTab === 'taxonomy' && <TaxonomyDictionaryPanel tokens={tokens} onChange={v => updateReporting({ taxonomyTokens: v })} />}
       {activeTab === 'labels' && <LabelOverridesPanel overrides={labelOverrides} onChange={v => updateReporting({ labelOverrides: v })} />}
-      {activeTab === 'suppression' && (
-        <ConversionSuppressionPanel
-          suppression={suppression}
-          onChange={v => updateReporting({ conversionSuppression: v })}
-        />
-      )}
     </div>
   );
 }
 
-/* ─── Conversion Suppression ─── */
-function ConversionSuppressionPanel({
-  suppression, onChange,
-}: { suppression: Record<PlatformKey, string[]>; onChange: (v: Record<PlatformKey, string[]>) => void }) {
-  const [activePlatform, setActivePlatform] = useState<PlatformKey>('meta');
-  const [draft, setDraft] = useState('');
-  const list = suppression[activePlatform] ?? [];
-
-  const update = (next: string[]) => {
-    onChange({ ...suppression, [activePlatform]: next });
-  };
-
-  const addNames = (raw: string) => {
-    const names = raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
-    if (!names.length) return;
-    const set = new Set(list.map(s => s.toLowerCase()));
-    const merged = [...list];
-    for (const n of names) {
-      if (!set.has(n.toLowerCase())) {
-        merged.push(n);
-        set.add(n.toLowerCase());
-      }
-    }
-    update(merged);
-    setDraft('');
-  };
-
-  const remove = (name: string) => update(list.filter(n => n !== name));
-  const resetMeta = () => {
-    if (activePlatform === 'meta') {
-      onChange({ ...suppression, meta: [...DEFAULT_META_SUPPRESSION] });
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <p className="text-xs text-muted-foreground">
-        Conversion event names listed here are excluded from the Conversion Breakdown card on the matching platform page. Useful for hiding duplicate or platform-derived events. Case-insensitive.
-      </p>
-
-      {/* Platform tabs */}
-      <div className="flex flex-wrap gap-1.5">
-        {PLATFORMS.map(p => {
-          const count = (suppression[p.key] ?? []).length;
-          return (
-            <button
-              key={p.key}
-              onClick={() => setActivePlatform(p.key)}
-              className={cn(
-                'px-2.5 py-1 text-xs rounded-md border transition-colors',
-                activePlatform === p.key
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-border text-muted-foreground hover:bg-muted/40 hover:text-foreground'
-              )}
-            >
-              {p.label}
-              {count > 0 && <span className="ml-1.5 text-[9px] opacity-70">{count}</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Add input */}
-      <div className="flex gap-2">
-        <Input
-          value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') { e.preventDefault(); addNames(draft); }
-          }}
-          placeholder="e.g. omni_purchase  (paste multiple separated by commas or newlines)"
-          className="h-8 text-xs font-mono"
-        />
-        <Button size="sm" onClick={() => addNames(draft)} className="gap-1.5 text-xs shrink-0">
-          <Plus size={12} /> Add
-        </Button>
-        {activePlatform === 'meta' && (
-          <Button size="sm" variant="ghost" onClick={resetMeta} className="text-xs text-muted-foreground shrink-0">
-            Reset defaults
-          </Button>
-        )}
-      </div>
-
-      {/* List */}
-      {list.length === 0 ? (
-        <div className="text-xs text-muted-foreground italic px-3 py-6 border border-dashed border-border rounded-lg text-center">
-          No suppressed conversion events for {PLATFORMS.find(p => p.key === activePlatform)?.label}.
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {list.map(name => (
-            <span
-              key={name}
-              className="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-md border border-border bg-muted/20 text-[11px] font-mono text-card-foreground"
-            >
-              {name}
-              <button
-                onClick={() => remove(name)}
-                className="p-0.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                aria-label={`Remove ${name}`}
-              >
-                <X size={11} />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ─── Metric Mapping ─── */
 function MetricMappingPanel({ client, updateClient }: Props) {
