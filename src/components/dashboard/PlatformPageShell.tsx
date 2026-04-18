@@ -113,11 +113,13 @@ export function PlatformPageShell({
 
       {topExtras}
 
-      {/* Conversion split */}
-      <ConversionSplitCard
-        lowerFunnel={totals.conversionsLowerFunnel}
-        upperFunnel={totals.conversionsUpperFunnel}
-      />
+      {/* Conversion split — hidden when no conversions tracked */}
+      {hasConversions && (
+        <ConversionSplitCard
+          lowerFunnel={totals.conversionsLowerFunnel}
+          upperFunnel={totals.conversionsUpperFunnel}
+        />
+      )}
 
       {/* Trends */}
       <div className="space-y-3 md:space-y-4 print-break-before">
@@ -132,7 +134,7 @@ export function PlatformPageShell({
 
       {midExtras?.({ totals })}
 
-      {!hideConversionBreakdown && (
+      {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" subtitle="Grouped by tracked conversion event and funnel stage." />
           <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
