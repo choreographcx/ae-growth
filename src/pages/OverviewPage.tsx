@@ -198,13 +198,10 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Primary KPI cards (3×2) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
+      {/* Primary KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
       </div>
-
-      {/* Secondary business KPI strip */}
-      <SecondaryKPIStrip stats={secondaryStats} />
 
       {/* Platform Contribution */}
       <div className="space-y-2.5 md:space-y-3">
