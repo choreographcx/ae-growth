@@ -523,6 +523,7 @@ export type Database = {
               landing_page_views: number
               outbound_clicks: number
               platform: string
+              publisher_platform: string
               reach: number
               video_p100: number
               video_views: number
