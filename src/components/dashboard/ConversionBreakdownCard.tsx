@@ -38,7 +38,13 @@ function funnelKind(group: string): 'lower' | 'upper' | 'other' {
 }
 
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className, suppressNames }: Props) {
-  const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
+  const { client } = useDashboard();
+  const suppressedConversions = useMemo(() => {
+    const reporting = (client as any)?.reporting ?? {};
+    const configured = reporting.conversionSuppression as Partial<Record<PlatformKey, string[]>> | undefined;
+    return { ...DEFAULT_CONVERSION_SUPPRESSION, ...(configured ?? {}) };
+  }, [client]);
+  const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns, suppressedConversions });
   const isMobile = useIsMobile();
 
   const [showLower, setShowLower] = useState(true);
