@@ -30,7 +30,7 @@ export function SectionHeader({
         )}
       </div>
       {action && (
-        <div className="flex items-center gap-2 lg:shrink-0 lg:order-last">
+        <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
           {action}
         </div>
       )}
