@@ -100,9 +100,8 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 
   return (
     <div className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden", className)}>
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-border">
         <h3 className="text-sm font-semibold text-card-foreground">Platform Performance</h3>
-        <p className="text-[11px] text-muted-foreground">CPA &amp; conversions use lower-funnel actions.</p>
       </div>
       <div className="overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
@@ -160,10 +159,6 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
 function MobilePlatformCards({ data, currency, className }: { data: PlatformSummary[]; currency: string; className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="text-[13px] font-semibold text-foreground">Platform Performance</h3>
-        <span className="text-[10px] text-muted-foreground">{data.length} platforms</span>
-      </div>
       {data.map(p => <MobilePlatformCard key={p.platform} platform={p} currency={currency} />)}
     </div>
   );
@@ -174,29 +169,29 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
   const lf = p.conversionsLowerFunnel ?? p.conversions;
   return (
     <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
-      <div className="px-3 pt-3 pb-2">
+      <div className="px-3 pt-3 pb-3">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[12px] font-semibold text-card-foreground">{p.label}</p>
-          <p className="text-[12px] font-bold text-card-foreground"><CurrencyValue amount={p.spend} currency={currency} /></p>
+          <p className="text-[15px] font-semibold text-card-foreground">{p.label}</p>
         </div>
+        <p className="text-[28px] font-bold text-card-foreground tracking-tight leading-none mb-3"><CurrencyValue amount={p.spend} currency={currency} /></p>
         <div className="grid grid-cols-3 gap-px bg-border/30 rounded overflow-hidden">
           <div className="bg-card px-2 py-2 text-center">
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">LF Conv.</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none">{lf.toLocaleString()}</p>
+            <p className="text-[12px] text-muted-foreground uppercase tracking-wider leading-tight mb-1">LF Conv.</p>
+            <p className="text-[14px] font-semibold text-card-foreground leading-none">{lf.toLocaleString()}</p>
           </div>
           <div className="bg-card px-2 py-2 text-center">
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">CPA</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.cpa > 0 ? <CurrencyValue amount={p.cpa} decimals={2} currency={currency} /> : '—'}</p>
+            <p className="text-[12px] text-muted-foreground uppercase tracking-wider leading-tight mb-1">CPA</p>
+            <p className="text-[14px] font-semibold text-card-foreground leading-none">{p.cpa > 0 ? <CurrencyValue amount={p.cpa} decimals={2} currency={currency} /> : '—'}</p>
           </div>
           <div className="bg-card px-2 py-2 text-center">
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">ROAS</p>
-            <p className="text-[12px] font-semibold text-card-foreground leading-none">{p.roas != null && p.roas > 0 ? `${p.roas.toFixed(2)}x` : '—'}</p>
+            <p className="text-[12px] text-muted-foreground uppercase tracking-wider leading-tight mb-1">ROAS</p>
+            <p className="text-[14px] font-semibold text-card-foreground leading-none">{p.roas != null && p.roas > 0 ? `${p.roas.toFixed(2)}x` : '—'}</p>
           </div>
         </div>
       </div>
       {expanded && (
-        <div className="px-3 pb-2 pt-1.5 border-t border-border/40">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+        <div className="px-3 pb-2 pt-2 border-t border-border/40">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             <DRow label="CTR" value={`${p.ctr.toFixed(2)}%`} />
             <DRow label="CPC" value={<CurrencyValue amount={p.cpc} decimals={2} currency={currency} />} />
             <DRow label="Impr." value={fmtCompact(p.impressions)} />
@@ -208,10 +203,10 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
       )}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-center gap-0.5 py-2 text-[10px] font-medium text-muted-foreground hover:text-primary border-t border-border/30 bg-muted/15 transition-colors"
+        className="w-full flex items-center justify-center gap-0.5 py-2 text-[12px] font-medium text-muted-foreground hover:text-primary border-t border-border/30 bg-muted/15 transition-colors"
       >
         {expanded ? 'Less' : 'More'}
-        {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+        {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
       </button>
     </div>
   );
@@ -220,8 +215,8 @@ function MobilePlatformCard({ platform: p, currency }: { platform: PlatformSumma
 function DRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[10px] text-muted-foreground">{label}</span>
-      <span className="text-[11px] font-semibold text-card-foreground">{value}</span>
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="text-[13px] font-semibold text-card-foreground">{value}</span>
     </div>
   );
 }

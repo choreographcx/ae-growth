@@ -190,7 +190,7 @@ export default function OverviewPage() {
 
       {/* Platform Contribution */}
       <div className="space-y-2.5 md:space-y-3">
-        <SectionHeader title="Platform Contribution" subtitle="Spend allocation vs lower-funnel output." />
+        <SectionHeader title="Platform Contribution" />
         <PlatformContributionCard platforms={platformSummaries} />
       </div>
 

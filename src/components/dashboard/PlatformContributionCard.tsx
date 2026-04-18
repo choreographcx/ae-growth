@@ -54,7 +54,6 @@ export function PlatformContributionCard({ platforms, className }: Props) {
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
       <div className="px-5 py-4 border-b border-border">
         <h3 className="text-sm font-semibold text-card-foreground">Platform Contribution</h3>
-        <p className="text-[11px] text-muted-foreground mt-0.5">Where the budget goes vs where the lower-funnel conversions come from.</p>
       </div>
 
       <div className="px-5 py-4 space-y-5">
