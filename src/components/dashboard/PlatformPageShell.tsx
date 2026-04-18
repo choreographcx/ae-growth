@@ -10,14 +10,11 @@ import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard'
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { EmptyPlatformState } from '@/components/dashboard/EmptyPlatformState';
 import { AlertCard } from '@/components/dashboard/AlertCard';
+import { generateInsights, sortInsights } from '@/lib/insights';
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
 
 function formatCompact(n: number): string {
-  if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
-  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
+  // On platform pages we display full integers with thousand separators (no compact suffixes).
   return Math.round(n).toLocaleString();
 }
 
@@ -51,7 +48,7 @@ export function PlatformPageShell({
 }: PlatformPageShellProps) {
   const { client, data } = useDashboard();
   const currency = client.currency;
-  const { loading, error, rows, previousRows, range } = data;
+  const { loading, error, rows, previousRows, range, platformSummaries } = data;
 
   const scoped     = useMemo(() => rows.filter(r => normalizePlatform(r.platform) === platformKey), [rows, platformKey]);
   const scopedPrev = useMemo(() => previousRows.filter(r => normalizePlatform(r.platform) === platformKey), [previousRows, platformKey]);
@@ -75,7 +72,7 @@ export function PlatformPageShell({
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <SectionHeader title={title} subtitle="Platform-level performance with all conversion layers visible." />
+      <SectionHeader title={title} />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
@@ -134,13 +131,44 @@ export function PlatformPageShell({
       )}
 
       {bottomExtras}
+
+      {/* Insights — bottom of page */}
+      <PlatformInsights platformKey={platformKey} totals={totals} prevTotals={prevTotals} platformSummaries={platformSummaries} />
     </div>
   );
 }
 
-/** Helper to build a USD KPI value with the symbol. */
+function PlatformInsights({ platformKey, totals, prevTotals, platformSummaries }: {
+  platformKey: PlatformKey;
+  totals: ReturnType<typeof aggregateRows>;
+  prevTotals: ReturnType<typeof aggregateRows> | null;
+  platformSummaries: ReturnType<typeof useDashboard>['data']['platformSummaries'];
+}) {
+  const insights = useMemo(() => {
+    const scoped = platformSummaries.filter(p => p.platform === platformKey);
+    return sortInsights(generateInsights({
+      totals: totals as any,
+      previousTotals: prevTotals as any,
+      platforms: scoped,
+    }));
+  }, [platformKey, totals, prevTotals, platformSummaries]);
+
+  if (!insights.length) return null;
+
+  return (
+    <div className="space-y-2.5 md:space-y-3">
+      <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
+        {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
+      </div>
+    </div>
+  );
+}
+
+/** Helper to build a currency-aware KPI value with the symbol and thousand separators. */
 export function moneyKpi(amount: number, currency: string, decimals = 2) {
-  return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{amount.toFixed(decimals)}</span>;
+  const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatted}</span>;
 }
 
 export { formatCompact };
