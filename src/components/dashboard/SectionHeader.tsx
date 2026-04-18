@@ -12,7 +12,7 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({
-  title, subtitle, action, className, showMobileDatePicker = true,
+  title, subtitle, action, className, showMobileDatePicker = false,
 }: SectionHeaderProps) {
   return (
     <div className={cn("flex items-center justify-between gap-2", className)}>
