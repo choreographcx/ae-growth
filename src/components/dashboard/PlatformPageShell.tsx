@@ -10,9 +10,8 @@ import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard'
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { EmptyPlatformState } from '@/components/dashboard/EmptyPlatformState';
 import { AlertCard } from '@/components/dashboard/AlertCard';
+import { generateInsights, sortInsights } from '@/lib/insights';
 import { Loader2, AlertTriangle } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
 
 function formatCompact(n: number): string {
   // On platform pages we display full integers with thousand separators (no compact suffixes).
