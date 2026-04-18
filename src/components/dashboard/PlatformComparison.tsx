@@ -1,4 +1,4 @@
-import { PlatformSummary, PlatformKey } from '@/types/dashboard';
+import { PlatformSummary, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
