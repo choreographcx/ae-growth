@@ -82,7 +82,7 @@ interface Props {
 type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels' | 'suppression';
 
 /** Default Meta duplicate conversion event names to suppress out of the box. */
-const DEFAULT_META_SUPPRESSION: string[] = [
+export const DEFAULT_META_SUPPRESSION: string[] = [
   'omni_initiated_checkout',
   'offsite_conversion.fb_pixel_initiate_checkout',
   'onsite_web_initiate_checkout',
@@ -97,6 +97,8 @@ const DEFAULT_META_SUPPRESSION: string[] = [
   'onsite_web_purchase',
   'omni_landing_page_view',
   'offsite_conversion.fb_pixel_add_payment_info',
+  'web_app_in_store_purchase',
+  'onsite_web_lead',
 ];
 
 export const DEFAULT_CONVERSION_SUPPRESSION: Record<PlatformKey, string[]> = {
