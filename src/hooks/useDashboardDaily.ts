@@ -314,7 +314,7 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
+  const { selectedPlatformLabels = [], selectedCampaigns = [], suppressedConversions } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
