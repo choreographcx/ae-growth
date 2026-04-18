@@ -79,7 +79,30 @@ interface Props {
   updateClient: (u: Partial<ClientProfile>) => void;
 }
 
-type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels';
+type TabKey = 'mapping' | 'naming' | 'aliases' | 'taxonomy' | 'labels' | 'suppression';
+
+/** Default Meta duplicate conversion event names to suppress out of the box. */
+const DEFAULT_META_SUPPRESSION: string[] = [
+  'omni_initiated_checkout',
+  'offsite_conversion.fb_pixel_initiate_checkout',
+  'onsite_web_initiate_checkout',
+  'onsite_conversion.lead_grouped',
+  'offsite_search_add_meta_leads',
+  'offsite_content_view_add_meta_leads',
+  'offsite_complete_registration_add_meta_leads',
+  'onsite_web_app_purchase',
+  'offsite_conversion.fb_pixel_purchase',
+  'omni_purchase',
+  'web_in_store_purchase',
+  'onsite_web_purchase',
+  'omni_landing_page_view',
+  'offsite_conversion.fb_pixel_add_payment_info',
+];
+
+export const DEFAULT_CONVERSION_SUPPRESSION: Record<PlatformKey, string[]> = {
+  meta: DEFAULT_META_SUPPRESSION,
+  google: [], tiktok: [], snapchat: [], x: [], linkedin: [], programmatic: [],
+};
 
 export function ReportingRulesSection({ client, updateClient }: Props) {
   const [activeTab, setActiveTab] = useState<TabKey>('mapping');
