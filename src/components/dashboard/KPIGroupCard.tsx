@@ -111,34 +111,34 @@ function MobileKPICard({ data, className }: KPIGroupCardProps) {
 
   return (
     <div className={cn(
-      "bg-card rounded-lg border border-border px-2.5 py-2 shadow-sm min-w-0 overflow-hidden",
+      "bg-card rounded-lg border border-border px-3 py-3 shadow-sm min-w-0 overflow-hidden",
       className
     )}>
-      <div className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
         {isCurrencyIcon && (
-          <div className={cn("flex items-center justify-center w-5 h-5 rounded shrink-0", colorClass)}>
-            <CurrencySymbol currency={client.currency} size={11} className="text-emerald-600" />
+          <div className={cn("flex items-center justify-center w-7 h-7 rounded shrink-0", colorClass)}>
+            <CurrencySymbol currency={client.currency} size={14} className="text-emerald-600" />
           </div>
         )}
         {IconComp && (
-          <div className={cn("flex items-center justify-center w-5 h-5 rounded shrink-0", colorClass)}>
-            <IconComp size={11} />
+          <div className={cn("flex items-center justify-center w-7 h-7 rounded shrink-0", colorClass)}>
+            <IconComp size={14} />
           </div>
         )}
-        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none truncate flex-1 min-w-0">{data.title}</p>
+        <p className="text-[14px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight truncate flex-1 min-w-0">{data.title}</p>
         {data.tooltip && <InfoTooltip text={data.tooltip} compact />}
         <MobileChange value={primary.change} />
       </div>
-      <p className="text-lg font-bold text-card-foreground tracking-tight leading-none mt-0.5 truncate">{primary.formattedValue}</p>
+      <p className="text-[30px] font-bold text-card-foreground tracking-tight leading-none mt-2 truncate">{primary.formattedValue}</p>
       {supporting.length > 0 && (
         <div className={cn(
-          "mt-1 pt-1 border-t border-border/30 grid gap-x-2 gap-y-0.5 min-w-0",
+          "mt-2.5 pt-2 border-t border-border/30 grid gap-x-3 gap-y-1.5 min-w-0",
           supporting.length === 1 ? "grid-cols-1" : "grid-cols-2"
         )}>
           {supporting.map((s, i) => (
-            <div key={i} className="min-w-0 flex flex-col leading-tight">
-              <span className="text-[8px] text-muted-foreground uppercase tracking-wider truncate">{s.label}</span>
-              <span className="text-[11px] font-semibold text-card-foreground truncate">{s.formattedValue}</span>
+            <div key={i} className="min-w-0 flex flex-col leading-tight gap-0.5">
+              <span className="text-[14px] text-muted-foreground tracking-wide truncate">{s.label}</span>
+              <span className="text-[14px] font-semibold text-card-foreground truncate">{s.formattedValue}</span>
             </div>
           ))}
         </div>
