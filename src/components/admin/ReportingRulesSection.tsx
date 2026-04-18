@@ -119,19 +119,12 @@ export function ReportingRulesSection({ client, updateClient }: Props) {
   const delimiter = reporting.delimiter ?? '|';
   const dimensionOrder: string[] = reporting.dimensionOrder ?? TAXONOMY_DIMENSIONS;
 
-  const suppression: Record<PlatformKey, string[]> = {
-    ...DEFAULT_CONVERSION_SUPPRESSION,
-    ...(reporting.conversionSuppression ?? {}),
-  };
-  const suppressionCount = Object.values(suppression).reduce((s, arr) => s + (arr?.length || 0), 0);
-
   const tabs: { key: TabKey; label: string; count?: number }[] = [
     { key: 'mapping', label: 'Metric Mapping', count: client.metricMappings.length },
     { key: 'naming', label: 'Naming Normalization' },
     { key: 'aliases', label: 'Alias Manager', count: aliases.length },
     { key: 'taxonomy', label: 'Taxonomy Dictionary', count: tokens.length },
     { key: 'labels', label: 'Label Overrides', count: labelOverrides.filter(l => l.active).length },
-    { key: 'suppression', label: 'Conversion Suppression', count: suppressionCount },
   ];
 
   return (
@@ -172,12 +165,6 @@ export function ReportingRulesSection({ client, updateClient }: Props) {
       {activeTab === 'aliases' && <AliasManagerPanel aliases={aliases} onChange={v => updateReporting({ aliases: v })} />}
       {activeTab === 'taxonomy' && <TaxonomyDictionaryPanel tokens={tokens} onChange={v => updateReporting({ taxonomyTokens: v })} />}
       {activeTab === 'labels' && <LabelOverridesPanel overrides={labelOverrides} onChange={v => updateReporting({ labelOverrides: v })} />}
-      {activeTab === 'suppression' && (
-        <ConversionSuppressionPanel
-          suppression={suppression}
-          onChange={v => updateReporting({ conversionSuppression: v })}
-        />
-      )}
     </div>
   );
 }
