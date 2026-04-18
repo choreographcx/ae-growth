@@ -381,8 +381,8 @@ export function useDashboardDaily(
       const prevStart = subDays(prevEnd, days - 1);
 
       const [current, previous] = await Promise.all([
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end), p_suppressed_conversions: suppressionPayload }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd),   p_suppressed_conversions: suppressionPayload }),
       ]);
       if (cancelled) return;
       if (current.error) {
@@ -396,7 +396,7 @@ export function useDashboardDaily(
     };
     run();
     return () => { cancelled = true; };
-  }, [range.start.getTime(), range.end.getTime()]);
+  }, [range.start.getTime(), range.end.getTime(), suppressionKey]);
 
   useEffect(() => {
     if (!filtersActive) { setFilteredRows([]); return; }
