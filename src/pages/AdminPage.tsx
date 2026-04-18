@@ -518,6 +518,38 @@ function ModularPlatformCard({
                   rows={2}
                 />
               </div>
+
+              {p.key === 'meta' && (
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      Conversion Suppression
+                      <span className="ml-1.5 text-muted-foreground/70 normal-case tracking-normal">
+                        ({suppressionList.length} event{suppressionList.length === 1 ? '' : 's'})
+                      </span>
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={resetMetaSuppression}
+                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Reset defaults
+                    </button>
+                  </div>
+                  <textarea
+                    value={suppressionDraft}
+                    onChange={e => setSuppressionDraft(e.target.value)}
+                    onBlur={e => commitSuppression(e.target.value)}
+                    placeholder="One conversion event name per line, e.g.&#10;omni_purchase&#10;onsite_web_lead"
+                    className="mt-1 w-full border border-input rounded-lg p-2 text-[11px] font-mono bg-background text-foreground resize-y focus:ring-1 focus:ring-ring focus:border-ring outline-none transition-colors"
+                    rows={8}
+                    spellCheck={false}
+                  />
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    These conversion events are excluded from all Meta totals, KPIs, trends, and breakdowns. Case-insensitive. Changes save when you leave the field, then click Save.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
