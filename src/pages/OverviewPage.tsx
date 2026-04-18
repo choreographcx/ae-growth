@@ -56,7 +56,6 @@ export default function OverviewPage() {
   ].filter(s => s.value > 0 || s.label === 'Lower-Funnel Conversions'), [totals, lf]);
 
   // Insight flags for KPI cards
-  const lowRoas      = totals.spend > 0 && totals.roas < 1;
   const highFreq     = totals.frequency >= 4;
   const ctrFalling   = previousTotals && totals.ctr < previousTotals.ctr;
   const weakLpvRate  = totals.ctr >= 1.5 && totals.lpvRate > 0 && totals.lpvRate < 30;
@@ -70,7 +69,7 @@ export default function OverviewPage() {
     const moneyCompact = (v: number) => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span>;
 
     const groups: KPIGroupData[] = [
-      // 1. SPEND — Budget + Pacing (or ROAS if no budget configured)
+      // 1. SPEND — Budget + Pacing (or just spend if no budget configured)
       {
         title: 'Spend', icon: 'DollarSign',
         primary: {
@@ -82,10 +81,7 @@ export default function OverviewPage() {
         supporting: totalBudget > 0 ? [
           { label: 'Budget', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{totalBudget.toLocaleString()}</span> },
           { label: 'Pacing', formattedValue: `${Math.round((cur.spend / totalBudget) * 100)}%` },
-        ] : [
-          { label: 'ROAS', formattedValue: cur.roas > 0 ? `${cur.roas.toFixed(2)}x` : '—' },
-        ],
-        tooltip: lowRoas ? 'ROAS is below 1x — campaigns spending more than they generate in tracked value.' : undefined,
+        ] : [],
       },
       // 2. IMPRESSIONS — CPM only (Reach lives in its own card)
       {
@@ -164,7 +160,7 @@ export default function OverviewPage() {
     ];
 
     return applyCurrencyToKPIGroups(groups, currency, 26);
-  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, lowRoas, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
+  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
 
 
 

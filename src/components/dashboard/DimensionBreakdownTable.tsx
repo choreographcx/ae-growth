@@ -24,7 +24,7 @@ const fmtCompact = (v: number): string => {
 
 /**
  * Generic dimension breakdown table. Aggregates spend, lower-funnel conversions,
- * CPA (LF) and ROAS by an arbitrary dimension extractor. Used to surface
+ * and CPA (LF) by an arbitrary dimension extractor. Used to surface
  * audience_type, campaign_objective, campaign_type, etc.
  */
 export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAllUnspecified, className }: Props) {
@@ -51,7 +51,6 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
         ctr: a.ctr,
         lfConv: a.conversionsLowerFunnel,
         cpa: a.cpaLowerFunnel,
-        roas: a.roas,
       };
     }).sort((a, b) => b.spend - a.spend);
   }, [rows, pick]);
@@ -77,7 +76,6 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
               <th className="px-4 py-3 text-right">CTR</th>
               <th className="px-4 py-3 text-right">LF Conv.</th>
               <th className="px-4 py-3 text-right">CPA (LF)</th>
-              <th className="px-4 py-3 text-right">ROAS</th>
             </tr>
           </thead>
           <tbody>
@@ -100,7 +98,6 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
                   <td className={cn('px-4 py-3 text-right text-xs tabular-nums text-card-foreground', winner && 'bg-success/[0.08]')}>
                     {g.cpa > 0 ? <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{g.cpa.toFixed(2)}</span> : '—'}
                   </td>
-                  <td className="px-4 py-3 text-right text-xs tabular-nums text-card-foreground">{g.roas > 0 ? `${g.roas.toFixed(2)}x` : '—'}</td>
                 </tr>
               );
             })}

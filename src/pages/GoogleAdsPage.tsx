@@ -13,11 +13,8 @@ export default function GoogleAdsPage() {
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
-      tooltip: cur.roas > 0 && cur.roas < 1 ? 'ROAS below 1x — campaigns spending more than they return in tracked value.' : undefined,
       primary: { label: 'Spend', value: cur.spend, formattedValue: moneyKpi(cur.spend, currency, 0), change: pctChange(cur.spend, prev?.spend), trend: [] },
-      supporting: [
-        { label: 'ROAS', formattedValue: cur.roas > 0 ? `${cur.roas.toFixed(2)}x` : '—', change: pctChange(cur.roas, prev?.roas) },
-      ],
+      supporting: [],
     },
     {
       title: 'Impressions', icon: 'Eye',
