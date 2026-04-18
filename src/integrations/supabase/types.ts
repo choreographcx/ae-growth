@@ -470,6 +470,7 @@ export type Database = {
           p_end: string
           p_platforms?: string[]
           p_start: string
+          p_suppressed_conversions?: Json
         }
         Returns: {
           conversion_funnel_group: string
@@ -504,6 +505,7 @@ export type Database = {
               p_end: string
               p_platforms?: string[]
               p_start: string
+              p_suppressed_conversions?: Json
             }
             Returns: {
               audience_type: string
