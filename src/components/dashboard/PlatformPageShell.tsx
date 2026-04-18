@@ -48,7 +48,7 @@ export function PlatformPageShell({
 }: PlatformPageShellProps) {
   const { client, data } = useDashboard();
   const currency = client.currency;
-  const { loading, error, rows, previousRows, range } = data;
+  const { loading, error, rows, previousRows, range, platformSummaries } = data;
 
   const scoped     = useMemo(() => rows.filter(r => normalizePlatform(r.platform) === platformKey), [rows, platformKey]);
   const scopedPrev = useMemo(() => previousRows.filter(r => normalizePlatform(r.platform) === platformKey), [previousRows, platformKey]);
