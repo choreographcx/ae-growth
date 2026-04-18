@@ -100,8 +100,8 @@ export function PlatformPageShell({
         </div>
       )}
 
-      {/* KPIs — 3-col grid matches the Overview layout (Impressions+CPM together, Reach+Frequency together, etc.) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
+      {/* KPIs — single column on mobile, 3-col on desktop (matches Overview) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
       </div>
 

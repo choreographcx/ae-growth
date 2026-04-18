@@ -155,10 +155,10 @@ function ChangeIndicator({ value }: { value: number }) {
   const Icon = isPositive ? TrendingUp : isNeutral ? Minus : TrendingDown;
   return (
     <div className={cn(
-      "flex items-center gap-1 mt-1.5 text-[11px]",
+      "flex items-center gap-1 mt-1.5 text-[14px]",
       isPositive ? 'text-kpi-positive' : isNeutral ? 'text-kpi-neutral' : 'text-kpi-negative'
     )}>
-      <Icon size={11} />
+      <Icon size={14} />
       <span className="font-semibold">{isPositive ? '+' : ''}{value}%</span>
       <span className="text-muted-foreground font-normal">vs prev</span>
     </div>
@@ -170,7 +170,7 @@ function MobileChange({ value }: { value: number }) {
   const isNeutral = value === 0;
   return (
     <span className={cn(
-      "text-[11px] font-semibold leading-none",
+      "text-[14px] font-semibold leading-none",
       isPositive ? 'text-kpi-positive' : isNeutral ? 'text-kpi-neutral' : 'text-kpi-negative'
     )}>
       {isPositive ? '+' : ''}{value}%
