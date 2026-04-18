@@ -50,11 +50,6 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
   const [showLower, setShowLower] = useState(true);
   const [showUpper, setShowUpper] = useState(true);
 
-  const platformCampaigns = useMemo(() => {
-    if (!campaigns?.length) return undefined;
-    return campaigns;
-  }, [campaigns]);
-
   const suppressSet = useMemo(
     () => new Set((suppressNames || []).map(n => n.trim().toLowerCase())),
     [suppressNames]
