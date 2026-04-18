@@ -72,9 +72,9 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="justify-start text-left font-normal gap-1.5 h-7 text-[11px] px-2 flex-1 min-w-0"
+            className="justify-start text-left font-normal gap-1.5 h-9 text-sm px-2.5 flex-1 min-w-0"
           >
-            <CalendarIcon size={12} className="shrink-0 text-muted-foreground" />
+            <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
             <span className="truncate">{displayText}</span>
           </Button>
         </PopoverTrigger>
