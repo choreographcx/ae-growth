@@ -18,7 +18,8 @@ function formatCompact(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
-import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
+// Conversion suppression is now applied at the data source via the RPCs;
+// the breakdown card no longer needs a client-side suppress list.
 
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
