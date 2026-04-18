@@ -72,9 +72,9 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="justify-start text-left font-normal gap-1.5 h-7 text-[11px] px-2 flex-1 min-w-0"
+            className="justify-start text-left font-normal gap-1.5 h-9 text-sm px-2.5 flex-1 min-w-0"
           >
-            <CalendarIcon size={12} className="shrink-0 text-muted-foreground" />
+            <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
             <span className="truncate">{displayText}</span>
           </Button>
         </PopoverTrigger>
@@ -95,10 +95,10 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
                 )}
               >
                 <div className={cn(
-                  "text-xs font-medium",
+                  "text-sm font-medium",
                   activeField === 'from' ? "text-primary" : "text-foreground"
                 )}>Start</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
+                <div className="text-sm text-muted-foreground mt-0.5">
                   {format(draftRange.from, 'MMM d, yyyy')}
                 </div>
               </button>
@@ -111,10 +111,10 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
                 )}
               >
                 <div className={cn(
-                  "text-xs font-medium",
+                  "text-sm font-medium",
                   activeField === 'to' ? "text-primary" : "text-foreground"
                 )}>End</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
+                <div className="text-sm text-muted-foreground mt-0.5">
                   {format(draftRange.to, 'MMM d, yyyy')}
                 </div>
               </button>
@@ -157,7 +157,7 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
               checked={showPreviousPeriod}
               onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
             />
-            <label htmlFor="prev-period-mobile" className="text-[11px] text-muted-foreground cursor-pointer select-none">
+            <label htmlFor="prev-period-mobile" className="text-sm text-muted-foreground cursor-pointer select-none">
               Compare to previous period
             </label>
           </div>
