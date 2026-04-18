@@ -18,21 +18,7 @@ function formatCompact(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
-/** Meta conversion event names that duplicate other tracked events; hidden from the breakdown. */
-const META_DUPLICATE_CONVERSIONS = [
-  'omni_initiated_checkout',
-  'offsite_conversion.fb_pixel_initiate_checkout',
-  'onsite_web_initiate_checkout',
-  'onsite_conversion.lead_grouped',
-  'offsite_search_add_meta_leads',
-  'offsite_content_view_add_meta_leads',
-  'offsite_complete_registration_add_meta_leads',
-  'onsite_web_app_purchase',
-  'offsite_conversion.fb_pixel_purchase',
-  'omni_purchase',
-  'web_in_store_purchase',
-  'onsite_web_purchase',
-];
+import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
 
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
@@ -167,7 +153,11 @@ export function PlatformPageShell({
             platform={platformKey}
             start={range.start}
             end={range.end}
-            suppressNames={platformKey === 'meta' ? META_DUPLICATE_CONVERSIONS : undefined}
+            suppressNames={(() => {
+              const configured = (client as any)?.reporting?.conversionSuppression?.[platformKey];
+              if (Array.isArray(configured)) return configured;
+              return DEFAULT_CONVERSION_SUPPRESSION[platformKey];
+            })()}
           />
         </div>
       )}
