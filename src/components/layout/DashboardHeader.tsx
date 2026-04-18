@@ -157,7 +157,7 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
               checked={showPreviousPeriod}
               onCheckedChange={(v) => setShowPreviousPeriod(!!v)}
             />
-            <label htmlFor="prev-period-mobile" className="text-[11px] text-muted-foreground cursor-pointer select-none">
+            <label htmlFor="prev-period-mobile" className="text-sm text-muted-foreground cursor-pointer select-none">
               Compare to previous period
             </label>
           </div>
