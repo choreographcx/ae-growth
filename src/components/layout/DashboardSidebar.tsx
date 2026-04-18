@@ -25,7 +25,6 @@ export function DashboardSidebar() {
       label: client.platforms[p].label,
       entry: platformIconEntries[p],
     })),
-    { to: '/tracking-health', label: 'Tracking Health', entry: { type: 'lucide' as const, icon: Activity } },
     { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
   ];
 
