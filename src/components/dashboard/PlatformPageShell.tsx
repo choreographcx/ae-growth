@@ -153,7 +153,11 @@ export function PlatformPageShell({
             platform={platformKey}
             start={range.start}
             end={range.end}
-            suppressNames={platformKey === 'meta' ? META_DUPLICATE_CONVERSIONS : undefined}
+            suppressNames={(() => {
+              const configured = (client as any)?.reporting?.conversionSuppression?.[platformKey];
+              if (Array.isArray(configured)) return configured;
+              return DEFAULT_CONVERSION_SUPPRESSION[platformKey];
+            })()}
           />
         </div>
       )}
