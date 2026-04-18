@@ -50,10 +50,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [configLoaded, setConfigLoaded] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
+  // Resolve per-platform conversion suppression list from client config.
+  const suppressedConversions = useMemo(() => {
+    const reporting = (client as any)?.reporting ?? {};
+    const configured = reporting.conversionSuppression as
+      | Partial<Record<PlatformKey, string[]>>
+      | undefined;
+    return { ...DEFAULT_CONVERSION_SUPPRESSION, ...(configured ?? {}) };
+  }, [client]);
+
   // Single source of truth for dashboard data — shared with header and pages
   const data = useDashboardDaily(dateRange, {
     selectedPlatformLabels: selectedPlatforms,
     selectedCampaigns,
+    suppressedConversions,
   });
 
   useEffect(() => {
