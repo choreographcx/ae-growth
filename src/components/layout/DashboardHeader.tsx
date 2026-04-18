@@ -195,7 +195,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
-      <div className="flex h-12 items-center justify-between gap-2">
+      <div className="flex h-12 items-center justify-between gap-2 relative">
         <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
@@ -209,10 +209,17 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             <img
               src={(client as any).branding.logoUrl}
               alt={client.name}
-              className="h-7 w-auto object-contain shrink-0"
+              className="h-7 w-auto object-contain shrink-0 hidden lg:block"
             />
           )}
         </div>
+        {(client as any).branding?.logoUrl && (
+          <img
+            src={(client as any).branding.logoUrl}
+            alt={client.name}
+            className="h-7 w-auto object-contain absolute left-1/2 -translate-x-1/2 lg:hidden"
+          />
+        )}
         <div className="hidden items-center gap-1.5 lg:flex">
           <DateRangePicker />
           <div className="h-3.5 w-px bg-border mx-1" />
