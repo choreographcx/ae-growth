@@ -1,14 +1,38 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
+import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
+import { useMemo, useState, useCallback } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 
 export default function GoogleAdsPage() {
   const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'google'), [data.rows]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
+  // All Google rows (unfiltered) — used to build the available campaign-type options.
+  const googleRows = useMemo(
+    () => data.rows.filter(r => normalizePlatform(r.platform) === 'google'),
+    [data.rows]
+  );
+
+  const availableTypes = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of googleRows) {
+      const v = (r.campaign_type || '').trim();
+      if (v) set.add(v);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [googleRows]);
+
+  // Filter applied to BOTH the KPI/trend data (via PlatformPageShell) and the breakdown tables below.
+  const typeFilter = useCallback((r: DashboardDailyRow) => {
+    if (!selectedTypes.length) return true;
+    return selectedTypes.includes((r.campaign_type || '').trim());
+  }, [selectedTypes]);
+
+  const scoped = useMemo(() => googleRows.filter(typeFilter), [googleRows, typeFilter]);
 
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
@@ -65,6 +89,17 @@ export default function GoogleAdsPage() {
       title="Google Ads"
       buildKpiCards={buildKpis}
       warnOnWastedSpend
+      extraRowFilter={typeFilter}
+      titleAction={
+        availableTypes.length > 0 ? (
+          <MultiSelectFilter
+            label="Campaign Type"
+            options={availableTypes}
+            selected={selectedTypes}
+            onChange={setSelectedTypes}
+          />
+        ) : null
+      }
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">
