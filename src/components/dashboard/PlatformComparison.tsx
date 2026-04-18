@@ -1,4 +1,4 @@
-import { PlatformSummary, PlatformKey } from '@/types/dashboard';
+import { PlatformSummary, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -87,7 +87,12 @@ export function PlatformComparison({ data, className }: PlatformComparisonProps)
     else { setSortKey(key); setSortDir('desc'); }
   };
 
-  if (isMobile) return <MobilePlatformCards data={sorted} currency={currency} className={className} />;
+  if (isMobile) {
+    const ordered = [...data].sort(
+      (a, b) => PLATFORM_ORDER.indexOf(a.platform) - PLATFORM_ORDER.indexOf(b.platform)
+    );
+    return <MobilePlatformCards data={ordered} currency={currency} className={className} />;
+  }
 
   type Col = {
     key: keyof PlatformSummary;
