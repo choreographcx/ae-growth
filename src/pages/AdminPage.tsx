@@ -268,6 +268,8 @@ function ModularPlatformCard({
   updatePlatform,
   formatBudgetNumber,
   parseBudgetString,
+  client,
+  updateClient,
 }: {
   platform: typeof allPlatforms[0];
   cfg: ClientProfile['platforms'][PlatformKey];
@@ -276,9 +278,50 @@ function ModularPlatformCard({
   updatePlatform: (key: PlatformKey, updates: Partial<ClientProfile['platforms'][PlatformKey]>) => void;
   formatBudgetNumber: (n: number) => string;
   parseBudgetString: (s: string) => number;
+  client: ClientProfile;
+  updateClient: (updates: Partial<ClientProfile>) => void;
 }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const hasIds = cfg.accountIds.filter(Boolean).length > 0;
+
+  // Conversion suppression list (per platform). Stored under client.reporting.conversionSuppression.
+  const reporting = (client as any).reporting ?? {};
+  const suppressionMap: Record<PlatformKey, string[]> = {
+    ...DEFAULT_CONVERSION_SUPPRESSION,
+    ...(reporting.conversionSuppression ?? {}),
+  };
+  const suppressionList = suppressionMap[p.key] ?? [];
+  const [suppressionDraft, setSuppressionDraft] = useState<string>(suppressionList.join('\n'));
+  // Keep local draft in sync if external value changes (e.g. on initial load).
+  // We only resync when the canonical list reference changes via JSON equality.
+  const canonicalJoined = suppressionList.join('\n');
+  if (suppressionDraft !== canonicalJoined && document.activeElement?.getAttribute('data-suppression-platform') !== p.key) {
+    // No-op: allow uncontrolled drift while user is editing this card.
+  }
+
+  const commitSuppression = (raw: string) => {
+    const names = Array.from(new Set(
+      raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
+    ));
+    updateClient({
+      reporting: {
+        ...reporting,
+        conversionSuppression: { ...suppressionMap, [p.key]: names },
+      },
+    } as any);
+  };
+
+  const resetMetaSuppression = () => {
+    const next = [...DEFAULT_META_SUPPRESSION];
+    setSuppressionDraft(next.join('\n'));
+    updateClient({
+      reporting: {
+        ...reporting,
+        conversionSuppression: { ...suppressionMap, meta: next },
+      },
+    } as any);
+  };
+
 
   const iconEntry = platformIconEntries[p.key];
   const PlatformIcon = iconEntry.type === 'custom'
