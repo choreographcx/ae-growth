@@ -68,7 +68,16 @@ export function PlatformPageShell({
     return <EmptyPlatformState title={title} spend={totals.spend} impressions={totals.impressions} clicks={totals.clicks} />;
   }
 
-  const kpiCards = applyCurrencyToKPIGroups(buildKpiCards(totals, prevTotals, currency), currency, 26);
+  const hasConversions = (totals.conversionsLowerFunnel + totals.conversionsUpperFunnel + totals.conversionsAll) > 0;
+  const hasLPV = totals.landingPageViews > 0;
+
+  const rawCards = buildKpiCards(totals, prevTotals, currency).filter(c => {
+    const t = c.title.toLowerCase();
+    if (!hasConversions && t.includes('conversion')) return false;
+    if (!hasLPV && t.includes('landing page')) return false;
+    return true;
+  });
+  const kpiCards = applyCurrencyToKPIGroups(rawCards, currency, 26);
 
   return (
     <div className="space-y-6 md:space-y-8">
