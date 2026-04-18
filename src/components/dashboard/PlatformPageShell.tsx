@@ -18,7 +18,8 @@ function formatCompact(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
-import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
+// Conversion suppression is now applied at the data source via the RPCs;
+// the breakdown card no longer needs a client-side suppress list.
 
 interface PlatformPageShellProps {
   platformKey: PlatformKey;
@@ -153,11 +154,6 @@ export function PlatformPageShell({
             platform={platformKey}
             start={range.start}
             end={range.end}
-            suppressNames={(() => {
-              const configured = (client as any)?.reporting?.conversionSuppression?.[platformKey];
-              if (Array.isArray(configured)) return configured;
-              return DEFAULT_CONVERSION_SUPPRESSION[platformKey];
-            })()}
           />
         </div>
       )}

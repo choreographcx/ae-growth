@@ -259,7 +259,34 @@ export interface PlatformOption { key: PlatformKey; label: string; raw: string; 
 export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
+  /** Per-platform-key list of conversion event names to exclude from totals. */
+  suppressedConversions?: Partial<Record<PlatformKey, string[]>>;
 }
+
+/**
+ * Build the JSON payload sent to the RPC for conversion suppression.
+ * Source rows use raw platform values (meta, facebook, instagram, …) — we
+ * expand each PlatformKey-keyed list to every known raw value that maps to it,
+ * AND keep the canonical key itself as a fallback. SQL match is case-insensitive.
+ */
+function buildSuppressionPayload(
+  suppressed: Partial<Record<PlatformKey, string[]>> | undefined,
+  rawPlatforms: string[]
+): Record<string, string[]> | null {
+  if (!suppressed) return null;
+  const out: Record<string, string[]> = {};
+  for (const [key, names] of Object.entries(suppressed)) {
+    if (!names || names.length === 0) continue;
+    const k = key as PlatformKey;
+    out[k] = names;
+    for (const raw of rawPlatforms) {
+      if (normalizePlatform(raw) === k) out[raw.toLowerCase()] = names;
+    }
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+export { buildSuppressionPayload };
 
 interface UseDashboardDailyResult {
   loading: boolean;
@@ -287,7 +314,7 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
+  const { selectedPlatformLabels = [], selectedCampaigns = [], suppressedConversions } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
@@ -326,6 +353,23 @@ export function useDashboardDaily(
 
   const filtersActive = !!(platformsParam || campaignsParam);
 
+  // Build the per-platform suppression payload. Recomputes when raw platform
+  // strings are discovered after the first fetch, triggering a single refetch.
+  const rawPlatformValues = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of allRows) if (r.platform) set.add(r.platform);
+    return Array.from(set);
+  }, [allRows]);
+
+  const suppressionPayload = useMemo(
+    () => buildSuppressionPayload(suppressedConversions, rawPlatformValues),
+    [suppressedConversions, rawPlatformValues]
+  );
+  const suppressionKey = useMemo(
+    () => (suppressionPayload ? JSON.stringify(suppressionPayload) : ''),
+    [suppressionPayload]
+  );
+
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -337,8 +381,8 @@ export function useDashboardDaily(
       const prevStart = subDays(prevEnd, days - 1);
 
       const [current, previous] = await Promise.all([
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end), p_suppressed_conversions: suppressionPayload }),
+        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd),   p_suppressed_conversions: suppressionPayload }),
       ]);
       if (cancelled) return;
       if (current.error) {
@@ -352,7 +396,7 @@ export function useDashboardDaily(
     };
     run();
     return () => { cancelled = true; };
-  }, [range.start.getTime(), range.end.getTime()]);
+  }, [range.start.getTime(), range.end.getTime(), suppressionKey]);
 
   useEffect(() => {
     if (!filtersActive) { setFilteredRows([]); return; }
@@ -364,13 +408,14 @@ export function useDashboardDaily(
         p_end: fmt(range.end),
         p_platforms: platformsParam,
         p_campaign_names: campaignsParam,
+        p_suppressed_conversions: suppressionPayload,
       });
       if (cancelled) return;
       if (err) { setError(err.message); setFilteredRows([]); return; }
       setFilteredRows((data as DashboardDailyRow[]) || []);
     })();
     return () => { cancelled = true; };
-  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam]);
+  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam, suppressionKey]);
 
   const rows = filtersActive ? filteredRows : allRows;
 
