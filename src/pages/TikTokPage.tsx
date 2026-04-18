@@ -73,7 +73,6 @@ export default function TikTokPage() {
       platformKey="tiktok"
       title="TikTok Ads"
       buildKpiCards={buildKpis}
-      warnOnWastedSpend
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">

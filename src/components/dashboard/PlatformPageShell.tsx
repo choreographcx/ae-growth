@@ -68,7 +68,16 @@ export function PlatformPageShell({
     return <EmptyPlatformState title={title} spend={totals.spend} impressions={totals.impressions} clicks={totals.clicks} />;
   }
 
-  const kpiCards = applyCurrencyToKPIGroups(buildKpiCards(totals, prevTotals, currency), currency, 26);
+  const hasConversions = (totals.conversionsLowerFunnel + totals.conversionsUpperFunnel + totals.conversionsAll) > 0;
+  const hasLPV = totals.landingPageViews > 0;
+
+  const rawCards = buildKpiCards(totals, prevTotals, currency).filter(c => {
+    const t = c.title.toLowerCase();
+    if (!hasConversions && t.includes('conversion')) return false;
+    if (!hasLPV && t.includes('landing page')) return false;
+    return true;
+  });
+  const kpiCards = applyCurrencyToKPIGroups(rawCards, currency, 26);
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -104,11 +113,13 @@ export function PlatformPageShell({
 
       {topExtras}
 
-      {/* Conversion split */}
-      <ConversionSplitCard
-        lowerFunnel={totals.conversionsLowerFunnel}
-        upperFunnel={totals.conversionsUpperFunnel}
-      />
+      {/* Conversion split — hidden when no conversions tracked */}
+      {hasConversions && (
+        <ConversionSplitCard
+          lowerFunnel={totals.conversionsLowerFunnel}
+          upperFunnel={totals.conversionsUpperFunnel}
+        />
+      )}
 
       {/* Trends */}
       <div className="space-y-3 md:space-y-4 print-break-before">
@@ -123,7 +134,7 @@ export function PlatformPageShell({
 
       {midExtras?.({ totals })}
 
-      {!hideConversionBreakdown && (
+      {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" subtitle="Grouped by tracked conversion event and funnel stage." />
           <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
@@ -146,11 +157,19 @@ function PlatformInsights({ platformKey, totals, prevTotals, platformSummaries }
 }) {
   const insights = useMemo(() => {
     const scoped = platformSummaries.filter(p => p.platform === platformKey);
-    return sortInsights(generateInsights({
+    const label = scoped[0]?.label;
+    const raw = sortInsights(generateInsights({
       totals: totals as any,
       previousTotals: prevTotals as any,
       platforms: scoped,
     }));
+    // Strip the "<Platform>: " prefix from titles since context is implicit on a platform page.
+    if (!label) return raw;
+    const prefix = `${label}: `;
+    return raw.map(a => a.title.startsWith(prefix)
+      ? { ...a, title: a.title.slice(prefix.length).replace(/^./, c => c.toUpperCase()) }
+      : a
+    );
   }, [platformKey, totals, prevTotals, platformSummaries]);
 
   if (!insights.length) return null;
