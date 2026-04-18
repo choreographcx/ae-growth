@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { PlatformKey } from '@/types/dashboard';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,7 @@ function badgeClass(group: string) {
 
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
+  const isMobile = useIsMobile();
 
   const sorted = useMemo(
     () => [...rows].sort((a, b) => b.conversions_all - a.conversions_all),
@@ -43,7 +45,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
         {!loading && !error && total > 0 && (
           <div className="text-right">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
-            <p className="text-sm font-semibold tabular-nums">{total.toLocaleString()}</p>
+            <p className="text-sm font-semibold tabular-nums">{Math.round(total).toLocaleString()}</p>
           </div>
         )}
       </div>
@@ -63,35 +65,63 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
       )}
 
       {!loading && !error && sorted.length > 0 && (
-        <div className="overflow-x-auto scrollbar-thin">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-2.5 text-left text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Conversion Name</th>
-                <th className="px-4 py-2.5 text-left text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Funnel</th>
-                <th className="px-4 py-2.5 text-right text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Conversions</th>
-                <th className="px-4 py-2.5 text-right text-[10px] font-medium text-muted-foreground uppercase tracking-wider">% of Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((r, i) => {
-                const pct = total > 0 ? (r.conversions_all / total) * 100 : 0;
-                return (
-                  <tr key={`${r.conversion_name}::${r.conversion_funnel_group}::${i}`} className="border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-2.5 text-xs font-medium text-card-foreground">{r.conversion_name}</td>
-                    <td className="px-4 py-2.5">
-                      <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border', badgeClass(r.conversion_funnel_group))}>
-                        {r.conversion_funnel_group}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-xs text-right tabular-nums font-semibold">{Math.round(r.conversions_all).toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-xs text-right tabular-nums text-muted-foreground">{pct.toFixed(1)}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        isMobile ? (
+          <div className="p-3 space-y-2.5">
+            {sorted.map((r, i) => {
+              const pct = total > 0 ? (r.conversions_all / total) * 100 : 0;
+              return (
+                <div key={`${r.conversion_name}::${r.conversion_funnel_group}::${i}`} className="rounded-lg border border-border bg-background p-3">
+                  <div className="flex items-baseline justify-between gap-2 mb-2">
+                    <p className="text-[14px] font-semibold text-card-foreground truncate">{r.conversion_name}</p>
+                    <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border shrink-0', badgeClass(r.conversion_funnel_group))}>
+                      {r.conversion_funnel_group}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between pt-2 border-t border-border/60">
+                    <div>
+                      <p className="text-[12px] text-muted-foreground">Conversions</p>
+                      <p className="text-[18px] font-bold text-card-foreground tabular-nums">{Math.round(r.conversions_all).toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[12px] text-muted-foreground">% of Total</p>
+                      <p className="text-[14px] font-semibold tabular-nums text-card-foreground">{pct.toFixed(1)}%</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Conversion Name</th>
+                  <th className="px-4 py-2.5 text-left text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Funnel</th>
+                  <th className="px-4 py-2.5 text-right text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Conversions</th>
+                  <th className="px-4 py-2.5 text-right text-[10px] font-medium text-muted-foreground uppercase tracking-wider">% of Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((r, i) => {
+                  const pct = total > 0 ? (r.conversions_all / total) * 100 : 0;
+                  return (
+                    <tr key={`${r.conversion_name}::${r.conversion_funnel_group}::${i}`} className="border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-2.5 text-xs font-medium text-card-foreground">{r.conversion_name}</td>
+                      <td className="px-4 py-2.5">
+                        <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border', badgeClass(r.conversion_funnel_group))}>
+                          {r.conversion_funnel_group}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-right tabular-nums font-semibold">{Math.round(r.conversions_all).toLocaleString()}</td>
+                      <td className="px-4 py-2.5 text-xs text-right tabular-nums text-muted-foreground">{pct.toFixed(1)}%</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
       )}
     </div>
   );
