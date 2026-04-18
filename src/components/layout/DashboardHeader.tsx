@@ -63,9 +63,6 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const fromFormat = range.from.getFullYear() === range.to.getFullYear() ? 'MMM d' : 'MMM d, yyyy';
   const displayText = `${format(range.from, fromFormat)} – ${format(range.to, 'MMM d, yyyy')}`;
 
-  const fromFormat = range.from.getFullYear() === range.to.getFullYear() ? 'MMM d' : 'MMM d, yyyy';
-  const displayText = `${format(range.from, fromFormat)} – ${format(range.to, 'MMM d, yyyy')}`;
-
   const [activeField, setActiveField] = useState<'from' | 'to'>('from');
 
   if (compact) {
