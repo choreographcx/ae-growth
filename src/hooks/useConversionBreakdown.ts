@@ -53,10 +53,11 @@ export function useConversionBreakdown({ start, end, platform, campaigns, suppre
       setLoading(true);
       setError(null);
       const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
+      const platformParam = platform ? [platform] : null;
       const { data, error: err } = await (supabase.rpc as any)('get_dashboard_conversion_breakdown', {
         p_start: fmt(start),
         p_end: fmt(end),
-        p_platforms: null,
+        p_platforms: platformParam,
         p_campaign_names: campaigns?.length ? campaigns : null,
         p_suppressed_conversions: suppressionPayload,
       });
@@ -65,11 +66,7 @@ export function useConversionBreakdown({ start, end, platform, campaigns, suppre
         setError(err.message);
         setRows([]);
       } else {
-        const all = (data as ConversionBreakdownRow[]) || [];
-        const filtered = platform
-          ? all.filter(r => normalizePlatform(r.platform) === platform)
-          : all;
-        setRows(filtered);
+        setRows(((data as ConversionBreakdownRow[]) || []).filter(r => !platform || normalizePlatform(r.platform) === platform));
       }
       setLoading(false);
     })();
