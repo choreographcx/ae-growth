@@ -166,7 +166,7 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-5 md:space-y-7">
-      <SectionHeader title="Overview" />
+      <SectionHeader title="Overview" showMobileDatePicker />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
