@@ -27,7 +27,7 @@ export function ConversionSplitCard({ lowerFunnel, upperFunnel, className }: Pro
         <p className="text-[11px] text-muted-foreground">Lower-funnel = real outcomes · Upper-funnel = intent signals</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 gap-3 mb-4">
         <div className="rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 px-4 py-3">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Lower Funnel</p>
           <p className="text-2xl font-bold text-card-foreground tabular-nums mt-1">{fmt(lowerFunnel)}</p>
