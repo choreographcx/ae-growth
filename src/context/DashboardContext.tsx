@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
 import { useDashboardDaily, UseDashboardDailyOptions } from '@/hooks/useDashboardDaily';
+import { DEFAULT_CONVERSION_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
 
 type DashboardData = ReturnType<typeof useDashboardDaily>;
 
