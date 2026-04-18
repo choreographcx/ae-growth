@@ -136,9 +136,10 @@ export function PlatformPageShell({
   );
 }
 
-/** Helper to build a USD KPI value with the symbol. */
+/** Helper to build a currency-aware KPI value with the symbol and thousand separators. */
 export function moneyKpi(amount: number, currency: string, decimals = 2) {
-  return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{amount.toFixed(decimals)}</span>;
+  const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatted}</span>;
 }
 
 export { formatCompact };
