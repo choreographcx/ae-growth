@@ -353,6 +353,23 @@ export function useDashboardDaily(
 
   const filtersActive = !!(platformsParam || campaignsParam);
 
+  // Build the per-platform suppression payload. Recomputes when raw platform
+  // strings are discovered after the first fetch, triggering a single refetch.
+  const rawPlatformValues = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of allRows) if (r.platform) set.add(r.platform);
+    return Array.from(set);
+  }, [allRows]);
+
+  const suppressionPayload = useMemo(
+    () => buildSuppressionPayload(suppressedConversions, rawPlatformValues),
+    [suppressedConversions, rawPlatformValues]
+  );
+  const suppressionKey = useMemo(
+    () => (suppressionPayload ? JSON.stringify(suppressionPayload) : ''),
+    [suppressionPayload]
+  );
+
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
