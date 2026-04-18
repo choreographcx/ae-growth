@@ -21,7 +21,7 @@ interface Props {
 
 const TEMPLATE_TYPES = [
   { value: 'lead_gen', label: 'Lead Generation', icon: Target, description: 'Optimised for lead-form and WhatsApp conversions' },
-  { value: 'ecommerce', label: 'Ecommerce', icon: ShoppingCart, description: 'Revenue, ROAS, and purchase funnel tracking' },
+  { value: 'ecommerce', label: 'Ecommerce', icon: ShoppingCart, description: 'Purchase and conversion-funnel tracking' },
   { value: 'awareness', label: 'Awareness', icon: Eye, description: 'Reach, frequency, and video-view focused' },
   { value: 'full_funnel', label: 'Full-Funnel', icon: Zap, description: 'Combined awareness-to-conversion pipeline' },
   { value: 'b2b', label: 'B2B', icon: Briefcase, description: 'LinkedIn-heavy with long attribution windows' },
