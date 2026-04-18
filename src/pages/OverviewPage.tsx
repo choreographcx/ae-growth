@@ -2,7 +2,6 @@ import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PlatformComparison } from '@/components/dashboard/PlatformComparison';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
-import { SecondaryKPIStrip, MoneyValue } from '@/components/dashboard/SecondaryKPIStrip';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
@@ -167,21 +166,7 @@ export default function OverviewPage() {
     return applyCurrencyToKPIGroups(groups, currency, 26);
   }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, lowRoas, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
 
-  // Secondary business-performance strip
-  const secondaryStats = useMemo(() => [
-    { label: 'ROAS',           value: totals.roas > 0 ? `${totals.roas.toFixed(2)}x` : '—',
-      tone: (totals.roas >= 2 ? 'positive' : totals.roas > 0 && totals.roas < 1 ? 'negative' : 'neutral') as 'positive' | 'negative' | 'neutral',
-      tooltip: 'Return on ad spend — sum(conversion_value) / sum(cost_usd).' },
-    { label: 'CPA (LF)',       value: <MoneyValue amount={totals.cpaLowerFunnel} />,
-      tooltip: 'Cost per lower-funnel conversion. Standardized across platforms.' },
-    { label: 'CVR (LF)',       value: `${totals.cvrLowerFunnel.toFixed(2)}%`,
-      tooltip: 'Lower-funnel conversion rate from landing page views.' },
-    { label: 'Cost per LPV',   value: <MoneyValue amount={totals.costPerLPV} />,
-      tooltip: 'Average cost to drive one landing page view.' },
-    { label: 'Frequency',      value: totals.frequency > 0 ? totals.frequency.toFixed(2) : '—',
-      tone: (totals.frequency >= 4 ? 'negative' : 'neutral') as 'negative' | 'neutral',
-      tooltip: 'Average impressions per reached user. >4 may indicate fatigue.' },
-  ], [totals]);
+
 
   return (
     <div className="space-y-5 md:space-y-7">
@@ -198,13 +183,10 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Primary KPI cards (3×2) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
+      {/* Primary KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
         {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
       </div>
-
-      {/* Secondary business KPI strip */}
-      <SecondaryKPIStrip stats={secondaryStats} />
 
       {/* Platform Contribution */}
       <div className="space-y-2.5 md:space-y-3">
