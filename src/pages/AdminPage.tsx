@@ -20,7 +20,7 @@ import { SetupStatusSummary, AdminSection, SectionPlaceholder } from '@/componen
 import { platformIconEntries } from '@/lib/platformIcons';
 import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
-import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
+import { ReportingRulesSection, DEFAULT_CONVERSION_SUPPRESSION, DEFAULT_META_SUPPRESSION } from '@/components/admin/ReportingRulesSection';
 import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
 
