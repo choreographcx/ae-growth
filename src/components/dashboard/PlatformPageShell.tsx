@@ -91,7 +91,7 @@ export function PlatformPageShell({
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <SectionHeader title={title} action={titleAction} showMobileDatePicker showFilters actionBelow />
+      <SectionHeader title={title} action={titleAction} showMobileDatePicker showFilters scopeToPlatform={platformKey} actionBelow />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
