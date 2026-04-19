@@ -16,6 +16,20 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const branding = loadCachedBranding();
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/` },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || 'Google sign-in failed');
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
