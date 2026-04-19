@@ -11,44 +11,70 @@ interface SectionHeaderProps {
   className?: string;
   /** When true, render a compact mobile date-range picker on the right (mobile only). */
   showMobileDatePicker?: boolean;
-  /** When true, render Platforms + Campaigns filters and the date range picker inline on desktop. */
+  /** When true, render filter cluster + date range picker inline on desktop. */
   showFilters?: boolean;
+  /** When true (and showFilters), include the Platforms multi-select. Defaults to false (Overview only). */
+  showPlatformsFilter?: boolean;
+  /**
+   * When true, render `action` on its own row below the title/filters (desktop).
+   * Useful for page-specific filters (e.g. Facebook/Instagram toggles on Meta).
+   */
+  actionBelow?: boolean;
 }
 
 export function SectionHeader({
   title, subtitle, action, className,
   showMobileDatePicker = false,
   showFilters = false,
+  showPlatformsFilter = false,
+  actionBelow = false,
 }: SectionHeaderProps) {
+  const inlineAction = !actionBelow ? action : undefined;
+  const belowAction = actionBelow ? action : undefined;
+
   return (
-    <div className={cn("flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2", className)}>
-      <div className="flex items-start justify-between gap-2 lg:contents">
-        <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-foreground truncate">{title}</h2>
-          {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
-        </div>
-        {showMobileDatePicker && (
-          <div className="lg:hidden flex items-center min-w-0 max-w-[180px] shrink-0">
-            <DateRangePicker compact />
+    <div className={cn("flex flex-col gap-2", className)}>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 lg:contents">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-foreground truncate">{title}</h2>
+            {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
           </div>
+          {showMobileDatePicker && (
+            <div className="lg:hidden flex items-center min-w-0 max-w-[180px] shrink-0">
+              <DateRangePicker compact />
+            </div>
+          )}
+        </div>
+
+        {showFilters ? (
+          <DesktopInlineFilters extraAction={inlineAction} showPlatformsFilter={showPlatformsFilter} />
+        ) : (
+          inlineAction && (
+            <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
+              {inlineAction}
+            </div>
+          )
         )}
       </div>
 
-      {showFilters ? (
-        <DesktopInlineFilters extraAction={action} />
-      ) : (
-        action && (
-          <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
-            {action}
-          </div>
-        )
+      {belowAction && (
+        <div className="flex items-center gap-2 justify-end">
+          {belowAction}
+        </div>
       )}
     </div>
   );
 }
 
-/** Desktop-only inline filter cluster: Platforms + Campaigns on the left of the cluster, date picker on the far right. */
-function DesktopInlineFilters({ extraAction }: { extraAction?: ReactNode }) {
+/** Desktop-only inline filter cluster: optional Platforms + Campaigns on the left, date picker on the far right. */
+function DesktopInlineFilters({
+  extraAction,
+  showPlatformsFilter,
+}: {
+  extraAction?: ReactNode;
+  showPlatformsFilter: boolean;
+}) {
   const {
     data,
     selectedPlatforms, setSelectedPlatforms,
@@ -57,17 +83,27 @@ function DesktopInlineFilters({ extraAction }: { extraAction?: ReactNode }) {
 
   const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
   const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
-  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0;
+
+  // When the Platforms filter is hidden (platform pages), the platform selection is
+  // implicit and shouldn't influence the visible "Clear" affordance.
+  const hasFilters = (showPlatformsFilter && selectedPlatforms.length > 0) || selectedCampaigns.length > 0;
+
+  const clearAll = () => {
+    if (showPlatformsFilter) setSelectedPlatforms([]);
+    setSelectedCampaigns([]);
+  };
 
   return (
     <div className="hidden lg:flex items-center gap-1.5 lg:shrink-0">
       {extraAction}
-      <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+      {showPlatformsFilter && (
+        <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+      )}
       <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
       {hasFilters && (
         <button
           type="button"
-          onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
+          onClick={clearAll}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors px-1"
         >
           Clear
