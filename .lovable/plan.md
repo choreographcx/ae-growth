@@ -1,71 +1,71 @@
 
-The user wants drag-and-drop reordering of dashboard cards/sections, with per-user persistence so layouts survive logout.
+The user wants Google SSO so users can sign in with their Google account instead of (or in addition to) email/password.
 
-## Scope
+## How Google SSO works on this project
 
-Looking at `OverviewPage.tsx`, the page has discrete top-level blocks:
-1. KPI cards grid (6 cards)
-2. Platform Contribution
-3. Trends (4 charts)
-4. Funnel
-5. Platform Performance
-6. Campaign Performance
-7. Insights
+This project uses an **external Supabase project** (`ldydiabaczrjferglbar`), not Lovable Cloud. Google as an OAuth provider is configured in the **Supabase dashboard**, not in code. Once enabled there, the app calls `supabase.auth.signInWithOAuth({ provider: 'google' })` and Supabase handles the Google consent screen + callback.
 
-Two natural levels of reordering:
-- **Section level** (the 7 blocks above) — high value, low complexity
-- **KPI card level** (within the grid) — nice but adds friction
+## Two parts
 
-I'll propose section-level for Overview first, with the KPI grid optionally reorderable as a stretch. Same pattern can extend to platform pages later.
+### 1. Configuration (you do this, one-time, in dashboards)
 
-## Approach
+**A. Google Cloud Console** — create OAuth credentials:
+1. Go to console.cloud.google.com → create/select a project
+2. **APIs & Services → OAuth consent screen** → add your domains as Authorized domains: `supabase.co`, `lovable.app`, and `analyticsmena.com` (your custom domain)
+3. **APIs & Services → Credentials → Create Credentials → OAuth Client ID → Web application**
+4. **Authorized JavaScript origins** — add:
+   - `https://media-template.lovable.app`
+   - `https://acx-media.analyticsmena.com`
+   - `https://id-preview--4005571c-f8a2-45e7-aefa-102fb024d337.lovable.app`
+   - `http://localhost:8080` (for local dev, optional)
+5. **Authorized redirect URIs** — add the Supabase callback (shown in step B below):
+   - `https://ldydiabaczrjferglbar.supabase.co/auth/v1/callback`
+6. Save → copy the **Client ID** and **Client Secret**
 
-**Library**: `@dnd-kit/core` + `@dnd-kit/sortable` — accessible, keyboard-friendly, works well with existing card markup, no wrapper hijacking.
+**B. Supabase Dashboard** — enable Google provider:
+1. Open Authentication → Providers → Google
+2. Toggle Enable → paste Client ID and Client Secret → Save
+3. Copy the callback URL shown there back into Google (step A.5) if you didn't already
 
-**Persistence**: New Supabase table `user_layouts` keyed by `(user_id, layout_key)` storing an ordered array of section IDs in JSONB. RLS: users manage their own rows.
+**C. Supabase Auth → URL Configuration:**
+- **Site URL**: `https://acx-media.analyticsmena.com` (your primary domain)
+- **Redirect URLs (allowed)**: add all of the following so sign-in works from every environment:
+  - `https://acx-media.analyticsmena.com/**`
+  - `https://media-template.lovable.app/**`
+  - `https://id-preview--4005571c-f8a2-45e7-aefa-102fb024d337.lovable.app/**`
+  - `http://localhost:8080/**`
 
-```text
-user_layouts
-├─ id (uuid, pk)
-├─ user_id (uuid, not null)
-├─ layout_key (text)        e.g. 'overview', 'meta', 'google_ads'
-├─ order (jsonb)            ['kpis','contribution','trends',...]
-├─ created_at / updated_at
-unique(user_id, layout_key)
+Without these, Google sign-in returns "requested path is invalid".
+
+### 2. App code changes (I'll do this once approved)
+
+**a. `src/pages/AuthPage.tsx`** — add a "Continue with Google" button above the email form, with a divider ("or continue with email"). The button calls:
+```ts
+await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: { redirectTo: `${window.location.origin}/` },
+});
 ```
+Styled to match the existing branded card (outlined button with Google "G" mark, primary-tinted hover).
 
-RLS: `auth.uid() = user_id` for select/insert/update/delete.
+**b. Profile auto-creation** — already handled. The existing `handle_new_user` trigger fires for any new auth user (email or OAuth) and:
+- creates a `profiles` row pulling `full_name` from `raw_user_meta_data` (Google supplies this automatically)
+- assigns the `user` role
+- auto-approves `@wppmedia.com` addresses (your existing domain rule applies to Google sign-ins too)
+- auto-grants admin/superadmin to `rachel.montague@wppmedia.com`
 
-**UI behavior**:
-- Each section gets a small drag handle (grip icon) shown on hover top-right of the section.
-- "Edit layout" toggle in the page header turns on visible handles + dashed outlines; when off, dragging is disabled (prevents accidental drags on touch).
-- "Reset layout" button in edit mode deletes the saved row and reverts to default order.
-- Save happens automatically on drop (debounced upsert), with a subtle toast on first save.
-- Print/PDF export uses default order (already handled by print CSS) OR the saved order — I'll keep saved order so what you see is what exports.
+So Google sign-ups will land in the same approval flow as email sign-ups. No DB migration needed.
 
-**Code structure**:
-- `src/hooks/useUserLayout.ts` — load/save layout for a given `layoutKey`, returns `{ order, setOrder, resetLayout, isEditing, setEditing, loading }`.
-- `src/components/dashboard/SortableSection.tsx` — wrapper that renders a drag handle and applies dnd-kit transforms.
-- Refactor `OverviewPage.tsx` to define sections as a `Record<id, ReactNode>` and render them in `order.map(...)` inside `<DndContext><SortableContext>`.
-- Add an "Edit layout" toggle button in `SectionHeader` (or page-level) for Overview.
+**c. No new packages, no edge functions, no secrets in the app codebase.** Google Client ID/Secret live only in Supabase.
 
-**Default order** lives in code; saved order is merged so newly added sections appear at the end automatically.
+## What I need from you before coding
 
-## Out of scope (for this pass)
-- Reordering individual KPI cards inside the grid
-- Resizing cards
-- Per-platform-page layouts (pattern is reusable; we'll wire Overview only first, then extend if you like)
-- Cross-device sync conflicts (last write wins)
+A quick decision on the button placement and whether to also offer email sign-up alongside Google.
 
-## Files to add / change
+## Files I'll change
+- `src/pages/AuthPage.tsx` — add Google button + divider
 
-- New: `supabase/migrations/*_user_layouts.sql` (table + RLS + trigger for `updated_at`)
-- New: `src/hooks/useUserLayout.ts`
-- New: `src/components/dashboard/SortableSection.tsx`
-- New: `src/components/dashboard/LayoutEditToggle.tsx`
-- Edit: `src/pages/OverviewPage.tsx` — wrap sections in DndContext, drive order from hook
-- Edit: `package.json` — add `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
-
-## Open question
-
-Should this also apply to the platform pages (Meta, Google Ads, etc.) in this same change, or start with Overview only and extend after you've tried it?
+## Out of scope
+- Other providers (Microsoft, Apple, etc.) — easy to add later with the same pattern
+- Restricting sign-in to specific Google Workspace domains at the Google level (we already have app-side approval gating via `is_approved`)
+- Linking an existing email/password account to a Google identity (Supabase handles this automatically when emails match and "Confirm email" is on)
