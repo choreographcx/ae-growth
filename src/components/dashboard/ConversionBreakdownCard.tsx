@@ -4,9 +4,9 @@ import { PlatformKey } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
-type FunnelFilter = 'both' | 'lower' | 'upper';
+type FunnelKey = 'lower' | 'upper';
 
 interface Props {
   platform: PlatformKey;
@@ -31,15 +31,26 @@ function badgeClass(group: string) {
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
-  const [funnelFilter, setFunnelFilter] = useState<FunnelFilter>('both');
+  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true });
+
+  const toggle = (key: FunnelKey) => setEnabled(prev => {
+    const next = { ...prev, [key]: !prev[key] };
+    // Prevent both being unchecked — re-enable the other one.
+    if (!next.lower && !next.upper) return prev;
+    return next;
+  });
 
   const filtered = useMemo(() => {
-    if (funnelFilter === 'both') return rows;
     return rows.filter(r => {
       const g = (r.conversion_funnel_group || '').toLowerCase();
-      return funnelFilter === 'lower' ? g.includes('lower') : g.includes('upper');
+      const isLower = g.includes('lower');
+      const isUpper = g.includes('upper');
+      if (isLower) return enabled.lower;
+      if (isUpper) return enabled.upper;
+      // Unknown / unspecified groups always show when at least one filter is on.
+      return enabled.lower || enabled.upper;
     });
-  }, [rows, funnelFilter]);
+  }, [rows, enabled.lower, enabled.upper]);
 
   const sorted = useMemo(
     () => [...filtered].sort((a, b) => b.conversions_all - a.conversions_all),
@@ -57,16 +68,24 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
             <p className="text-sm font-semibold tabular-nums">{Math.round(total).toLocaleString()}</p>
           </div>
-          <Select value={funnelFilter} onValueChange={(v) => setFunnelFilter(v as FunnelFilter)}>
-            <SelectTrigger className="h-8 w-[160px] text-xs">
-              <SelectValue placeholder="Funnel" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="both">Both funnels</SelectItem>
-              <SelectItem value="lower">Lower funnel</SelectItem>
-              <SelectItem value="upper">Upper funnel</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
+              <Checkbox
+                checked={enabled.lower}
+                onCheckedChange={() => toggle('lower')}
+                aria-label="Show Lower Funnel"
+              />
+              Lower Funnel
+            </label>
+            <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
+              <Checkbox
+                checked={enabled.upper}
+                onCheckedChange={() => toggle('upper')}
+                aria-label="Show Upper Funnel"
+              />
+              Upper Funnel
+            </label>
+          </div>
         </div>
       )}
 
