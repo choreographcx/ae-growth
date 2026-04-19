@@ -179,7 +179,7 @@ const fallbackData: DashboardData = {
   platformSummaries: [],
   spendSeries: [], conversionsSeries: [], cpaSeries: [], ctrSeries: [],
   range: { start: new Date(), end: new Date() },
-  availablePlatforms: [], availableCampaigns: [],
+  availablePlatforms: [], availableCampaigns: [], campaignsByPlatform: {},
 };
 
 const fallback: DashboardContextType = {
