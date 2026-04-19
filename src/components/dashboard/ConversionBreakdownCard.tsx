@@ -1,9 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { PlatformKey } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type FunnelFilter = 'both' | 'lower' | 'upper';
 
 interface Props {
   platform: PlatformKey;
