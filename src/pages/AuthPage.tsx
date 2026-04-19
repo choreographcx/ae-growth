@@ -176,6 +176,7 @@ export default function AuthPage() {
               New accounts may require approval before access is granted.
             </p>
           )}
+          </div>
         </div>
       </div>
     </div>
