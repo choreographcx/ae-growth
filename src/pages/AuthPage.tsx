@@ -97,13 +97,11 @@ export default function AuthPage() {
               aria-hidden
             />
             {branding?.logoUrl ? (
-              <div className="inline-flex items-center justify-center h-14 px-4 mb-4 bg-card rounded-xl border border-border shadow-sm">
-                <img
-                  src={branding.logoUrl}
-                  alt="Logo"
-                  className="h-8 w-auto object-contain"
-                />
-              </div>
+              <img
+                src={branding.logoUrl}
+                alt="Logo"
+                className="h-10 w-auto object-contain mx-auto mb-4"
+              />
             ) : (
               <div className="h-14 w-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
                 <LogIn className="text-primary" size={24} />
