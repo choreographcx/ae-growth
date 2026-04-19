@@ -109,9 +109,11 @@ export default function AuthPage() {
                 <LogIn className="text-primary" size={24} />
               </div>
             )}
-            <h1 className="text-2xl font-bold text-card-foreground">
-              {isSignUp ? 'Create Account' : 'Welcome back'}
-            </h1>
+            {isSignUp && (
+              <h1 className="text-2xl font-bold text-card-foreground">
+                Create Account
+              </h1>
+            )}
             <p className="text-sm text-muted-foreground mt-2">
               {isSignUp ? 'Set up your dashboard access' : 'Sign in to your paid media dashboard'}
             </p>
