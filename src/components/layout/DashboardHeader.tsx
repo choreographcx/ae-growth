@@ -314,17 +314,16 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
   return (
     <header data-print-hide className="sticky top-0 z-30 bg-card/95 backdrop-blur-sm border-b border-border px-3 md:px-5">
-      <div className="relative flex h-12 items-center gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <button
-            type="button"
-            aria-label="Open navigation menu"
-            onClick={onMenuClick}
-            className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0 lg:hidden"
-          >
-            <Menu size={18} />
-          </button>
-        </div>
+      {/* Mobile: single row with menu + centered logo */}
+      <div className="relative flex h-12 items-center gap-2 lg:hidden">
+        <button
+          type="button"
+          aria-label="Open navigation menu"
+          onClick={onMenuClick}
+          className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0"
+        >
+          <Menu size={18} />
+        </button>
         {(client as any).branding?.logoUrl && (
           <Link
             to="/"
@@ -338,7 +337,26 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             />
           </Link>
         )}
-        <div className="ml-auto hidden items-center gap-1.5 lg:flex">
+      </div>
+
+      {/* Desktop: logo on its own row, filters below */}
+      <div className="hidden lg:block">
+        {(client as any).branding?.logoUrl && (
+          <div className="flex h-14 items-center justify-center">
+            <Link
+              to="/"
+              aria-label="Go to Overview"
+              className="shrink-0 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <img
+                src={(client as any).branding.logoUrl}
+                alt={client.name}
+                className="h-8 w-auto object-contain"
+              />
+            </Link>
+          </div>
+        )}
+        <div className="flex h-12 items-center justify-end gap-1.5 border-t border-border">
           <DateRangePicker />
           <div className="h-3.5 w-px bg-border mx-1" />
           <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
@@ -347,19 +365,19 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             <button
               type="button"
               onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
-              className="text-[11px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-0.5"
             >
               Clear
             </button>
           )}
           <div className="h-3.5 w-px bg-border mx-1" />
-          <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={handleExportPDF} disabled={isExporting}>
-            {isExporting ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-sm" onClick={handleExportPDF} disabled={isExporting}>
+            {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             {isExporting ? 'Exporting…' : 'Export PDF'}
           </Button>
           <div className="h-3.5 w-px bg-border mx-1" />
-          <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={signOut}>
-            <LogOut size={12} /> Sign out
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-sm" onClick={signOut}>
+            <LogOut size={13} /> Sign out
           </Button>
         </div>
       </div>
