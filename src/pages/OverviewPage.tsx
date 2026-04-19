@@ -6,13 +6,31 @@ import { PlatformContributionCard } from '@/components/dashboard/PlatformContrib
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
+import { SortableSection } from '@/components/dashboard/SortableSection';
+import { LayoutEditToggle } from '@/components/dashboard/LayoutEditToggle';
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { pctChange, aggregateRows, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
 import { generateInsights, sortInsights } from '@/lib/insights';
+import { useUserLayout } from '@/hooks/useUserLayout';
 import { Loader2 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
 
 function formatCompact(n: number): string {
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
@@ -20,6 +38,17 @@ function formatCompact(n: number): string {
   if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
   return Math.round(n).toLocaleString();
 }
+
+// Default order of top-level Overview sections (ids must be stable across releases).
+const DEFAULT_SECTION_ORDER = [
+  'kpis',
+  'contribution',
+  'trends',
+  'funnel',
+  'platforms',
+  'campaigns',
+  'insights',
+] as const;
 
 export default function OverviewPage() {
   const { client, data } = useDashboard();
@@ -70,7 +99,6 @@ export default function OverviewPage() {
     const moneyCompact = (v: number) => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatCompact(v)}</span>;
 
     const groups: KPIGroupData[] = [
-      // 1. SPEND — Budget + Pacing (or just spend if no budget configured)
       {
         title: 'Spend', icon: 'DollarSign',
         primary: {
@@ -84,7 +112,6 @@ export default function OverviewPage() {
           { label: 'Pacing', formattedValue: `${Math.round((cur.spend / totalBudget) * 100)}%` },
         ] : [],
       },
-      // 2. IMPRESSIONS — CPM only (Reach lives in its own card)
       {
         title: 'Impressions', icon: 'Eye',
         primary: {
@@ -97,7 +124,6 @@ export default function OverviewPage() {
           { label: 'CPM', formattedValue: money(cur.cpm), change: pctChange(cur.cpm, prev?.cpm) },
         ],
       },
-      // 3. CLICKS — CTR + CPC
       {
         title: 'Clicks', icon: 'MousePointerClick',
         primary: {
@@ -111,7 +137,6 @@ export default function OverviewPage() {
           { label: 'CPC', formattedValue: money(cur.cpc), change: pctChange(cur.cpc, prev?.cpc) },
         ],
       },
-      // 4. CONVERSIONS — primary KPI; CPA + CVR + LF/UF breakdown
       {
         title: 'Conversions', icon: 'Target',
         tooltip: 'Primary KPI uses lower-funnel actions — leads, purchases, sign-ups. Standardized across platforms.',
@@ -128,7 +153,6 @@ export default function OverviewPage() {
           { label: 'Upper Funnel', formattedValue: formatCompact(cur.conversionsUpperFunnel) },
         ],
       },
-      // 5. REACH — Frequency
       {
         title: 'Reach', icon: 'Users',
         primary: {
@@ -143,7 +167,6 @@ export default function OverviewPage() {
         tooltip: (highFreq && ctrFalling) ? 'Frequency is high (≥4) while CTR is declining — possible audience fatigue.'
           : reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
       },
-      // 6. LANDING PAGE VIEWS — Cost per LPV + LPV Rate
       {
         title: 'Landing Page Views', icon: 'FileText',
         primary: {
@@ -163,11 +186,109 @@ export default function OverviewPage() {
     return applyCurrencyToKPIGroups(groups, currency, 26);
   }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
 
+  // Layout persistence
+  const defaultOrder = useMemo(() => [...DEFAULT_SECTION_ORDER], []);
+  const { order, setOrder, resetLayout, isEditing, setEditing } = useUserLayout('overview', defaultOrder);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = order.indexOf(String(active.id));
+    const newIndex = order.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    setOrder(arrayMove(order, oldIndex, newIndex));
+  };
+
+  // Section content map — keyed by stable id used in DEFAULT_SECTION_ORDER.
+  const sectionMap: Record<string, { label: string; node: JSX.Element } | null> = {
+    kpis: {
+      label: 'KPI cards',
+      node: (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
+          {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
+        </div>
+      ),
+    },
+    contribution: {
+      label: 'Platform Contribution',
+      node: (
+        <div className="space-y-2.5 md:space-y-3">
+          <SectionHeader title="Platform Contribution" />
+          <PlatformContributionCard platforms={platformSummaries} />
+        </div>
+      ),
+    },
+    trends: {
+      label: 'Trends',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Trends" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
+            <TrendChartCard title="Spend"                       data={spendSeries}    currency={currency} color="hsl(var(--chart-1))" />
+            <TrendChartCard title="Lower-Funnel Conversions"    data={lfConvSeries}                          color="hsl(var(--chart-3))" />
+            <TrendChartCard title="CPA (Lower Funnel)"          data={lfCpaSeries}    currency={currency} color="hsl(var(--chart-4))" />
+            <TrendChartCard title="CTR"                         data={ctrSeries}      valueSuffix="%"     color="hsl(var(--chart-2))" />
+          </div>
+        </div>
+      ),
+    },
+    funnel: {
+      label: 'Funnel',
+      node: <EnhancedFunnelCard steps={funnelSteps} />,
+    },
+    platforms: {
+      label: 'Platform Performance',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Platform Performance" />
+          <PlatformComparison data={platformSummaries} />
+        </div>
+      ),
+    },
+    campaigns: {
+      label: 'Campaign Performance',
+      node: (
+        <div className="space-y-2.5 md:space-y-3">
+          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend across all platforms" />
+          <CampaignPerformance />
+        </div>
+      ),
+    },
+    insights: insights.length > 0 ? {
+      label: 'Key Issues & Insights',
+      node: (
+        <div className="space-y-2.5 md:space-y-3">
+          <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
+            {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
+          </div>
+        </div>
+      ),
+    } : null,
+  };
+
+  const visibleOrder = order.filter(id => sectionMap[id] != null);
 
   return (
     <div className="space-y-5 md:space-y-7">
-      <SectionHeader title="Overview" showMobileDatePicker showFilters showPlatformsFilter />
+      <SectionHeader
+        title="Overview"
+        showMobileDatePicker
+        showFilters
+        showPlatformsFilter
+        action={
+          <LayoutEditToggle
+            isEditing={isEditing}
+            onToggle={() => setEditing(!isEditing)}
+            onReset={resetLayout}
+          />
+        }
+      />
 
       {error && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
@@ -180,52 +301,20 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {/* Primary KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
-        {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
-      </div>
-
-      {/* Platform Contribution */}
-      <div className="space-y-2.5 md:space-y-3">
-        <SectionHeader title="Platform Contribution" />
-        <PlatformContributionCard platforms={platformSummaries} />
-      </div>
-
-      {/* Trend Charts — fixed to lower-funnel by default */}
-      <div className="space-y-2.5 md:space-y-3 print-break-before">
-        <SectionHeader title="Trends" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
-          <TrendChartCard title="Spend"                       data={spendSeries}    currency={currency} color="hsl(var(--chart-1))" />
-          <TrendChartCard title="Lower-Funnel Conversions"    data={lfConvSeries}                          color="hsl(var(--chart-3))" />
-          <TrendChartCard title="CPA (Lower Funnel)"          data={lfCpaSeries}    currency={currency} color="hsl(var(--chart-4))" />
-          <TrendChartCard title="CTR"                         data={ctrSeries}      valueSuffix="%"     color="hsl(var(--chart-2))" />
-        </div>
-      </div>
-
-      {/* Funnel — pre-computed rates from sums */}
-      <EnhancedFunnelCard steps={funnelSteps} />
-
-      {/* Platform performance table */}
-      <div className="space-y-2.5 md:space-y-3 print-break-before">
-        <SectionHeader title="Platform Performance" />
-        <PlatformComparison data={platformSummaries} />
-      </div>
-
-      {/* Campaign performance table */}
-      <div className="space-y-2.5 md:space-y-3">
-        <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend across all platforms" />
-        <CampaignPerformance />
-      </div>
-
-      {/* Diagnostics & Insights — bottom of page */}
-      {insights.length > 0 && (
-        <div className="space-y-2.5 md:space-y-3">
-          <SectionHeader title="Key Issues & Insights" subtitle="Auto-detected from current performance" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-3">
-            {insights.slice(0, 6).map(a => <AlertCard key={a.id} alert={a} />)}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={visibleOrder} strategy={verticalListSortingStrategy}>
+          <div className="space-y-5 md:space-y-7">
+            {visibleOrder.map(id => {
+              const section = sectionMap[id]!;
+              return (
+                <SortableSection key={id} id={id} isEditing={isEditing} label={section.label}>
+                  {section.node}
+                </SortableSection>
+              );
+            })}
           </div>
-        </div>
-      )}
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
