@@ -135,7 +135,7 @@ export default function MetaPage() {
             />
           </div>
           <div className="space-y-3">
-            <SectionHeader title="Campaign Objective" subtitle="Performance by Meta campaign objective." />
+            <SectionHeader title="Campaign Objective" />
             <DimensionBreakdownTable
               rows={scoped}
               pick={r => r.campaign_objective}
