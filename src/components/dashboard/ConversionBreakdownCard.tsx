@@ -4,9 +4,9 @@ import { PlatformKey } from '@/types/dashboard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
-type FunnelFilter = 'both' | 'lower' | 'upper';
+type FunnelKey = 'lower' | 'upper';
 
 interface Props {
   platform: PlatformKey;
