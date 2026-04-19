@@ -37,7 +37,7 @@ export function SortableSection({ id, isEditing, children, label }: SortableSect
       style={style}
       className={cn(
         'relative group',
-        isEditing && 'rounded-lg ring-1 ring-dashed ring-border/60 p-1 -m-1 transition-shadow',
+        isEditing && 'rounded-lg border border-dashed border-border/70 p-2 -m-2 transition-shadow',
         isDragging && 'opacity-60 z-10 shadow-lg'
       )}
     >
