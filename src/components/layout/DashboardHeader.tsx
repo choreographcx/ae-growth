@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
+
 import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
@@ -286,19 +286,9 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
-  const {
-    client, data,
-    selectedPlatforms, setSelectedPlatforms,
-    selectedCampaigns, setSelectedCampaigns,
-  } = useDashboard();
+  const { client } = useDashboard();
   const { signOut } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
-
-  // Filter options come from the live BigQuery data so they reflect what's actually available.
-  const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
-  const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
-
-  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0;
 
   const handleExportPDF = useCallback(async () => {
     setIsExporting(true);
