@@ -1,6 +1,7 @@
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PlatformComparison } from '@/components/dashboard/PlatformComparison';
+import { CampaignPerformance } from '@/components/dashboard/CampaignPerformance';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
@@ -208,6 +209,12 @@ export default function OverviewPage() {
       <div className="space-y-2.5 md:space-y-3 print-break-before">
         <SectionHeader title="Platform Performance" />
         <PlatformComparison data={platformSummaries} />
+      </div>
+
+      {/* Campaign performance table */}
+      <div className="space-y-2.5 md:space-y-3">
+        <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend across all platforms" />
+        <CampaignPerformance />
       </div>
 
       {/* Diagnostics & Insights — bottom of page */}
