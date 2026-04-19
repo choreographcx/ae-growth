@@ -31,21 +31,42 @@ function badgeClass(group: string) {
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
+  const [funnelFilter, setFunnelFilter] = useState<FunnelFilter>('both');
+
+  const filtered = useMemo(() => {
+    if (funnelFilter === 'both') return rows;
+    return rows.filter(r => {
+      const g = (r.conversion_funnel_group || '').toLowerCase();
+      return funnelFilter === 'lower' ? g.includes('lower') : g.includes('upper');
+    });
+  }, [rows, funnelFilter]);
 
   const sorted = useMemo(
-    () => [...rows].sort((a, b) => b.conversions_all - a.conversions_all),
-    [rows]
+    () => [...filtered].sort((a, b) => b.conversions_all - a.conversions_all),
+    [filtered]
   );
   const total = useMemo(() => sorted.reduce((s, r) => s + (r.conversions_all || 0), 0), [sorted]);
 
+  const showHeader = !loading && !error;
+
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
-      {!loading && !error && total > 0 && (
-        <div className="px-5 py-4 border-b border-border flex items-center justify-end gap-3">
-          <div className="text-right">
+      {showHeader && (
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
+          <div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</p>
             <p className="text-sm font-semibold tabular-nums">{Math.round(total).toLocaleString()}</p>
           </div>
+          <Select value={funnelFilter} onValueChange={(v) => setFunnelFilter(v as FunnelFilter)}>
+            <SelectTrigger className="h-8 w-[160px] text-xs">
+              <SelectValue placeholder="Funnel" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="both">Both funnels</SelectItem>
+              <SelectItem value="lower">Lower funnel</SelectItem>
+              <SelectItem value="upper">Upper funnel</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
