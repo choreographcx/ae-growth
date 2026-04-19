@@ -339,7 +339,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         )}
       </div>
 
-      {/* Desktop: logo row with actions; filters below */}
+      {/* Desktop: single logo row with actions. Filters live inline with the page title (rendered by SectionHeader). */}
       <div className="hidden lg:block">
         <div className="relative flex h-14 items-center">
           {(client as any).branding?.logoUrl && (
@@ -365,21 +365,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <LogOut size={12} /> Sign out
             </Button>
           </div>
-        </div>
-        <div className="flex h-12 items-center justify-end gap-1.5 border-t border-border">
-          <DateRangePicker />
-          <div className="h-3.5 w-px bg-border mx-1" />
-          <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
-          <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
-          {hasFilters && (
-            <button
-              type="button"
-              onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-0.5"
-            >
-              Clear
-            </button>
-          )}
         </div>
       </div>
     </header>

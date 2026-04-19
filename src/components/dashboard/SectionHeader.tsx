@@ -1,6 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
+import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
+import { useDashboard } from '@/context/DashboardContext';
 
 interface SectionHeaderProps {
   title: string;
@@ -9,13 +11,15 @@ interface SectionHeaderProps {
   className?: string;
   /** When true, render a compact mobile date-range picker on the right (mobile only). */
   showMobileDatePicker?: boolean;
+  /** When true, render Platforms + Campaigns filters and the date range picker inline on desktop. */
+  showFilters?: boolean;
 }
 
 export function SectionHeader({
-  title, subtitle, action, className, showMobileDatePicker = false,
+  title, subtitle, action, className,
+  showMobileDatePicker = false,
+  showFilters = false,
 }: SectionHeaderProps) {
-  // On mobile, when both an action (extra filters) and the date picker are present,
-  // stack the action below the date picker. On desktop they sit inline.
   return (
     <div className={cn("flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2", className)}>
       <div className="flex items-start justify-between gap-2 lg:contents">
@@ -29,11 +33,48 @@ export function SectionHeader({
           </div>
         )}
       </div>
-      {action && (
-        <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
-          {action}
-        </div>
+
+      {showFilters ? (
+        <DesktopInlineFilters extraAction={action} />
+      ) : (
+        action && (
+          <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
+            {action}
+          </div>
+        )
       )}
+    </div>
+  );
+}
+
+/** Desktop-only inline filter cluster: Platforms + Campaigns on the left of the cluster, date picker on the far right. */
+function DesktopInlineFilters({ extraAction }: { extraAction?: ReactNode }) {
+  const {
+    data,
+    selectedPlatforms, setSelectedPlatforms,
+    selectedCampaigns, setSelectedCampaigns,
+  } = useDashboard();
+
+  const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
+  const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
+  const hasFilters = selectedPlatforms.length > 0 || selectedCampaigns.length > 0;
+
+  return (
+    <div className="hidden lg:flex items-center gap-1.5 lg:shrink-0">
+      {extraAction}
+      <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+      <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
+      {hasFilters && (
+        <button
+          type="button"
+          onClick={() => { setSelectedPlatforms([]); setSelectedCampaigns([]); }}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors px-1"
+        >
+          Clear
+        </button>
+      )}
+      <div className="h-3.5 w-px bg-border mx-1" />
+      <DateRangePicker />
     </div>
   );
 }

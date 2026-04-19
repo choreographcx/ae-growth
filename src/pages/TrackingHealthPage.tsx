@@ -25,7 +25,7 @@ export default function TrackingHealthPage() {
 
   return (
     <div className="space-y-8">
-      <SectionHeader title="Tracking Health" subtitle="Data quality and source status monitoring" />
+      <SectionHeader title="Tracking Health" subtitle="Data quality and source status monitoring" showMobileDatePicker showFilters />
 
       {/* Status cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
