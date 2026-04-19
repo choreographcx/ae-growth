@@ -52,24 +52,58 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-card rounded-2xl border border-border shadow-lg p-8">
-          <div className="text-center mb-8">
-            {branding?.logoUrl && (
-              <img
-                src={branding.logoUrl}
-                alt="Logo"
-                className="h-10 w-auto object-contain mx-auto mb-4"
-              />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Brand-tinted ambient background */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-60"
+        style={{
+          background:
+            'radial-gradient(ellipse at top, hsl(var(--primary) / 0.12), transparent 60%), radial-gradient(ellipse at bottom right, hsl(var(--primary) / 0.08), transparent 55%)',
+        }}
+        aria-hidden
+      />
+
+      <div className="w-full max-w-md relative">
+        <div className="bg-card rounded-2xl border border-border shadow-2xl overflow-hidden">
+          {/* Branded header band */}
+          <div
+            className="px-8 pt-8 pb-6 text-center relative"
+            style={{
+              background:
+                'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.02))',
+              borderBottom: '1px solid hsl(var(--border))',
+            }}
+          >
+            <div
+              className="absolute top-0 left-0 right-0 h-1"
+              style={{
+                background:
+                  'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.6), hsl(var(--primary)))',
+              }}
+              aria-hidden
+            />
+            {branding?.logoUrl ? (
+              <div className="inline-flex items-center justify-center h-14 px-4 mb-4 bg-card rounded-xl border border-border shadow-sm">
+                <img
+                  src={branding.logoUrl}
+                  alt="Logo"
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+            ) : (
+              <div className="h-14 w-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center">
+                <LogIn className="text-primary" size={24} />
+              </div>
             )}
             <h1 className="text-2xl font-bold text-card-foreground">
-              {isSignUp ? 'Create Account' : 'Sign In'}
+              {isSignUp ? 'Create Account' : 'Welcome back'}
             </h1>
             <p className="text-sm text-muted-foreground mt-2">
-              {isSignUp ? 'Set up your dashboard access' : 'Access your paid media dashboard'}
+              {isSignUp ? 'Set up your dashboard access' : 'Sign in to your paid media dashboard'}
             </p>
           </div>
+
+          <div className="p-8 pt-6">
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
