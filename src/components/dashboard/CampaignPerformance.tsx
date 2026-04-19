@@ -9,7 +9,7 @@ import {
   aggregateRows,
   normalizePlatform,
 } from '@/hooks/useDashboardDaily';
-import { PlatformKey, PLATFORM_LABELS_MAP } from '@/types/dashboard';
+import { PlatformKey } from '@/types/dashboard';
 import { platformIconEntries } from '@/lib/platformIcons';
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
