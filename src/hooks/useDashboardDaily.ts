@@ -276,6 +276,8 @@ interface UseDashboardDailyResult {
   range: DateBounds;
   availablePlatforms: PlatformOption[];
   availableCampaigns: string[];
+  /** Campaign names grouped by normalized platform key (used to scope the campaign filter on platform pages). */
+  campaignsByPlatform: Partial<Record<PlatformKey, string[]>>;
 }
 
 export {
@@ -416,10 +418,27 @@ export function useDashboardDaily(
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [allRows, platformsParam]);
 
+  const campaignsByPlatform = useMemo<Partial<Record<PlatformKey, string[]>>>(() => {
+    const buckets = new Map<PlatformKey, Set<string>>();
+    for (const r of allRows) {
+      if (!r.campaign_name) continue;
+      const k = normalizePlatform(r.platform);
+      if (!k) continue;
+      let s = buckets.get(k);
+      if (!s) { s = new Set<string>(); buckets.set(k, s); }
+      s.add(r.campaign_name);
+    }
+    const out: Partial<Record<PlatformKey, string[]>> = {};
+    buckets.forEach((set, k) => {
+      out[k] = Array.from(set).sort((a, b) => a.localeCompare(b));
+    });
+    return out;
+  }, [allRows]);
+
   return {
     loading, error, rows, previousRows: filteredPrevRows, totals, previousTotals,
     platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
-    availablePlatforms, availableCampaigns,
+    availablePlatforms, availableCampaigns, campaignsByPlatform,
   };
 }
 

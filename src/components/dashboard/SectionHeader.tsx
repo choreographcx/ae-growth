@@ -1,8 +1,9 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
 import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
 import { useDashboard } from '@/context/DashboardContext';
+import { PlatformKey } from '@/types/dashboard';
 
 interface SectionHeaderProps {
   title: string;
@@ -15,6 +16,8 @@ interface SectionHeaderProps {
   showFilters?: boolean;
   /** When true (and showFilters), include the Platforms multi-select. Defaults to false (Overview only). */
   showPlatformsFilter?: boolean;
+  /** When set, the Campaigns filter is restricted to campaigns belonging to this platform. */
+  scopeToPlatform?: PlatformKey;
   /**
    * When true, render `action` on its own row below the title/filters (desktop).
    * Useful for page-specific filters (e.g. Facebook/Instagram toggles on Meta).
@@ -27,6 +30,7 @@ export function SectionHeader({
   showMobileDatePicker = false,
   showFilters = false,
   showPlatformsFilter = false,
+  scopeToPlatform,
   actionBelow = false,
 }: SectionHeaderProps) {
   const inlineAction = !actionBelow ? action : undefined;
@@ -48,7 +52,11 @@ export function SectionHeader({
         </div>
 
         {showFilters ? (
-          <DesktopInlineFilters extraAction={inlineAction} showPlatformsFilter={showPlatformsFilter} />
+          <DesktopInlineFilters
+            extraAction={inlineAction}
+            showPlatformsFilter={showPlatformsFilter}
+            scopeToPlatform={scopeToPlatform}
+          />
         ) : (
           inlineAction && (
             <div className="flex items-center gap-2 justify-end lg:justify-start lg:shrink-0 lg:order-last">
@@ -71,9 +79,11 @@ export function SectionHeader({
 function DesktopInlineFilters({
   extraAction,
   showPlatformsFilter,
+  scopeToPlatform,
 }: {
   extraAction?: ReactNode;
   showPlatformsFilter: boolean;
+  scopeToPlatform?: PlatformKey;
 }) {
   const {
     data,
@@ -82,7 +92,20 @@ function DesktopInlineFilters({
   } = useDashboard();
 
   const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
-  const campaignNames = useMemo(() => data.availableCampaigns, [data.availableCampaigns]);
+
+  // On platform pages, restrict campaign options to campaigns belonging to that platform.
+  const campaignNames = useMemo(() => {
+    if (scopeToPlatform) return data.campaignsByPlatform[scopeToPlatform] ?? [];
+    return data.availableCampaigns;
+  }, [scopeToPlatform, data.campaignsByPlatform, data.availableCampaigns]);
+
+  // Drop any selected campaigns no longer in scope (e.g. when navigating between platform pages).
+  useEffect(() => {
+    if (!scopeToPlatform || selectedCampaigns.length === 0) return;
+    const allowed = new Set(campaignNames);
+    const filtered = selectedCampaigns.filter(c => allowed.has(c));
+    if (filtered.length !== selectedCampaigns.length) setSelectedCampaigns(filtered);
+  }, [scopeToPlatform, campaignNames, selectedCampaigns, setSelectedCampaigns]);
 
   // When the Platforms filter is hidden (platform pages), the platform selection is
   // implicit and shouldn't influence the visible "Clear" affordance.
