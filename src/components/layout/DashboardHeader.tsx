@@ -339,14 +339,14 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         )}
       </div>
 
-      {/* Desktop: logo on its own row, filters below */}
+      {/* Desktop: logo row with actions; filters below */}
       <div className="hidden lg:block">
-        {(client as any).branding?.logoUrl && (
-          <div className="flex h-14 items-center justify-center">
+        <div className="relative flex h-14 items-center">
+          {(client as any).branding?.logoUrl && (
             <Link
               to="/"
               aria-label="Go to Overview"
-              className="shrink-0 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shrink-0 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <img
                 src={(client as any).branding.logoUrl}
@@ -354,8 +354,18 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 className="h-8 w-auto object-contain"
               />
             </Link>
+          )}
+          <div className="ml-auto flex items-center gap-1.5 pb-2">
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-sm" onClick={handleExportPDF} disabled={isExporting}>
+              {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+              {isExporting ? 'Exporting…' : 'Export PDF'}
+            </Button>
+            <div className="h-3.5 w-px bg-border mx-1" />
+            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-sm" onClick={signOut}>
+              <LogOut size={13} /> Sign out
+            </Button>
           </div>
-        )}
+        </div>
         <div className="flex h-12 items-center justify-end gap-1.5 border-t border-border">
           <DateRangePicker />
           <div className="h-3.5 w-px bg-border mx-1" />
@@ -370,15 +380,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               Clear
             </button>
           )}
-          <div className="h-3.5 w-px bg-border mx-1" />
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-sm" onClick={handleExportPDF} disabled={isExporting}>
-            {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-            {isExporting ? 'Exporting…' : 'Export PDF'}
-          </Button>
-          <div className="h-3.5 w-px bg-border mx-1" />
-          <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-sm" onClick={signOut}>
-            <LogOut size={13} /> Sign out
-          </Button>
         </div>
       </div>
     </header>
