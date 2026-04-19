@@ -355,7 +355,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               />
             </Link>
           )}
-          <div className="ml-auto flex items-center gap-1.5 pb-2">
+          <div className="ml-auto flex items-center gap-1.5">
             <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={handleExportPDF} disabled={isExporting}>
               {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
               {isExporting ? 'Exporting…' : 'Export PDF'}
