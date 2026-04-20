@@ -46,10 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsApproved(profileRes.data.is_approved);
     }
 
+    let userIsAdmin = false;
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
       setIsSuperAdmin(roles.includes('superadmin'));
-      setIsAdmin(roles.includes('admin') || roles.includes('superadmin'));
+      userIsAdmin = roles.includes('admin') || roles.includes('superadmin');
+      setIsAdmin(userIsAdmin);
     }
 
     // Apply saved branding immediately so login/loading/pending screens
@@ -58,6 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (branding) {
       applyBrandingToRoot(branding);
       cacheBranding(branding);
+      // Mirror branding to the public row so logged-out / incognito visitors
+      // see it on the auth screen. Only admins are allowed to write.
+      if (userIsAdmin) {
+        void syncPublicBranding({
+          branding: {
+            logoUrl: branding.logoUrl,
+            faviconUrl: branding.faviconUrl,
+            primaryColor: branding.primaryColor,
+          },
+        });
+      }
     }
   };
 
