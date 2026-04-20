@@ -255,6 +255,14 @@ export function UserManagement() {
           )}
           <span className="text-border">·</span>
           <span><strong className="text-card-foreground">{adminCount}</strong> admin{adminCount !== 1 ? 's' : ''}</span>
+          <span className="text-border">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <strong className="text-emerald-600">{onlineCount}</strong> online
+          </span>
         </div>
         {isSuperUser && (
           <div className="flex items-center gap-2">
