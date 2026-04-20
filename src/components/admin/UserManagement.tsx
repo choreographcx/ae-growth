@@ -88,6 +88,60 @@ export function UserManagement() {
     if (isAdmin) fetchUsers();
   }, [isAdmin]);
 
+  // Load permissions when the perm dialog opens for a user.
+  useEffect(() => {
+    if (!permDialogUser) {
+      setPermissions(null);
+      return;
+    }
+    const role: 'admin' | 'user' = permDialogUser.roles.includes('admin') || permDialogUser.roles.includes('superadmin') ? 'admin' : 'user';
+    setPermRole(role);
+    setPermLoading(true);
+    loadUserPermissions(permDialogUser.user_id, role)
+      .then(setPermissions)
+      .catch(() => {
+        setPermissions(defaultPermissionsForRole(role));
+        toast.error('Could not load saved permissions — showing defaults');
+      })
+      .finally(() => setPermLoading(false));
+  }, [permDialogUser]);
+
+  const handleRoleChange = async (newRoleValue: 'admin' | 'user') => {
+    if (!permDialogUser) return;
+    if (permDialogUser.roles.includes('superadmin')) {
+      toast.error('Super admin role cannot be changed');
+      return;
+    }
+    setPermSaving(true);
+    try {
+      await setUserRole(permDialogUser.user_id, newRoleValue);
+      setPermRole(newRoleValue);
+      const fresh = defaultPermissionsForRole(newRoleValue);
+      setPermissions(fresh);
+      toast.success(`Role updated to ${newRoleValue === 'admin' ? 'Admin' : 'Viewer'}`);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update role');
+    } finally {
+      setPermSaving(false);
+    }
+  };
+
+  const handlePermissionToggle = async (key: PermissionKey, value: boolean) => {
+    if (!permDialogUser || !permissions) return;
+    const next = { ...permissions, [key]: value };
+    setPermissions(next);
+    setPermSaving(true);
+    try {
+      await saveUserPermissions(permDialogUser.user_id, next);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save permission');
+      setPermissions(permissions); // revert
+    } finally {
+      setPermSaving(false);
+    }
+  };
+
   const handleToggleApproval = async (profile: UserProfile) => {
     const { error } = await supabase
       .from('profiles')
