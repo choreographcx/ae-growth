@@ -127,7 +127,25 @@ export default function AuthPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full gap-2 hover:bg-primary/5 hover:border-primary/30"
+            className="w-full gap-2 hover:bg-primary/5 hover:border-primary/30 hover:!text-[hsl(var(--primary)_/_1)] [&:hover]:[color:hsl(var(--primary)_h_var(--primary)_s_calc(var(--primary)_l_-_20%))]"
+            style={{
+              ['--tw-hover-brand-dark' as any]: 'hsl(var(--primary) / 1)',
+            }}
+            onMouseEnter={(e) => {
+              const root = getComputedStyle(document.documentElement);
+              const primary = root.getPropertyValue('--primary').trim(); // "H S% L%"
+              const parts = primary.split(/\s+/);
+              if (parts.length === 3) {
+                const h = parts[0];
+                const s = parts[1];
+                const l = parseFloat(parts[2]);
+                const darkL = Math.max(10, l - 20);
+                e.currentTarget.style.color = `hsl(${h} ${s} ${darkL}%)`;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '';
+            }}
             onClick={handleGoogleSignIn}
             disabled={loading}
           >
