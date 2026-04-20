@@ -260,6 +260,7 @@ export interface PlatformOption { key: PlatformKey; label: string; raw: string; 
 export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
+  selectedObjectives?: string[];
 }
 
 interface UseDashboardDailyResult {
@@ -279,6 +280,10 @@ interface UseDashboardDailyResult {
   availableCampaigns: string[];
   /** Campaign names grouped by normalized platform key (used to scope the campaign filter on platform pages). */
   campaignsByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct campaign objectives present in the data (after platform scoping). */
+  availableObjectives: string[];
+  /** Objectives grouped by normalized platform key (used to scope the objective filter on platform pages). */
+  objectivesByPlatform: Partial<Record<PlatformKey, string[]>>;
 }
 
 export {
