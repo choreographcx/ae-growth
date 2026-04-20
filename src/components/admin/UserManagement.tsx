@@ -42,6 +42,7 @@ const ROLE_BADGES: Record<string, { label: string; color: string; icon: typeof S
 
 export function UserManagement() {
   const { isAdmin, isSuperAdmin } = useAuth();
+  const onlineUserIds = useOnlineUsers();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
