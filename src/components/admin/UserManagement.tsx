@@ -324,6 +324,7 @@ export function UserManagement() {
         <div className="space-y-2">
           {users.map(u => {
             const primaryRole = u.roles.includes('superadmin') ? 'superadmin' : u.roles.includes('admin') ? 'admin' : 'user';
+            const isOnline = onlineUserIds.has(u.user_id);
 
             return (
               <div key={u.id} className={cn(
