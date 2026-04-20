@@ -106,9 +106,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setClient(prev => ({ ...prev, ...mergedClient }));
 
       if (configRes.data?.updated_at) {
-          setLastSavedAt(new Date(data.updated_at).toLocaleString([], { 
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-          }));
+        setLastSavedAt(new Date(configRes.data.updated_at).toLocaleString([], {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }));
       }
       setConfigLoaded(true);
     };
