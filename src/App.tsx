@@ -20,7 +20,19 @@ import TrackingHealthPage from "./pages/TrackingHealthPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Tuned for an analytics dashboard backed by BigQuery RPCs:
+// keep results fresh for 5 min, cache for 30 min, no aggressive refetches.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 function ProtectedRoutes() {
   const { user, loading, isApproved, isAdmin } = useAuth();

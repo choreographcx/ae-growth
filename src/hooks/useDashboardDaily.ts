@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear, differenceInCalendarDays, parse, isValid } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
@@ -285,6 +286,19 @@ export {
   buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries, buildFrequencySeries,
 };
 
+/**
+ * Fetch the full unfiltered range from BigQuery via the supabase RPC.
+ * Cached & deduped by react-query keyed on the date range.
+ */
+async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
+  const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
+  const { data, error } = await (supabase.rpc as any)('get_dashboard_daily', {
+    p_start: fmt(start), p_end: fmt(end),
+  });
+  if (error) throw new Error(error.message);
+  return (data as DashboardDailyRow[]) || [];
+}
+
 export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
@@ -292,11 +306,33 @@ export function useDashboardDaily(
   const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
-  const [allRows, setAllRows] = useState<DashboardDailyRow[]>([]);
-  const [filteredRows, setFilteredRows] = useState<DashboardDailyRow[]>([]);
-  const [prevRows, setPrevRows] = useState<DashboardDailyRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const days = differenceInCalendarDays(range.end, range.start) + 1;
+  const prevEnd = useMemo(() => subDays(range.start, 1), [range.start.getTime()]);
+  const prevStart = useMemo(() => subDays(prevEnd, Math.max(0, days - 1)), [prevEnd.getTime(), days]);
+
+  const startKey = format(range.start, 'yyyy-MM-dd');
+  const endKey   = format(range.end, 'yyyy-MM-dd');
+  const pStartKey = format(prevStart, 'yyyy-MM-dd');
+  const pEndKey   = format(prevEnd, 'yyyy-MM-dd');
+
+  // Current period — blocks first paint.
+  const currentQ = useQuery({
+    queryKey: ['dashboard-daily', startKey, endKey],
+    queryFn: () => fetchDashboardRange(range.start, range.end),
+  });
+
+  // Previous period — fired in parallel but does NOT gate the loading flag.
+  // We don't need it for the first paint of charts/KPIs.
+  const previousQ = useQuery({
+    queryKey: ['dashboard-daily', pStartKey, pEndKey],
+    queryFn: () => fetchDashboardRange(prevStart, prevEnd),
+    enabled: !currentQ.isLoading,
+  });
+
+  const allRows = currentQ.data ?? [];
+  const prevRows = previousQ.data ?? [];
+  const loading = currentQ.isLoading;
+  const error = currentQ.error ? (currentQ.error as Error).message : null;
 
   const labelToRawPlatforms = useMemo(() => {
     const m = new Map<string, string[]>();
@@ -311,80 +347,38 @@ export function useDashboardDaily(
     return m;
   }, [allRows]);
 
-  const platformsParam = useMemo(() => {
+  const platformRawSet = useMemo(() => {
     if (!selectedPlatformLabels.length) return null;
-    const raws: string[] = [];
+    const set = new Set<string>();
     for (const lbl of selectedPlatformLabels) {
       const arr = labelToRawPlatforms.get(lbl);
-      if (arr) raws.push(...arr);
+      if (arr) for (const r of arr) set.add(r);
     }
-    return raws.length ? raws : ['__no_match__'];
+    return set;
   }, [selectedPlatformLabels, labelToRawPlatforms]);
 
-  const campaignsParam = useMemo(
-    () => (selectedCampaigns.length ? selectedCampaigns : null),
+  const campaignSet = useMemo(
+    () => (selectedCampaigns.length ? new Set(selectedCampaigns) : null),
     [selectedCampaigns]
   );
 
-  const filtersActive = !!(platformsParam || campaignsParam);
-
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      setLoading(true);
-      setError(null);
-      const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-      const days = Math.max(1, differenceInCalendarDays(range.end, range.start) + 1);
-      const prevEnd = subDays(range.start, 1);
-      const prevStart = subDays(prevEnd, days - 1);
-
-      const [current, previous] = await Promise.all([
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(range.start), p_end: fmt(range.end) }),
-        (supabase.rpc as any)('get_dashboard_daily', { p_start: fmt(prevStart),   p_end: fmt(prevEnd)   }),
-      ]);
-      if (cancelled) return;
-      if (current.error) {
-        setError(current.error.message);
-        setAllRows([]); setPrevRows([]); setLoading(false);
-        return;
-      }
-      setAllRows((current.data as DashboardDailyRow[]) || []);
-      setPrevRows(previous.error ? [] : ((previous.data as DashboardDailyRow[]) || []));
-      setLoading(false);
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [range.start.getTime(), range.end.getTime()]);
-
-  useEffect(() => {
-    if (!filtersActive) { setFilteredRows([]); return; }
-    let cancelled = false;
-    const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-    (async () => {
-      const { data, error: err } = await (supabase.rpc as any)('get_dashboard_daily', {
-        p_start: fmt(range.start),
-        p_end: fmt(range.end),
-        p_platforms: platformsParam,
-        p_campaign_names: campaignsParam,
-      });
-      if (cancelled) return;
-      if (err) { setError(err.message); setFilteredRows([]); return; }
-      setFilteredRows((data as DashboardDailyRow[]) || []);
-    })();
-    return () => { cancelled = true; };
-  }, [filtersActive, range.start.getTime(), range.end.getTime(), platformsParam, campaignsParam]);
-
-  const rows = filtersActive ? filteredRows : allRows;
+  // Client-side filtering — avoids an extra BigQuery round-trip whenever the
+  // unfiltered superset is already in memory.
+  const rows = useMemo(() => {
+    if (!platformRawSet && !campaignSet) return allRows;
+    return allRows.filter(r =>
+      (!platformRawSet || platformRawSet.has(r.platform)) &&
+      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name)))
+    );
+  }, [allRows, platformRawSet, campaignSet]);
 
   const filteredPrevRows = useMemo(() => {
-    if (!filtersActive) return prevRows;
-    const platSet = platformsParam ? new Set(platformsParam) : null;
-    const campSet = campaignsParam ? new Set(campaignsParam) : null;
+    if (!platformRawSet && !campaignSet) return prevRows;
     return prevRows.filter(r =>
-      (!platSet || platSet.has(r.platform)) &&
-      (!campSet || (r.campaign_name && campSet.has(r.campaign_name)))
+      (!platformRawSet || platformRawSet.has(r.platform)) &&
+      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name)))
     );
-  }, [filtersActive, prevRows, platformsParam, campaignsParam]);
+  }, [prevRows, platformRawSet, campaignSet]);
 
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
@@ -408,15 +402,14 @@ export function useDashboardDaily(
   }, [allRows]);
 
   const availableCampaigns = useMemo(() => {
-    const platSet = platformsParam ? new Set(platformsParam) : null;
     const set = new Set<string>();
     for (const r of allRows) {
       if (!r.campaign_name) continue;
-      if (platSet && !platSet.has(r.platform)) continue;
+      if (platformRawSet && !platformRawSet.has(r.platform)) continue;
       set.add(r.campaign_name);
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allRows, platformsParam]);
+  }, [allRows, platformRawSet]);
 
   const campaignsByPlatform = useMemo<Partial<Record<PlatformKey, string[]>>>(() => {
     const buckets = new Map<PlatformKey, Set<string>>();
