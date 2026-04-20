@@ -11,6 +11,16 @@ import { toast } from 'sonner';
 import { Trash2, Edit2, Check, X, Eye, EyeOff, UserPlus, Shield, User, Clock, Mail, ChevronDown, Settings2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import {
+  PERMISSIONS,
+  ROLE_OPTIONS,
+  defaultPermissionsForRole,
+  loadUserPermissions,
+  saveUserPermissions,
+  setUserRole,
+  type UserPermissions,
+  type PermissionKey,
+} from '@/lib/permissions';
 
 interface UserProfile {
   id: string;
