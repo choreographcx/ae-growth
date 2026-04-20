@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
@@ -118,6 +118,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setLastSavedAt(new Date(updatedAt).toLocaleString([], {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
       }));
+      // Refresh the cached settings so any other consumers see the latest values.
+      settingsQ.refetch();
       toast.success('Configuration saved');
     } catch (err: any) {
       console.error('Save error:', err);
@@ -126,7 +128,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSaving(false);
     }
-  }, [client]);
+  }, [client, settingsQ]);
 
   const enabledPlatforms = useMemo(() => {
     const withData = new Set(data.availablePlatforms.map(p => p.key));
