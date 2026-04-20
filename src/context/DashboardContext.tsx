@@ -49,7 +49,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [configLoaded, setConfigLoaded] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   // Single source of truth for dashboard data — shared with header and pages
@@ -58,26 +57,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedCampaigns,
   });
 
+  // Client settings cached so navigating between pages never refetches them.
+  const settingsQ = useQuery({
+    queryKey: ['client-settings'],
+    queryFn: loadClientSettings,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+  });
+  const configLoaded = !settingsQ.isLoading;
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { client: loaded, updatedAt } = await loadClientSettings();
-        if (cancelled) return;
-        setClient(loaded);
-        if (updatedAt) {
-          setLastSavedAt(new Date(updatedAt).toLocaleString([], {
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to load client settings:', err);
-      } finally {
-        if (!cancelled) setConfigLoaded(true);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+    if (!settingsQ.data) return;
+    setClient(settingsQ.data.client);
+    if (settingsQ.data.updatedAt) {
+      setLastSavedAt(new Date(settingsQ.data.updatedAt).toLocaleString([], {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      }));
+    }
+  }, [settingsQ.data]);
 
   // Whenever the in-memory client's branding changes (admin live-edit, etc.),
   // mirror it to the document root and the localStorage cache so unauth pages
