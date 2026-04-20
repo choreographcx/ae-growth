@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
-import { applyBrandingToRoot, cacheBranding, syncPublicBranding } from '@/lib/branding';
+// Branding now flows through the public client_branding table (read by anon
+// users via RLS), so AuthProvider no longer needs to mirror it itself.
 
 interface AuthContextType {
   user: User | null;
@@ -38,10 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   const fetchUserData = async (userId: string) => {
-    const [profileRes, rolesRes, configRes] = await Promise.all([
+    const [profileRes, rolesRes] = await Promise.all([
       supabase.from('profiles').select('email, full_name, is_approved').eq('user_id', userId).single(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
-      supabase.from('client_configs').select('config').eq('user_id', userId).maybeSingle(),
     ]);
 
     if (profileRes.data) {
@@ -49,23 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsApproved(profileRes.data.is_approved);
     }
 
-    let userIsAdmin = false;
     if (rolesRes.data) {
       const roles = rolesRes.data.map((r: any) => r.role);
       setIsSuperAdmin(roles.includes('superadmin'));
-      userIsAdmin = roles.includes('admin') || roles.includes('superadmin');
-      setIsAdmin(userIsAdmin);
-    }
-
-    // Apply the admin's saved branding for this user, AND mirror the FULL
-    // config to the public row so every other user sees the same theme.
-    const branding = (configRes.data?.config as any)?.branding;
-    if (branding) {
-      applyBrandingToRoot(branding);
-      cacheBranding(branding);
-      if (userIsAdmin) {
-        void syncPublicBranding({ branding });
-      }
+      setIsAdmin(roles.includes('admin') || roles.includes('superadmin'));
     }
   };
 

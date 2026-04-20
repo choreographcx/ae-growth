@@ -3,8 +3,9 @@ import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { applyBrandingToRoot, cacheBranding, hydratePublicBranding } from '@/lib/branding';
-import { useDashboardDaily, UseDashboardDailyOptions } from '@/hooks/useDashboardDaily';
+import { applyBrandingToRoot, cacheBranding, cacheClientName, applyClientNameToTitle } from '@/lib/branding';
+import { useDashboardDaily } from '@/hooks/useDashboardDaily';
+import { loadClientSettings, saveClientSettings } from '@/lib/clientSettings';
 
 type DashboardData = ReturnType<typeof useDashboardDaily>;
 
@@ -57,74 +58,39 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    const loadConfig = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setConfigLoaded(true);
-        return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { client: loaded, updatedAt } = await loadClientSettings();
+        if (cancelled) return;
+        setClient(loaded);
+        if (updatedAt) {
+          setLastSavedAt(new Date(updatedAt).toLocaleString([], {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load client settings:', err);
+      } finally {
+        if (!cancelled) setConfigLoaded(true);
       }
-
-      const [configRes, rolesRes, publicBrandingRes] = await Promise.all([
-        supabase
-          .from('client_configs')
-          .select('config, updated_at')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-        supabase.from('user_roles').select('role').eq('user_id', user.id),
-        supabase
-          .from('public_branding')
-          .select('client_name, logo_url, favicon_url, primary_hex, branding_json')
-          .eq('id', 'singleton')
-          .maybeSingle(),
-      ]);
-
-      const saved = (configRes.data?.config as Record<string, any> | null) ?? null;
-      const roles = (rolesRes.data ?? []).map((r: any) => r.role);
-      const userIsAdmin = roles.includes('admin') || roles.includes('superadmin');
-      const publicBrandingRow = publicBrandingRes.data;
-      const publicBranding = publicBrandingRow
-        ? {
-            ...(((publicBrandingRow as any).branding_json as Record<string, any> | null) ?? {}),
-            ...((publicBrandingRow.logo_url && !((publicBrandingRow as any).branding_json?.logoUrl)) ? { logoUrl: publicBrandingRow.logo_url } : {}),
-            ...((publicBrandingRow.favicon_url && !((publicBrandingRow as any).branding_json?.faviconUrl)) ? { faviconUrl: publicBrandingRow.favicon_url } : {}),
-            ...((publicBrandingRow.primary_hex && !((publicBrandingRow as any).branding_json?.primaryColor)) ? { primaryColor: publicBrandingRow.primary_hex } : {}),
-          }
-        : null;
-
-      const mergedClient = {
-        ...defaultClient,
-        ...(saved ?? {}),
-        ...(!userIsAdmin && publicBrandingRow?.client_name ? { name: publicBrandingRow.client_name } : {}),
-        ...(!userIsAdmin && publicBranding ? {
-          branding: {
-            ...(((saved as any)?.branding ?? {}) as Record<string, any>),
-            ...publicBranding,
-          },
-        } : {}),
-      } as ClientProfile;
-
-      setClient(prev => ({ ...prev, ...mergedClient }));
-
-      if (configRes.data?.updated_at) {
-        setLastSavedAt(new Date(configRes.data.updated_at).toLocaleString([], {
-          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        }));
-      }
-      setConfigLoaded(true);
-    };
-
-    loadConfig();
+    })();
+    return () => { cancelled = true; };
   }, []);
 
+  // Whenever the in-memory client's branding changes (admin live-edit, etc.),
+  // mirror it to the document root and the localStorage cache so unauth pages
+  // can render with it on next load.
   useEffect(() => {
     const branding = (client as any).branding;
     if (branding) {
       applyBrandingToRoot(branding);
       cacheBranding(branding);
     }
-    // Always re-fetch the public branding row so the admin's saved theme
-    // overrides any stale per-user branding for non-admin viewers.
-    void hydratePublicBranding();
+    if (client.name) {
+      applyClientNameToTitle(client.name);
+      cacheClientName(client.name);
+    }
   }, [client]);
 
   const togglePlatform = (key: PlatformKey) => {
@@ -150,26 +116,15 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { error } = await supabase
-        .from('client_configs')
-        .upsert(
-          { user_id: user.id, config: client as any },
-          { onConflict: 'user_id' }
-        );
-
-      if (error) {
-        console.error('Save error:', error);
-        toast.error('Failed to save configuration');
-      } else {
-        const now = new Date().toLocaleString([], { 
-          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-        });
-        setLastSavedAt(now);
-        toast.success('Configuration saved');
-      }
-    } catch (err) {
+      const { updatedAt } = await saveClientSettings(client, user.id);
+      setLastSavedAt(new Date(updatedAt).toLocaleString([], {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      }));
+      toast.success('Configuration saved');
+    } catch (err: any) {
       console.error('Save error:', err);
-      toast.error('Failed to save configuration');
+      const msg = err?.message || 'Failed to save configuration';
+      toast.error(msg.includes('row-level security') ? 'Only admins can save settings' : 'Failed to save configuration');
     } finally {
       setIsSaving(false);
     }
