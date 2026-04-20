@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
-import { loadCachedBranding } from '@/lib/branding';
+import { loadCachedBranding, subscribeBrandingUpdates } from '@/lib/branding';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,7 +14,12 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const branding = loadCachedBranding();
+  const [branding, setBranding] = useState(() => loadCachedBranding());
+
+  useEffect(() => {
+    // Re-read branding when async hydration finishes (incognito / first visit).
+    return subscribeBrandingUpdates(() => setBranding(loadCachedBranding()));
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
