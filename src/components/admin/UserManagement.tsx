@@ -50,7 +50,11 @@ export function UserManagement() {
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState('viewer');
+  const [newRole, setNewRole] = useState<'admin' | 'user'>('user');
+  const [permissions, setPermissions] = useState<UserPermissions | null>(null);
+  const [permLoading, setPermLoading] = useState(false);
+  const [permSaving, setPermSaving] = useState(false);
+  const [permRole, setPermRole] = useState<'admin' | 'user'>('user');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
 
