@@ -57,22 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAdmin(userIsAdmin);
     }
 
-    // Apply saved branding immediately so login/loading/pending screens
-    // and the dashboard all use the user's configured theme — never defaults.
+    // Apply the admin's saved branding for this user, AND mirror the FULL
+    // config to the public row so every other user sees the same theme.
     const branding = (configRes.data?.config as any)?.branding;
     if (branding) {
       applyBrandingToRoot(branding);
       cacheBranding(branding);
-      // Mirror branding to the public row so logged-out / incognito visitors
-      // see it on the auth screen. Only admins are allowed to write.
       if (userIsAdmin) {
-        void syncPublicBranding({
-          branding: {
-            logoUrl: branding.logoUrl,
-            faviconUrl: branding.faviconUrl,
-            primaryColor: branding.primaryColor,
-          },
-        });
+        void syncPublicBranding({ branding });
       }
     }
   };
