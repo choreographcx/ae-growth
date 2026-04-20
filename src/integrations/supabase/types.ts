@@ -74,6 +74,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_branding_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "public_singleton_client"
+            referencedColumns: ["id"]
+          },
         ]
       }
       client_data_sources: {
@@ -125,6 +132,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_data_sources_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -184,6 +198,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_kpi_thresholds_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -261,6 +282,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_platform_settings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -341,6 +369,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: true
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reporting_settings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -491,7 +526,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_singleton_client: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          name: string | null
+          slug: string | null
+          status: string | null
+          timezone: string | null
+          updated_at: string | null
+          website_domain: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          name?: string | null
+          slug?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          website_domain?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          name?: string | null
+          slug?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          website_domain?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_dashboard_conversion_breakdown: {
