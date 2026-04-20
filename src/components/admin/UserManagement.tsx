@@ -33,22 +33,11 @@ interface UserProfile {
   roles: string[];
 }
 
-const ROLE_TYPES = [
-  { value: 'admin', label: 'Admin', color: 'bg-red-50 text-red-700 border-red-200', icon: Shield, description: 'Full access to all settings and data' },
-  { value: 'analyst', label: 'Analyst', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Settings2, description: 'Can view data and edit reporting rules' },
-  { value: 'viewer', label: 'Viewer', color: 'bg-muted text-muted-foreground border-border', icon: Eye, description: 'Read-only access to dashboards' },
-  { value: 'client_viewer', label: 'Client Viewer', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: User, description: 'Limited client-facing view' },
-  { value: 'executive', label: 'Executive Viewer', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: User, description: 'High-level summary view only' },
-];
-
-const PERMISSIONS = [
-  { key: 'edit_admin', label: 'Can edit admin settings' },
-  { key: 'manage_users', label: 'Can manage users' },
-  { key: 'export_pdf', label: 'Can export PDF' },
-  { key: 'manage_naming', label: 'Can manage naming rules' },
-  { key: 'view_tracking', label: 'Can view tracking health' },
-  { key: 'change_alerts', label: 'Can change alert thresholds' },
-];
+const ROLE_BADGES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
+  superadmin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: Shield },
+  admin:      { label: 'Admin',       color: 'bg-red-50 text-red-700 border-red-200',         icon: Shield },
+  user:       { label: 'Viewer',      color: 'bg-muted text-muted-foreground border-border',  icon: Eye },
+};
 
 export function UserManagement() {
   const { isAdmin, isSuperAdmin } = useAuth();
