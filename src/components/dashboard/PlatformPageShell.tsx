@@ -90,7 +90,47 @@ export function PlatformPageShell({
     if (!hasLPV && t.includes('landing page')) return false;
     return true;
   });
-  const kpiCards = applyCurrencyToKPIGroups(rawCards, currency, 26);
+
+  // Inject Budget & Pacing into the Spend card based on platform settings + active date range.
+  const platformCfg = client.platforms?.[platformKey];
+  const cardsWithPacing = useMemo(() => {
+    if (!platformCfg || !platformCfg.budget || platformCfg.budget <= 0) return rawCards;
+
+    const rangeDays = Math.max(1, Math.round((range.end.getTime() - range.start.getTime()) / 86400000) + 1);
+    const budgetForRange = (() => {
+      switch (platformCfg.budgetType) {
+        case 'annual':  return platformCfg.budget * (rangeDays / 365);
+        case 'monthly': return platformCfg.budget * (rangeDays / 30);
+        case 'campaign':
+        case 'custom':
+        default:        return platformCfg.budget;
+      }
+    })();
+    const pacing = budgetForRange > 0 ? (totals.spend / budgetForRange) * 100 : 0;
+    const budgetTypeLabel = platformCfg.budgetType === 'annual'
+      ? 'Annual Budget'
+      : platformCfg.budgetType === 'monthly'
+      ? 'Monthly Budget'
+      : 'Budget';
+
+    return rawCards.map(c => {
+      if (c.title.toLowerCase() !== 'spend') return c;
+      const supporting = [
+        {
+          label: budgetTypeLabel,
+          formattedValue: moneyKpi(platformCfg.budget, currency, 0),
+        },
+        {
+          label: `Pacing${platformCfg.budgetType === 'annual' || platformCfg.budgetType === 'monthly' ? ' (period)' : ''}`,
+          formattedValue: budgetForRange > 0 ? `${pacing.toFixed(0)}%` : '—',
+        },
+        ...(c.supporting ?? []),
+      ];
+      return { ...c, supporting };
+    });
+  }, [rawCards, platformCfg, range.start, range.end, totals.spend, currency]);
+
+  const kpiCards = applyCurrencyToKPIGroups(cardsWithPacing, currency, 26);
 
   return (
     <div className="space-y-6 md:space-y-8">
