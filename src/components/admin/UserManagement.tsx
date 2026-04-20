@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +42,7 @@ const ROLE_BADGES: Record<string, { label: string; color: string; icon: typeof S
 
 export function UserManagement() {
   const { isAdmin, isSuperAdmin } = useAuth();
+  const onlineUserIds = useOnlineUsers();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -235,6 +237,7 @@ export function UserManagement() {
   const activeCount = users.filter(u => u.is_approved).length;
   const pendingCount = users.filter(u => !u.is_approved).length;
   const adminCount = users.filter(u => u.roles.includes('admin')).length;
+  const onlineCount = users.filter(u => onlineUserIds.has(u.user_id)).length;
 
   return (
     <div className="space-y-4">
@@ -252,6 +255,14 @@ export function UserManagement() {
           )}
           <span className="text-border">·</span>
           <span><strong className="text-card-foreground">{adminCount}</strong> admin{adminCount !== 1 ? 's' : ''}</span>
+          <span className="text-border">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <strong className="text-emerald-600">{onlineCount}</strong> online
+          </span>
         </div>
         {isSuperUser && (
           <div className="flex items-center gap-2">
@@ -313,6 +324,7 @@ export function UserManagement() {
         <div className="space-y-2">
           {users.map(u => {
             const primaryRole = u.roles.includes('superadmin') ? 'superadmin' : u.roles.includes('admin') ? 'admin' : 'user';
+            const isOnline = onlineUserIds.has(u.user_id);
 
             return (
               <div key={u.id} className={cn(
@@ -357,6 +369,15 @@ export function UserManagement() {
                       )}>
                         {u.is_approved ? 'Active' : 'Pending'}
                       </Badge>
+                      {isOnline && (
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-700 bg-emerald-50 inline-flex items-center gap-1">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          </span>
+                          Online
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
                       <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>

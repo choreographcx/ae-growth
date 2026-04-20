@@ -89,6 +89,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Broadcast presence on a shared channel so admins can see who is currently online.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel('online-users', {
+      config: { presence: { key: user.id } },
+    });
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
+      }
+    });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
