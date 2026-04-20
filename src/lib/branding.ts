@@ -240,64 +240,52 @@ export function applyCachedTitle() {
 }
 
 /**
- * Fetch the public branding row (full config + client name) so EVERY user —
- * including non-admins, logged-out visitors and incognito sessions — sees
- * exactly what was saved in Admin → Branding & Theme.
+ * Fetch branding from the singleton client_branding row (anon-readable via
+ * RLS) so EVERY user — including non-admins, logged-out visitors and
+ * incognito sessions — sees exactly what the admin saved.
  */
 export async function hydratePublicBranding() {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
-    const { data, error } = await supabase
-      .from('public_branding')
-      .select('client_name, logo_url, favicon_url, primary_hex, branding_json')
-      .eq('id', 'singleton')
-      .maybeSingle();
-    if (error || !data) return;
 
-    // Prefer the full saved branding JSON; fall back to the individual columns.
-    const fullBranding = (data as any).branding_json as Partial<BrandingConfig> | null;
-    const branding: Partial<BrandingConfig> = fullBranding ? { ...fullBranding } : {};
-    if (!branding.logoUrl    && data.logo_url)                  branding.logoUrl     = data.logo_url;
-    if (!branding.faviconUrl && data.favicon_url)               branding.faviconUrl  = data.favicon_url;
-    if (!branding.primaryColor && isValidHex(data.primary_hex || '')) branding.primaryColor = data.primary_hex!;
+    const { data: clientRow } = await supabase
+      .from('clients')
+      .select('id, name')
+      .eq('is_singleton', true)
+      .maybeSingle();
+    if (!clientRow) return;
+
+    const { data: b } = await supabase
+      .from('client_branding')
+      .select('logo_url, dark_logo_url, favicon_url, primary_hex, secondary_hex, accent_hex, sidebar_style, chart_palette, card_radius, font_family')
+      .eq('client_id', clientRow.id)
+      .maybeSingle();
+
+    const branding: Partial<BrandingConfig> = {};
+    if (b) {
+      if (b.logo_url) branding.logoUrl = b.logo_url;
+      if (b.dark_logo_url) (branding as any).darkLogoUrl = b.dark_logo_url;
+      if (b.favicon_url) branding.faviconUrl = b.favicon_url;
+      if (isValidHex(b.primary_hex || '')) branding.primaryColor = b.primary_hex!;
+      if (isValidHex(b.secondary_hex || '')) branding.secondaryColor = b.secondary_hex!;
+      if (isValidHex(b.accent_hex || '')) branding.accentColor = b.accent_hex!;
+      if (b.sidebar_style) branding.sidebarStyle = b.sidebar_style as BrandingConfig['sidebarStyle'];
+      if (b.chart_palette) branding.chartPalette = b.chart_palette as BrandingConfig['chartPalette'];
+      if (b.card_radius) branding.cardRadius = b.card_radius as BrandingConfig['cardRadius'];
+      if (b.font_family) (branding as any).fontFamily = b.font_family;
+    }
 
     if (Object.keys(branding).length > 0) {
-      // Public branding is the source of truth — replace the cached copy
-      // entirely so old per-user values don't shadow the admin's settings.
       applyBrandingToRoot(branding);
       cacheBranding(branding);
     }
-    if (data.client_name) {
-      applyClientNameToTitle(data.client_name);
-      cacheClientName(data.client_name);
+    if (clientRow.name) {
+      applyClientNameToTitle(clientRow.name);
+      cacheClientName(clientRow.name);
     }
     emitBrandingUpdate();
   } catch {
     /* network errors during boot should not break rendering */
-  }
-}
-
-/** Push the current branding/client name to the public branding row (admin only). */
-export async function syncPublicBranding(input: {
-  clientName?: string | null;
-  branding?: Partial<BrandingConfig> | null;
-}) {
-  try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const payload: Record<string, unknown> = { id: 'singleton' };
-    if (input.clientName !== undefined) payload.client_name = input.clientName;
-    if (input.branding) {
-      // Mirror the visible columns (used by older code paths) AND store the
-      // full config so non-admin viewers can apply secondary/accent colors,
-      // sidebar style, chart palette, card radius and dark logo too.
-      if (input.branding.logoUrl !== undefined)      payload.logo_url     = input.branding.logoUrl;
-      if (input.branding.faviconUrl !== undefined)   payload.favicon_url  = input.branding.faviconUrl;
-      if (input.branding.primaryColor !== undefined) payload.primary_hex  = input.branding.primaryColor;
-      payload.branding_json = input.branding;
-    }
-    await supabase.from('public_branding').upsert(payload as any, { onConflict: 'id' });
-  } catch {
-    /* non-admins will be denied — silently ignore */
   }
 }
 

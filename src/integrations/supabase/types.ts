@@ -76,30 +76,6 @@ export type Database = {
           },
         ]
       }
-      client_configs: {
-        Row: {
-          config: Json
-          created_at: string
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          config?: Json
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          config?: Json
-          created_at?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       client_data_sources: {
         Row: {
           account_id: string | null
@@ -375,6 +351,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_singleton: boolean
           name: string
           owner_user_id: string
           slug: string
@@ -388,6 +365,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_singleton?: boolean
           name: string
           owner_user_id: string
           slug: string
@@ -401,6 +379,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_singleton?: boolean
           name?: string
           owner_user_id?: string
           slug?: string
@@ -441,36 +420,6 @@ export type Database = {
         }
         Relationships: []
       }
-      public_branding: {
-        Row: {
-          branding_json: Json | null
-          client_name: string | null
-          favicon_url: string | null
-          id: string
-          logo_url: string | null
-          primary_hex: string | null
-          updated_at: string
-        }
-        Insert: {
-          branding_json?: Json | null
-          client_name?: string | null
-          favicon_url?: string | null
-          id?: string
-          logo_url?: string | null
-          primary_hex?: string | null
-          updated_at?: string
-        }
-        Update: {
-          branding_json?: Json | null
-          client_name?: string | null
-          favicon_url?: string | null
-          id?: string
-          logo_url?: string | null
-          primary_hex?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       user_layouts: {
         Row: {
           created_at: string
@@ -493,6 +442,30 @@ export type Database = {
           id?: string
           layout_key?: string
           section_order?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          perms: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          perms?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          perms?: Json
           updated_at?: string
           user_id?: string
         }
@@ -595,6 +568,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_singleton: boolean
           name: string
           owner_user_id: string
           slug: string
@@ -611,6 +585,30 @@ export type Database = {
         }
       }
       get_profile_is_approved: { Args: { _user_id: string }; Returns: boolean }
+      get_singleton_client: {
+        Args: never
+        Returns: {
+          code: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_singleton: boolean
+          name: string
+          owner_user_id: string
+          slug: string
+          status: string
+          timezone: string
+          updated_at: string
+          website_domain: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "clients"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_singleton_client_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

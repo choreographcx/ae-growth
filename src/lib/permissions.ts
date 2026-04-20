@@ -22,7 +22,6 @@ export type UserPermissions = Record<PermissionKey, boolean>;
 // Sensible defaults per role (best-practice principle of least privilege).
 export function defaultPermissionsForRole(role: string): UserPermissions {
   if (role === 'admin' || role === 'superadmin') {
-    // Admins get every permission by default.
     return {
       edit_admin: true,
       manage_users: true,
@@ -32,7 +31,6 @@ export function defaultPermissionsForRole(role: string): UserPermissions {
       change_alerts: true,
     };
   }
-  // Standard users (viewers): read-only + can export their reports.
   return {
     edit_admin: false,
     manage_users: false,
@@ -43,44 +41,28 @@ export function defaultPermissionsForRole(role: string): UserPermissions {
   };
 }
 
-// Granular permissions live alongside other client config under a single jsonb row
-// keyed by the *admin's* user_id (the person managing them). We use a dedicated
-// "global" config row keyed by a fixed UUID-like sentinel? Simpler: store them on
-// the *target user's* own client_configs row under config.permissions so RLS
-// (admin can read/write all configs) works cleanly.
+/**
+ * Granular per-user permissions live in the dedicated `user_permissions`
+ * table. RLS enforces that users can read their own row, while admins and
+ * superadmins can read & write everyone's.
+ */
 export async function loadUserPermissions(userId: string, role: string): Promise<UserPermissions> {
   const { data } = await supabase
-    .from('client_configs')
-    .select('config')
+    .from('user_permissions')
+    .select('perms')
     .eq('user_id', userId)
     .maybeSingle();
 
-  const stored = (data?.config as any)?.permissions as Partial<UserPermissions> | undefined;
+  const stored = (data?.perms as Partial<UserPermissions> | null) ?? null;
   const defaults = defaultPermissionsForRole(role);
   return { ...defaults, ...(stored ?? {}) };
 }
 
 export async function saveUserPermissions(userId: string, perms: UserPermissions): Promise<void> {
-  const { data: existing } = await supabase
-    .from('client_configs')
-    .select('id, config')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  const nextConfig = { ...((existing?.config as any) ?? {}), permissions: perms };
-
-  if (existing?.id) {
-    const { error } = await supabase
-      .from('client_configs')
-      .update({ config: nextConfig })
-      .eq('id', existing.id);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase
-      .from('client_configs')
-      .insert({ user_id: userId, config: nextConfig });
-    if (error) throw error;
-  }
+  const { error } = await supabase
+    .from('user_permissions')
+    .upsert({ user_id: userId, perms: perms as any }, { onConflict: 'user_id' });
+  if (error) throw error;
 }
 
 // Role helpers — only admin/user/superadmin exist in the DB enum.
