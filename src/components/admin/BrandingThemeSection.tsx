@@ -82,31 +82,19 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
     cacheBranding(branding);
   }, [branding]);
 
-  // Debounced sync of public-visible fields (logo, favicon, primary) to the
-  // public_branding row so logged-out / incognito visitors see them on /auth.
+  // Debounced sync of the FULL branding config to the public_branding row so
+  // every user — admin or not — sees the admin's saved theme.
   useEffect(() => {
     const t = setTimeout(() => {
-      void syncPublicBranding({
-        branding: {
-          logoUrl: branding.logoUrl,
-          faviconUrl: branding.faviconUrl,
-          primaryColor: branding.primaryColor,
-        },
-      });
+      void syncPublicBranding({ branding });
     }, 800);
     return () => clearTimeout(t);
-  }, [branding.logoUrl, branding.faviconUrl, branding.primaryColor]);
+  }, [branding]);
 
   const handleApply = useCallback(() => {
     applyBrandingToRoot(branding);
     cacheBranding(branding);
-    void syncPublicBranding({
-      branding: {
-        logoUrl: branding.logoUrl,
-        faviconUrl: branding.faviconUrl,
-        primaryColor: branding.primaryColor,
-      },
-    });
+    void syncPublicBranding({ branding });
     toast.success('Colors & styles applied across the app');
   }, [branding]);
 

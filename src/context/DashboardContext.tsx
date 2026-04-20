@@ -3,7 +3,7 @@ import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
+import { applyBrandingToRoot, cacheBranding, hydratePublicBranding } from '@/lib/branding';
 import { useDashboardDaily, UseDashboardDailyOptions } from '@/hooks/useDashboardDaily';
 
 type DashboardData = ReturnType<typeof useDashboardDaily>;
@@ -91,6 +91,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       applyBrandingToRoot(branding);
       cacheBranding(branding);
     }
+    // Always re-fetch the public branding row so the admin's saved theme
+    // overrides any stale per-user branding for non-admin viewers.
+    void hydratePublicBranding();
   }, [client]);
 
   const togglePlatform = (key: PlatformKey) => {

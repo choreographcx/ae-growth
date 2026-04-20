@@ -1,0 +1,1 @@
+ALTER TABLE public.public_branding ADD COLUMN IF NOT EXISTS branding_json jsonb;
