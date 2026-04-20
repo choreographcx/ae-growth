@@ -91,6 +91,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       applyBrandingToRoot(branding);
       cacheBranding(branding);
     }
+    // Always re-fetch the public branding row so the admin's saved theme
+    // overrides any stale per-user branding for non-admin viewers.
+    void hydratePublicBranding();
   }, [client]);
 
   const togglePlatform = (key: PlatformKey) => {
