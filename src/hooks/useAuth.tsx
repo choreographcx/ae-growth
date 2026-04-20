@@ -105,9 +105,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Broadcast presence on a shared channel so admins can see who is currently online.
   useEffect(() => {
     if (!user) return;
-    const channel = supabase.channel('online-users-observer', {
+    const channel = supabase.channel('online-users', {
       config: { presence: { key: user.id } },
     });
+    // No-op presence handler attached BEFORE subscribe so the channel is
+    // presence-aware and other consumers (useOnlineUsers) can read state.
+    channel.on('presence', { event: 'sync' }, () => {});
     channel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         await channel.track({ user_id: user.id, online_at: new Date().toISOString() });

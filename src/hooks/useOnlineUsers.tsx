@@ -10,10 +10,12 @@ export function useOnlineUsers(): Set<string> {
   const [online, setOnline] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    // Use a distinct channel name so listeners are attached BEFORE subscribe().
-    // (Sharing the same name as useAuth's already-subscribed channel triggers
-    // "cannot add presence callbacks ... after subscribe()".)
-    const channel = supabase.channel('online-users-observer');
+    // Each consumer creates its own channel instance with the shared topic
+    // "online-users". Handlers are registered BEFORE subscribe() to avoid the
+    // "cannot add presence callbacks after subscribe()" runtime error.
+    const channel = supabase.channel(`online-users-reader-${Math.random().toString(36).slice(2)}`, {
+      config: { presence: { key: 'observer' } },
+    });
 
     const sync = () => {
       const state = channel.presenceState() as Record<string, Array<{ user_id?: string }>>;
