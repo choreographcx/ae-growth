@@ -11,6 +11,16 @@ import { toast } from 'sonner';
 import { Trash2, Edit2, Check, X, Eye, EyeOff, UserPlus, Shield, User, Clock, Mail, ChevronDown, Settings2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import {
+  PERMISSIONS,
+  ROLE_OPTIONS,
+  defaultPermissionsForRole,
+  loadUserPermissions,
+  saveUserPermissions,
+  setUserRole,
+  type UserPermissions,
+  type PermissionKey,
+} from '@/lib/permissions';
 
 interface UserProfile {
   id: string;
@@ -23,22 +33,11 @@ interface UserProfile {
   roles: string[];
 }
 
-const ROLE_TYPES = [
-  { value: 'admin', label: 'Admin', color: 'bg-red-50 text-red-700 border-red-200', icon: Shield, description: 'Full access to all settings and data' },
-  { value: 'analyst', label: 'Analyst', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Settings2, description: 'Can view data and edit reporting rules' },
-  { value: 'viewer', label: 'Viewer', color: 'bg-muted text-muted-foreground border-border', icon: Eye, description: 'Read-only access to dashboards' },
-  { value: 'client_viewer', label: 'Client Viewer', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: User, description: 'Limited client-facing view' },
-  { value: 'executive', label: 'Executive Viewer', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: User, description: 'High-level summary view only' },
-];
-
-const PERMISSIONS = [
-  { key: 'edit_admin', label: 'Can edit admin settings' },
-  { key: 'manage_users', label: 'Can manage users' },
-  { key: 'export_pdf', label: 'Can export PDF' },
-  { key: 'manage_naming', label: 'Can manage naming rules' },
-  { key: 'view_tracking', label: 'Can view tracking health' },
-  { key: 'change_alerts', label: 'Can change alert thresholds' },
-];
+const ROLE_BADGES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
+  superadmin: { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: Shield },
+  admin:      { label: 'Admin',       color: 'bg-red-50 text-red-700 border-red-200',         icon: Shield },
+  user:       { label: 'Viewer',      color: 'bg-muted text-muted-foreground border-border',  icon: Eye },
+};
 
 export function UserManagement() {
   const { isAdmin, isSuperAdmin } = useAuth();
@@ -51,7 +50,11 @@ export function UserManagement() {
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState('viewer');
+  const [newRole, setNewRole] = useState<'admin' | 'user'>('user');
+  const [permissions, setPermissions] = useState<UserPermissions | null>(null);
+  const [permLoading, setPermLoading] = useState(false);
+  const [permSaving, setPermSaving] = useState(false);
+  const [permRole, setPermRole] = useState<'admin' | 'user'>('user');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
 
@@ -84,6 +87,60 @@ export function UserManagement() {
   useEffect(() => {
     if (isAdmin) fetchUsers();
   }, [isAdmin]);
+
+  // Load permissions when the perm dialog opens for a user.
+  useEffect(() => {
+    if (!permDialogUser) {
+      setPermissions(null);
+      return;
+    }
+    const role: 'admin' | 'user' = permDialogUser.roles.includes('admin') || permDialogUser.roles.includes('superadmin') ? 'admin' : 'user';
+    setPermRole(role);
+    setPermLoading(true);
+    loadUserPermissions(permDialogUser.user_id, role)
+      .then(setPermissions)
+      .catch(() => {
+        setPermissions(defaultPermissionsForRole(role));
+        toast.error('Could not load saved permissions — showing defaults');
+      })
+      .finally(() => setPermLoading(false));
+  }, [permDialogUser]);
+
+  const handleRoleChange = async (newRoleValue: 'admin' | 'user') => {
+    if (!permDialogUser) return;
+    if (permDialogUser.roles.includes('superadmin')) {
+      toast.error('Super admin role cannot be changed');
+      return;
+    }
+    setPermSaving(true);
+    try {
+      await setUserRole(permDialogUser.user_id, newRoleValue);
+      setPermRole(newRoleValue);
+      const fresh = defaultPermissionsForRole(newRoleValue);
+      setPermissions(fresh);
+      toast.success(`Role updated to ${newRoleValue === 'admin' ? 'Admin' : 'Viewer'}`);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update role');
+    } finally {
+      setPermSaving(false);
+    }
+  };
+
+  const handlePermissionToggle = async (key: PermissionKey, value: boolean) => {
+    if (!permDialogUser || !permissions) return;
+    const next = { ...permissions, [key]: value };
+    setPermissions(next);
+    setPermSaving(true);
+    try {
+      await saveUserPermissions(permDialogUser.user_id, next);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save permission');
+      setPermissions(permissions); // revert
+    } finally {
+      setPermSaving(false);
+    }
+  };
 
   const handleToggleApproval = async (profile: UserProfile) => {
     const { error } = await supabase
@@ -140,7 +197,7 @@ export function UserManagement() {
       setNewEmail('');
       setNewName('');
       setNewPassword('');
-      setNewRole('viewer');
+      setNewRole('user');
       setTimeout(fetchUsers, 1000);
     } catch (error: any) {
       toast.error(error.message || 'Failed to create user');
@@ -227,20 +284,16 @@ export function UserManagement() {
                   </div>
                   <div>
                     <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Role</Label>
-                    <Select value={newRole} onValueChange={setNewRole}>
+                    <Select value={newRole} onValueChange={(v) => setNewRole(v as 'admin' | 'user')}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {ROLE_TYPES.map(r => (
-                          <SelectItem key={r.value} value={r.value}>
-                            <span className="flex items-center gap-2">
-                              <r.icon size={12} /> {r.label}
-                            </span>
-                          </SelectItem>
+                        {ROLE_OPTIONS.map(r => (
+                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      {ROLE_TYPES.find(r => r.value === newRole)?.description}
+                      {ROLE_OPTIONS.find(r => r.value === newRole)?.description}
                     </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={addLoading}>
@@ -259,8 +312,7 @@ export function UserManagement() {
       ) : (
         <div className="space-y-2">
           {users.map(u => {
-            const primaryRole = u.roles[0] || 'user';
-            const roleConfig = ROLE_TYPES.find(r => r.value === primaryRole) ?? ROLE_TYPES[2];
+            const primaryRole = u.roles.includes('superadmin') ? 'superadmin' : u.roles.includes('admin') ? 'admin' : 'user';
 
             return (
               <div key={u.id} className={cn(
@@ -288,16 +340,17 @@ export function UserManagement() {
                       ) : (
                         <p className="text-sm font-semibold text-card-foreground truncate">{u.full_name || 'No name'}</p>
                       )}
-                      {/* Role badges */}
-                      {u.roles.map(r => {
-                        const rc = ROLE_TYPES.find(rt => rt.value === r);
+                      {/* Role badge — show only the highest role */}
+                      {(() => {
+                        const rc = ROLE_BADGES[primaryRole];
+                        if (!rc) return null;
                         return (
-                          <Badge key={r} variant="outline" className={cn('text-[9px] px-1.5 py-0 border', rc?.color ?? 'border-border text-muted-foreground')}>
-                            {rc ? <rc.icon size={8} className="mr-0.5" /> : null}
-                            {rc?.label ?? r}
+                          <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 border', rc.color)}>
+                            <rc.icon size={8} className="mr-0.5" />
+                            {rc.label}
                           </Badge>
                         );
-                      })}
+                      })()}
                       <Badge variant={u.is_approved ? 'outline' : 'secondary'} className={cn(
                         'text-[9px] px-1.5 py-0',
                         u.is_approved ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-amber-200 text-amber-600 bg-amber-50'
@@ -369,19 +422,29 @@ export function UserManagement() {
               {/* Role selector */}
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Role</Label>
+                {permDialogUser.roles.includes('superadmin') && (
+                  <p className="text-[10px] text-muted-foreground mt-1.5 italic">
+                    Super admin role is permanent and cannot be changed here.
+                  </p>
+                )}
                 <div className="grid grid-cols-1 gap-2 mt-2">
-                  {ROLE_TYPES.map(r => {
-                    const isActive = permDialogUser.roles.includes(r.value);
+                  {ROLE_OPTIONS.map(r => {
+                    const isActive = permRole === r.value;
+                    const Icon = r.value === 'admin' ? Shield : Eye;
+                    const isLocked = permDialogUser.roles.includes('superadmin') || permSaving;
                     return (
                       <button
                         key={r.value}
-                        onClick={() => toast.info(`Role change to ${r.label} — requires database update`)}
+                        type="button"
+                        disabled={isLocked}
+                        onClick={() => handleRoleChange(r.value)}
                         className={cn(
                           'flex items-center gap-3 p-3 rounded-lg border text-left transition-all',
-                          isActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+                          isActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30',
+                          isLocked && 'opacity-60 cursor-not-allowed'
                         )}
                       >
-                        <r.icon size={16} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
+                        <Icon size={16} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-card-foreground">{r.label}</p>
                           <p className="text-[10px] text-muted-foreground">{r.description}</p>
@@ -395,19 +458,38 @@ export function UserManagement() {
 
               {/* Granular Permissions */}
               <div className="pt-4 border-t border-border/50">
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Granular Permissions</Label>
-                <div className="space-y-2 mt-2">
-                  {PERMISSIONS.map(p => (
-                    <div key={p.key} className="flex items-center justify-between py-1.5">
-                      <span className="text-xs text-card-foreground">{p.label}</span>
-                      <Switch
-                        checked={permDialogUser.roles.includes('admin')}
-                        onCheckedChange={() => toast.info('Permission toggle — requires database update')}
-                        className="scale-90"
-                      />
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Granular Permissions</Label>
+                  {permSaving && <span className="text-[10px] text-muted-foreground">Saving…</span>}
                 </div>
+                <div className="space-y-1 mt-2">
+                  {permLoading || !permissions ? (
+                    <div className="text-xs text-muted-foreground py-3">Loading permissions…</div>
+                  ) : (
+                    PERMISSIONS.map(p => (
+                      <div key={p.key} className="flex items-center justify-between py-2 gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs text-card-foreground">{p.label}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{p.description}</p>
+                        </div>
+                        <Switch
+                          checked={permissions[p.key]}
+                          onCheckedChange={(v) => handlePermissionToggle(p.key, v)}
+                          disabled={permSaving || permDialogUser.roles.includes('superadmin')}
+                          className="scale-90 shrink-0"
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => permissions && handlePermissionToggle && setPermissions(defaultPermissionsForRole(permRole))}
+                  className="text-[10px] text-primary hover:underline mt-3"
+                  disabled={permSaving}
+                >
+                  Reset to {permRole === 'admin' ? 'Admin' : 'Viewer'} defaults
+                </button>
               </div>
             </div>
           )}
