@@ -42,6 +42,7 @@ const standardMetrics = [
 const KPI_OPTIONS = ['conversions', 'leads', 'clicks', 'impressions', 'reach', 'video_views', 'app_installs', 'landing_page_views'];
 const CONVERSION_SOURCE_OPTIONS = ['pixel', 'tag', 'insight_tag', 'capi', 'offline', 'ga4', 'manual'];
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string }[] = [
+  { value: 'annual', label: 'Annually' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'campaign', label: 'Campaign' },
   { value: 'custom', label: 'Custom' },
@@ -341,7 +342,7 @@ function ModularPlatformCard({
             </div>
             <div>
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Budget Type</Label>
-              <Select value={cfg.budgetType || 'monthly'} onValueChange={v => updatePlatform(p.key, { budgetType: v as BudgetType })}>
+              <Select value={cfg.budgetType || 'annual'} onValueChange={v => updatePlatform(p.key, { budgetType: v as BudgetType })}>
                 <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {BUDGET_TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}

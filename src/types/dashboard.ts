@@ -5,7 +5,7 @@ export type PlatformKey = 'meta' | 'google' | 'tiktok' | 'snapchat' | 'x' | 'lin
 /** Canonical display order for all platforms */
 export const PLATFORM_ORDER: PlatformKey[] = ['meta', 'google', 'tiktok', 'snapchat', 'x', 'linkedin', 'programmatic'];
 
-export type BudgetType = 'monthly' | 'campaign' | 'custom';
+export type BudgetType = 'annual' | 'monthly' | 'campaign' | 'custom';
 
 export interface PlatformConfig {
   key: PlatformKey;
