@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,20 +64,51 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('client_configs')
-        .select('config, updated_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const [configRes, rolesRes, publicBrandingRes] = await Promise.all([
+        supabase
+          .from('client_configs')
+          .select('config, updated_at')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase.from('user_roles').select('role').eq('user_id', user.id),
+        supabase
+          .from('public_branding')
+          .select('client_name, logo_url, favicon_url, primary_hex, branding_json')
+          .eq('id', 'singleton')
+          .maybeSingle(),
+      ]);
 
-      if (data?.config) {
-        const saved = data.config as Record<string, any>;
-        setClient(prev => ({ ...prev, ...saved }));
-        if (data.updated_at) {
-          setLastSavedAt(new Date(data.updated_at).toLocaleString([], { 
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-          }));
-        }
+      const saved = (configRes.data?.config as Record<string, any> | null) ?? null;
+      const roles = (rolesRes.data ?? []).map((r: any) => r.role);
+      const userIsAdmin = roles.includes('admin') || roles.includes('superadmin');
+      const publicBrandingRow = publicBrandingRes.data;
+      const publicBranding = publicBrandingRow
+        ? {
+            ...(((publicBrandingRow as any).branding_json as Record<string, any> | null) ?? {}),
+            ...((publicBrandingRow.logo_url && !((publicBrandingRow as any).branding_json?.logoUrl)) ? { logoUrl: publicBrandingRow.logo_url } : {}),
+            ...((publicBrandingRow.favicon_url && !((publicBrandingRow as any).branding_json?.faviconUrl)) ? { faviconUrl: publicBrandingRow.favicon_url } : {}),
+            ...((publicBrandingRow.primary_hex && !((publicBrandingRow as any).branding_json?.primaryColor)) ? { primaryColor: publicBrandingRow.primary_hex } : {}),
+          }
+        : null;
+
+      const mergedClient = {
+        ...defaultClient,
+        ...(saved ?? {}),
+        ...(!userIsAdmin && publicBrandingRow?.client_name ? { name: publicBrandingRow.client_name } : {}),
+        ...(!userIsAdmin && publicBranding ? {
+          branding: {
+            ...(((saved as any)?.branding ?? {}) as Record<string, any>),
+            ...publicBranding,
+          },
+        } : {}),
+      } as ClientProfile;
+
+      setClient(prev => ({ ...prev, ...mergedClient }));
+
+      if (configRes.data?.updated_at) {
+        setLastSavedAt(new Date(configRes.data.updated_at).toLocaleString([], {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }));
       }
       setConfigLoaded(true);
     };
@@ -144,7 +175,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   }, [client]);
 
-  const enabledPlatforms = PLATFORM_ORDER.filter(k => client.platforms[k]?.enabled);
+  const enabledPlatforms = useMemo(() => {
+    const withData = new Set(data.availablePlatforms.map(p => p.key));
+    return PLATFORM_ORDER.filter(k => client.platforms[k]?.enabled || withData.has(k));
+  }, [client.platforms, data.availablePlatforms]);
 
   return (
     <DashboardContext.Provider value={{

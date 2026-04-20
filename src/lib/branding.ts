@@ -65,6 +65,11 @@ export function applyBrandingToRoot(branding: Partial<BrandingConfig> | undefine
   if (typeof document === 'undefined') return;
   if (!branding) return;
   const root = document.documentElement;
+  const toHslString = (hex: string | undefined | null) => {
+    if (!isValidHex(hex)) return null;
+    const hsl = hexToHsl(hex);
+    return hsl ? `${hsl.h} ${hsl.s}% ${hsl.l}%` : null;
+  };
 
   // Only override values that are explicitly provided in the saved branding.
   // We never apply DEFAULT_BRANDING here — the user wants their saved theme
@@ -82,11 +87,36 @@ export function applyBrandingToRoot(branding: Partial<BrandingConfig> | undefine
     }
   }
 
+  const secondaryVal = toHslString(branding.secondaryColor);
+  if (secondaryVal) {
+    root.style.setProperty('--secondary', secondaryVal);
+    root.style.setProperty('--chart-2', secondaryVal);
+  }
+
   if (isValidHex(branding.accentColor)) {
     const hsl = hexToHsl(branding.accentColor);
     if (hsl) {
-      root.style.setProperty('--warning', `${hsl.h} ${hsl.s}% ${hsl.l}%`);
+      const val = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
+      root.style.setProperty('--warning', val);
+      root.style.setProperty('--chart-4', val);
     }
+  }
+
+  const primaryVal = toHslString(branding.primaryColor);
+  const accentVal = toHslString(branding.accentColor);
+  if (branding.chartPalette) {
+    const paletteMap: Record<BrandingConfig['chartPalette'], Array<string | null>> = {
+      vibrant: [primaryVal, secondaryVal, '199 89% 48%', accentVal, '0 84% 60%', '330 80% 60%'],
+      muted: ['156 17% 52%', '211 26% 62%', '199 29% 57%', '38 46% 57%', '350 42% 61%', '262 24% 64%'],
+      monochrome: primaryVal
+        ? [primaryVal, primaryVal, primaryVal, primaryVal, primaryVal, primaryVal]
+        : ['160 84% 39%', '160 72% 33%', '160 58% 28%', '160 48% 22%', '160 38% 18%', '160 28% 14%'],
+      brand: [primaryVal, secondaryVal, accentVal, '0 84% 60%', '280 65% 55%', '172 82% 40%'],
+    };
+    paletteMap[branding.chartPalette].forEach((value, index) => {
+      if (!value) return;
+      root.style.setProperty(`--chart-${index + 1}`, value);
+    });
   }
 
   if (branding.cardRadius) {
