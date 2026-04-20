@@ -77,7 +77,7 @@ function ProtectedRoutes() {
           <Route path="/x" element={<XPage />} />
           <Route path="/programmatic" element={<ProgrammaticPage />} />
           <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
-          <Route path="/tracking-health" element={isAdmin ? <TrackingHealthPage /> : <Navigate to="/" replace />} />
+          <Route path="/tracking-health" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppShell>

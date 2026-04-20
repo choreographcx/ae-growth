@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
@@ -29,7 +29,6 @@ export function DashboardSidebar() {
     })),
     ...(isAdmin
       ? [
-          { to: '/tracking-health', label: 'Tracking Health', entry: { type: 'lucide' as const, icon: Activity } },
           { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
         ]
       : []),
