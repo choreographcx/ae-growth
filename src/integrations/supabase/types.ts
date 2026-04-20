@@ -441,6 +441,33 @@ export type Database = {
         }
         Relationships: []
       }
+      public_branding: {
+        Row: {
+          client_name: string | null
+          favicon_url: string | null
+          id: string
+          logo_url: string | null
+          primary_hex: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_hex?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_hex?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_layouts: {
         Row: {
           created_at: string

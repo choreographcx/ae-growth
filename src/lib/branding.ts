@@ -154,6 +154,9 @@ export function bootstrapBranding() {
   const cached = loadCachedBranding();
   if (cached) applyBrandingToRoot(cached);
   applyCachedTitle();
+  // Async: also fetch the public branding row so non-cached visitors
+  // (e.g., incognito / first visit) immediately see the correct theme.
+  void hydratePublicBranding();
 }
 
 const TITLE_KEY = 'app:clientName';
@@ -186,5 +189,59 @@ export function applyClientNameToTitle(name: string | undefined | null) {
 export function applyCachedTitle() {
   const cached = loadCachedClientName();
   if (cached) applyClientNameToTitle(cached);
+}
+
+/**
+ * Fetch the public branding row (logo, colors, client name, favicon) so the
+ * login screen and pre-auth pages render with the correct branding for any
+ * visitor — including incognito sessions that have no cached values.
+ */
+export async function hydratePublicBranding() {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase
+      .from('public_branding')
+      .select('client_name, logo_url, favicon_url, primary_hex')
+      .eq('id', 'singleton')
+      .maybeSingle();
+    if (error || !data) return;
+
+    const branding: Partial<BrandingConfig> = {};
+    if (data.logo_url) branding.logoUrl = data.logo_url;
+    if (data.favicon_url) branding.faviconUrl = data.favicon_url;
+    if (isValidHex(data.primary_hex || '')) branding.primaryColor = data.primary_hex!;
+    if (Object.keys(branding).length > 0) {
+      // Merge with whatever was already cached so we don't wipe other fields.
+      const merged = { ...(loadCachedBranding() || {}), ...branding };
+      applyBrandingToRoot(merged);
+      cacheBranding(merged);
+    }
+    if (data.client_name) {
+      applyClientNameToTitle(data.client_name);
+      cacheClientName(data.client_name);
+    }
+  } catch {
+    /* network errors during boot should not break rendering */
+  }
+}
+
+/** Push the current branding/client name to the public branding row (admin only). */
+export async function syncPublicBranding(input: {
+  clientName?: string | null;
+  branding?: Partial<BrandingConfig> | null;
+}) {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const payload: Record<string, unknown> = { id: 'singleton' };
+    if (input.clientName !== undefined) payload.client_name = input.clientName;
+    if (input.branding) {
+      if (input.branding.logoUrl !== undefined) payload.logo_url = input.branding.logoUrl;
+      if (input.branding.faviconUrl !== undefined) payload.favicon_url = input.branding.faviconUrl;
+      if (input.branding.primaryColor !== undefined) payload.primary_hex = input.branding.primaryColor;
+    }
+    await supabase.from('public_branding').upsert(payload as any, { onConflict: 'id' });
+  } catch {
+    /* non-admins will be denied — silently ignore */
+  }
 }
 

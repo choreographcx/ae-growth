@@ -13,6 +13,7 @@ import {
   applyBrandingToRoot,
   cacheBranding,
   hexToHsl as sharedHexToHsl,
+  syncPublicBranding,
 } from '@/lib/branding';
 
 const STATIC_PALETTES: Record<string, string[]> = {
@@ -81,9 +82,31 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
     cacheBranding(branding);
   }, [branding]);
 
+  // Debounced sync of public-visible fields (logo, favicon, primary) to the
+  // public_branding row so logged-out / incognito visitors see them on /auth.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      void syncPublicBranding({
+        branding: {
+          logoUrl: branding.logoUrl,
+          faviconUrl: branding.faviconUrl,
+          primaryColor: branding.primaryColor,
+        },
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [branding.logoUrl, branding.faviconUrl, branding.primaryColor]);
+
   const handleApply = useCallback(() => {
     applyBrandingToRoot(branding);
     cacheBranding(branding);
+    void syncPublicBranding({
+      branding: {
+        logoUrl: branding.logoUrl,
+        faviconUrl: branding.faviconUrl,
+        primaryColor: branding.primaryColor,
+      },
+    });
     toast.success('Colors & styles applied across the app');
   }, [branding]);
 
