@@ -11,6 +11,7 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isApproved: boolean;
   profile: { email: string; full_name: string; is_approved: boolean } | null;
+  onlineUserIds: Set<string>;
   signOut: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   isSuperAdmin: false,
   isApproved: false,
   profile: null,
+  onlineUserIds: new Set(),
   signOut: async () => {},
 });
 
@@ -33,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   const fetchUserData = async (userId: string) => {
     const [profileRes, rolesRes, configRes] = await Promise.all([
@@ -102,21 +105,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Broadcast presence on a shared channel so admins can see who is currently online.
+  // Own the realtime presence subscription in one place to avoid duplicate
+  // subscriptions to the same topic, which causes Supabase to throw when a
+  // second hook tries to add presence callbacks after subscribe().
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setOnlineUserIds(new Set());
+      return;
+    }
+
     const channel = supabase.channel('online-users', {
       config: { presence: { key: user.id } },
     });
-    // No-op presence handler attached BEFORE subscribe so the channel is
-    // presence-aware and other consumers (useOnlineUsers) can read state.
-    channel.on('presence', { event: 'sync' }, () => {});
-    channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') {
-        await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
-      }
-    });
+
+    const syncPresence = () => {
+      const state = channel.presenceState() as Record<string, Array<{ user_id?: string }>>;
+      const ids = new Set<string>();
+      Object.entries(state).forEach(([key, metas]) => {
+        ids.add(key);
+        metas.forEach((meta) => {
+          if (meta.user_id) ids.add(meta.user_id);
+        });
+      });
+      setOnlineUserIds(ids);
+    };
+
+    channel
+      .on('presence', { event: 'sync' }, syncPresence)
+      .on('presence', { event: 'join' }, syncPresence)
+      .on('presence', { event: 'leave' }, syncPresence)
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
+        }
+      });
+
     return () => {
+      setOnlineUserIds(new Set());
       supabase.removeChannel(channel);
     };
   }, [user]);
@@ -126,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isSuperAdmin, isApproved, profile, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isSuperAdmin, isApproved, profile, onlineUserIds, signOut }}>
       {children}
     </AuthContext.Provider>
   );
