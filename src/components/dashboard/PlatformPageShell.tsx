@@ -74,7 +74,10 @@ export function PlatformPageShell({
   const wastedSpend = warnOnWastedSpend && totals.spend >= 1000 && totals.conversionsLowerFunnel === 0;
 
   // Empty state for inactive platforms (X / LinkedIn).
-  if (emptyOnZeroSpend && !loading && !error && totals.spend === 0) {
+  // Only show when there is genuinely no activity at all — some platforms (e.g. X organic/earned)
+  // report impressions, reach, and clicks without paid spend, and we still want to display them.
+  const hasAnyActivity = totals.spend > 0 || totals.impressions > 0 || totals.clicks > 0 || totals.reach > 0;
+  if (emptyOnZeroSpend && !loading && !error && !hasAnyActivity) {
     return <EmptyPlatformState title={title} spend={totals.spend} impressions={totals.impressions} clicks={totals.clicks} />;
   }
 
