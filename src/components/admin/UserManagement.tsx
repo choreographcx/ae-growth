@@ -369,6 +369,15 @@ export function UserManagement() {
                       )}>
                         {u.is_approved ? 'Active' : 'Pending'}
                       </Badge>
+                      {isOnline && (
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-700 bg-emerald-50 inline-flex items-center gap-1">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          </span>
+                          Online
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
                       <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
