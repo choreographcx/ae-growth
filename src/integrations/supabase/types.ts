@@ -443,6 +443,7 @@ export type Database = {
       }
       public_branding: {
         Row: {
+          branding_json: Json | null
           client_name: string | null
           favicon_url: string | null
           id: string
@@ -451,6 +452,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          branding_json?: Json | null
           client_name?: string | null
           favicon_url?: string | null
           id?: string
@@ -459,6 +461,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          branding_json?: Json | null
           client_name?: string | null
           favicon_url?: string | null
           id?: string
