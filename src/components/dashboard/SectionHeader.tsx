@@ -99,6 +99,16 @@ function DesktopInlineFilters({
     return data.availableCampaigns;
   }, [scopeToPlatform, data.campaignsByPlatform, data.availableCampaigns]);
 
+  // On platform pages, force the hidden global platform filter to match the current page.
+  // Without this, a stale selection from Overview (e.g. Meta only) can silently blank the X page.
+  useEffect(() => {
+    if (!scopeToPlatform) return;
+    const scopedLabel = platformOptions.find(p => p === (scopeToPlatform === 'google' ? 'Google Ads' : scopeToPlatform === 'linkedin' ? 'LinkedIn' : scopeToPlatform === 'programmatic' ? 'Programmatic' : scopeToPlatform === 'snapchat' ? 'Snapchat' : scopeToPlatform === 'tiktok' ? 'TikTok' : scopeToPlatform === 'meta' ? 'Meta' : 'X'));
+    if (!scopedLabel) return;
+    if (selectedPlatforms.length === 1 && selectedPlatforms[0] === scopedLabel) return;
+    setSelectedPlatforms([scopedLabel]);
+  }, [scopeToPlatform, platformOptions, selectedPlatforms, setSelectedPlatforms]);
+
   // Drop any selected campaigns no longer in scope (e.g. when navigating between platform pages).
   useEffect(() => {
     if (!scopeToPlatform || selectedCampaigns.length === 0) return;
@@ -112,7 +122,7 @@ function DesktopInlineFilters({
   const hasFilters = (showPlatformsFilter && selectedPlatforms.length > 0) || selectedCampaigns.length > 0;
 
   const clearAll = () => {
-    if (showPlatformsFilter) setSelectedPlatforms([]);
+    setSelectedPlatforms(scopeToPlatform ? [scopeToPlatform === 'google' ? 'Google Ads' : scopeToPlatform === 'linkedin' ? 'LinkedIn' : scopeToPlatform === 'programmatic' ? 'Programmatic' : scopeToPlatform === 'snapchat' ? 'Snapchat' : scopeToPlatform === 'tiktok' ? 'TikTok' : scopeToPlatform === 'meta' ? 'Meta' : 'X'] : []);
     setSelectedCampaigns([]);
   };
 
