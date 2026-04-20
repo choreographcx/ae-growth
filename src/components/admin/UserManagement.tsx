@@ -237,6 +237,7 @@ export function UserManagement() {
   const activeCount = users.filter(u => u.is_approved).length;
   const pendingCount = users.filter(u => !u.is_approved).length;
   const adminCount = users.filter(u => u.roles.includes('admin')).length;
+  const onlineCount = users.filter(u => onlineUserIds.has(u.user_id)).length;
 
   return (
     <div className="space-y-4">
