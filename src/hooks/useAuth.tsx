@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
-import { applyBrandingToRoot, cacheBranding } from '@/lib/branding';
+import { applyBrandingToRoot, cacheBranding, syncPublicBranding } from '@/lib/branding';
 
 interface AuthContextType {
   user: User | null;
