@@ -422,19 +422,29 @@ export function UserManagement() {
               {/* Role selector */}
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Role</Label>
+                {permDialogUser.roles.includes('superadmin') && (
+                  <p className="text-[10px] text-muted-foreground mt-1.5 italic">
+                    Super admin role is permanent and cannot be changed here.
+                  </p>
+                )}
                 <div className="grid grid-cols-1 gap-2 mt-2">
-                  {ROLE_TYPES.map(r => {
-                    const isActive = permDialogUser.roles.includes(r.value);
+                  {ROLE_OPTIONS.map(r => {
+                    const isActive = permRole === r.value;
+                    const Icon = r.value === 'admin' ? Shield : Eye;
+                    const isLocked = permDialogUser.roles.includes('superadmin') || permSaving;
                     return (
                       <button
                         key={r.value}
-                        onClick={() => toast.info(`Role change to ${r.label} — requires database update`)}
+                        type="button"
+                        disabled={isLocked}
+                        onClick={() => handleRoleChange(r.value)}
                         className={cn(
                           'flex items-center gap-3 p-3 rounded-lg border text-left transition-all',
-                          isActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+                          isActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30',
+                          isLocked && 'opacity-60 cursor-not-allowed'
                         )}
                       >
-                        <r.icon size={16} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
+                        <Icon size={16} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-card-foreground">{r.label}</p>
                           <p className="text-[10px] text-muted-foreground">{r.description}</p>
@@ -448,19 +458,38 @@ export function UserManagement() {
 
               {/* Granular Permissions */}
               <div className="pt-4 border-t border-border/50">
-                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Granular Permissions</Label>
-                <div className="space-y-2 mt-2">
-                  {PERMISSIONS.map(p => (
-                    <div key={p.key} className="flex items-center justify-between py-1.5">
-                      <span className="text-xs text-card-foreground">{p.label}</span>
-                      <Switch
-                        checked={permDialogUser.roles.includes('admin')}
-                        onCheckedChange={() => toast.info('Permission toggle — requires database update')}
-                        className="scale-90"
-                      />
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Granular Permissions</Label>
+                  {permSaving && <span className="text-[10px] text-muted-foreground">Saving…</span>}
                 </div>
+                <div className="space-y-1 mt-2">
+                  {permLoading || !permissions ? (
+                    <div className="text-xs text-muted-foreground py-3">Loading permissions…</div>
+                  ) : (
+                    PERMISSIONS.map(p => (
+                      <div key={p.key} className="flex items-center justify-between py-2 gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs text-card-foreground">{p.label}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{p.description}</p>
+                        </div>
+                        <Switch
+                          checked={permissions[p.key]}
+                          onCheckedChange={(v) => handlePermissionToggle(p.key, v)}
+                          disabled={permSaving || permDialogUser.roles.includes('superadmin')}
+                          className="scale-90 shrink-0"
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => permissions && handlePermissionToggle && setPermissions(defaultPermissionsForRole(permRole))}
+                  className="text-[10px] text-primary hover:underline mt-3"
+                  disabled={permSaving}
+                >
+                  Reset to {permRole === 'admin' ? 'Admin' : 'Viewer'} defaults
+                </button>
               </div>
             </div>
           )}
