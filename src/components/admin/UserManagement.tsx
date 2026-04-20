@@ -143,7 +143,7 @@ export function UserManagement() {
       setNewEmail('');
       setNewName('');
       setNewPassword('');
-      setNewRole('viewer');
+      setNewRole('user');
       setTimeout(fetchUsers, 1000);
     } catch (error: any) {
       toast.error(error.message || 'Failed to create user');
@@ -230,20 +230,16 @@ export function UserManagement() {
                   </div>
                   <div>
                     <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Role</Label>
-                    <Select value={newRole} onValueChange={setNewRole}>
+                    <Select value={newRole} onValueChange={(v) => setNewRole(v as 'admin' | 'user')}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {ROLE_TYPES.map(r => (
-                          <SelectItem key={r.value} value={r.value}>
-                            <span className="flex items-center gap-2">
-                              <r.icon size={12} /> {r.label}
-                            </span>
-                          </SelectItem>
+                        {ROLE_OPTIONS.map(r => (
+                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      {ROLE_TYPES.find(r => r.value === newRole)?.description}
+                      {ROLE_OPTIONS.find(r => r.value === newRole)?.description}
                     </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={addLoading}>
@@ -262,8 +258,7 @@ export function UserManagement() {
       ) : (
         <div className="space-y-2">
           {users.map(u => {
-            const primaryRole = u.roles[0] || 'user';
-            const roleConfig = ROLE_TYPES.find(r => r.value === primaryRole) ?? ROLE_TYPES[2];
+            const primaryRole = u.roles.includes('superadmin') ? 'superadmin' : u.roles.includes('admin') ? 'admin' : 'user';
 
             return (
               <div key={u.id} className={cn(
@@ -291,16 +286,17 @@ export function UserManagement() {
                       ) : (
                         <p className="text-sm font-semibold text-card-foreground truncate">{u.full_name || 'No name'}</p>
                       )}
-                      {/* Role badges */}
-                      {u.roles.map(r => {
-                        const rc = ROLE_TYPES.find(rt => rt.value === r);
+                      {/* Role badge — show only the highest role */}
+                      {(() => {
+                        const rc = ROLE_BADGES[primaryRole];
+                        if (!rc) return null;
                         return (
-                          <Badge key={r} variant="outline" className={cn('text-[9px] px-1.5 py-0 border', rc?.color ?? 'border-border text-muted-foreground')}>
-                            {rc ? <rc.icon size={8} className="mr-0.5" /> : null}
-                            {rc?.label ?? r}
+                          <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 border', rc.color)}>
+                            <rc.icon size={8} className="mr-0.5" />
+                            {rc.label}
                           </Badge>
                         );
-                      })}
+                      })()}
                       <Badge variant={u.is_approved ? 'outline' : 'secondary'} className={cn(
                         'text-[9px] px-1.5 py-0',
                         u.is_approved ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-amber-200 text-amber-600 bg-amber-50'
