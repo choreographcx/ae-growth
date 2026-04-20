@@ -122,7 +122,7 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
 
   // Reporting settings
   const reporting = reportingRes.data;
-  const reportingExtras = ((reporting?.settings ?? {}) as Record<string, any>) ?? {};
+  const reportingExtras = (reporting?.settings ?? {}) as Record<string, any>;
   const metricMappings: MetricMapping[] = Array.isArray(reportingExtras.metricMappings)
     ? reportingExtras.metricMappings
     : defaultClient.metricMappings;
