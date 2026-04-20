@@ -42,7 +42,7 @@ const standardMetrics = [
 const KPI_OPTIONS = ['conversions', 'leads', 'clicks', 'impressions', 'reach', 'video_views', 'app_installs', 'landing_page_views'];
 const CONVERSION_SOURCE_OPTIONS = ['pixel', 'tag', 'insight_tag', 'capi', 'offline', 'ga4', 'manual'];
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string }[] = [
-  { value: 'annual', label: 'Annually' },
+  { value: 'annual', label: 'Annual' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'campaign', label: 'Campaign' },
   { value: 'custom', label: 'Custom' },
