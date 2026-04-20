@@ -149,14 +149,20 @@ export function loadCachedBranding(): Partial<BrandingConfig> | null {
   }
 }
 
-/** Apply cached branding immediately on app boot, before any data loads. */
-export function bootstrapBranding() {
+/**
+ * Apply cached branding immediately on app boot, then await the public
+ * branding row so first-time / incognito visitors don't flash the default
+ * theme. Resolves once branding has been applied (or after a short timeout
+ * to avoid blocking forever on a slow network).
+ */
+export async function bootstrapBranding(): Promise<void> {
   const cached = loadCachedBranding();
   if (cached) applyBrandingToRoot(cached);
   applyCachedTitle();
-  // Async: also fetch the public branding row so non-cached visitors
-  // (e.g., incognito / first visit) immediately see the correct theme.
-  void hydratePublicBranding();
+  await Promise.race([
+    hydratePublicBranding(),
+    new Promise<void>(resolve => setTimeout(resolve, 1500)),
+  ]);
 }
 
 /** Notifies subscribers (e.g. AuthPage) when branding is updated at runtime. */
