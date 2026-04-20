@@ -232,6 +232,7 @@ export async function hydratePublicBranding() {
       applyClientNameToTitle(data.client_name);
       cacheClientName(data.client_name);
     }
+    emitBrandingUpdate();
   } catch {
     /* network errors during boot should not break rendering */
   }
