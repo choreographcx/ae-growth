@@ -13,7 +13,6 @@ import {
   applyBrandingToRoot,
   cacheBranding,
   hexToHsl as sharedHexToHsl,
-  syncPublicBranding,
 } from '@/lib/branding';
 
 const STATIC_PALETTES: Record<string, string[]> = {
