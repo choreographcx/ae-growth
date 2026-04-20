@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
+import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number
 
 export function DashboardSidebar() {
   const { enabledPlatforms, client } = useDashboard();
+  const { isAdmin } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -25,8 +27,12 @@ export function DashboardSidebar() {
       label: client.platforms[p].label,
       entry: platformIconEntries[p],
     })),
-    { to: '/tracking-health', label: 'Tracking Health', entry: { type: 'lucide' as const, icon: Activity } },
-    { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
+    ...(isAdmin
+      ? [
+          { to: '/tracking-health', label: 'Tracking Health', entry: { type: 'lucide' as const, icon: Activity } },
+          { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
+        ]
+      : []),
   ];
 
   return (

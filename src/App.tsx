@@ -23,7 +23,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
-  const { user, loading, isApproved } = useAuth();
+  const { user, loading, isApproved, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -76,8 +76,8 @@ function ProtectedRoutes() {
           <Route path="/linkedin" element={<LinkedInPage />} />
           <Route path="/x" element={<XPage />} />
           <Route path="/programmatic" element={<ProgrammaticPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/tracking-health" element={<TrackingHealthPage />} />
+          <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
+          <Route path="/tracking-health" element={isAdmin ? <TrackingHealthPage /> : <Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppShell>
