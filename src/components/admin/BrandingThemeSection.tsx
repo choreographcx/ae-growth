@@ -13,7 +13,6 @@ import {
   applyBrandingToRoot,
   cacheBranding,
   hexToHsl as sharedHexToHsl,
-  syncPublicBranding,
 } from '@/lib/branding';
 
 const STATIC_PALETTES: Record<string, string[]> = {
@@ -82,19 +81,9 @@ export function BrandingThemeSection({ branding: brandingProp, onChange }: Props
     cacheBranding(branding);
   }, [branding]);
 
-  // Debounced sync of the FULL branding config to the public_branding row so
-  // every user — admin or not — sees the admin's saved theme.
-  useEffect(() => {
-    const t = setTimeout(() => {
-      void syncPublicBranding({ branding });
-    }, 800);
-    return () => clearTimeout(t);
-  }, [branding]);
-
   const handleApply = useCallback(() => {
     applyBrandingToRoot(branding);
     cacheBranding(branding);
-    void syncPublicBranding({ branding });
     toast.success('Colors & styles applied across the app');
   }, [branding]);
 
