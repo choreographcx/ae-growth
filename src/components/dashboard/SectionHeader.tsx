@@ -89,6 +89,7 @@ function DesktopInlineFilters({
     data,
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
+    selectedObjectives, setSelectedObjectives,
   } = useDashboard();
 
   const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
@@ -98,6 +99,12 @@ function DesktopInlineFilters({
     if (scopeToPlatform) return data.campaignsByPlatform[scopeToPlatform] ?? [];
     return data.availableCampaigns;
   }, [scopeToPlatform, data.campaignsByPlatform, data.availableCampaigns]);
+
+  // Objectives, optionally scoped to the current platform page.
+  const objectiveOptions = useMemo(() => {
+    if (scopeToPlatform) return data.objectivesByPlatform[scopeToPlatform] ?? [];
+    return data.availableObjectives;
+  }, [scopeToPlatform, data.objectivesByPlatform, data.availableObjectives]);
 
   // On platform pages, force the hidden global platform filter to match the current page.
   // Without this, a stale selection from Overview (e.g. Meta only) can silently blank the X page.
@@ -117,13 +124,25 @@ function DesktopInlineFilters({
     if (filtered.length !== selectedCampaigns.length) setSelectedCampaigns(filtered);
   }, [scopeToPlatform, campaignNames, selectedCampaigns, setSelectedCampaigns]);
 
+  // Drop any selected objectives no longer in scope.
+  useEffect(() => {
+    if (!scopeToPlatform || selectedObjectives.length === 0) return;
+    const allowed = new Set(objectiveOptions);
+    const filtered = selectedObjectives.filter(o => allowed.has(o));
+    if (filtered.length !== selectedObjectives.length) setSelectedObjectives(filtered);
+  }, [scopeToPlatform, objectiveOptions, selectedObjectives, setSelectedObjectives]);
+
   // When the Platforms filter is hidden (platform pages), the platform selection is
   // implicit and shouldn't influence the visible "Clear" affordance.
-  const hasFilters = (showPlatformsFilter && selectedPlatforms.length > 0) || selectedCampaigns.length > 0;
+  const hasFilters =
+    (showPlatformsFilter && selectedPlatforms.length > 0) ||
+    selectedCampaigns.length > 0 ||
+    selectedObjectives.length > 0;
 
   const clearAll = () => {
     setSelectedPlatforms(scopeToPlatform ? [scopeToPlatform === 'google' ? 'Google Ads' : scopeToPlatform === 'linkedin' ? 'LinkedIn' : scopeToPlatform === 'programmatic' ? 'Programmatic' : scopeToPlatform === 'snapchat' ? 'Snapchat' : scopeToPlatform === 'tiktok' ? 'TikTok' : scopeToPlatform === 'meta' ? 'Meta' : 'X'] : []);
     setSelectedCampaigns([]);
+    setSelectedObjectives([]);
   };
 
   return (
@@ -133,6 +152,9 @@ function DesktopInlineFilters({
         <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
       )}
       <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
+      {objectiveOptions.length > 0 && (
+        <MultiSelectFilter label="Objective" options={objectiveOptions} selected={selectedObjectives} onChange={setSelectedObjectives} />
+      )}
       {hasFilters && (
         <button
           type="button"

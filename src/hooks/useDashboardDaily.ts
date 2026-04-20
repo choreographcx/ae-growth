@@ -260,6 +260,7 @@ export interface PlatformOption { key: PlatformKey; label: string; raw: string; 
 export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
+  selectedObjectives?: string[];
 }
 
 interface UseDashboardDailyResult {
@@ -279,6 +280,10 @@ interface UseDashboardDailyResult {
   availableCampaigns: string[];
   /** Campaign names grouped by normalized platform key (used to scope the campaign filter on platform pages). */
   campaignsByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct campaign objectives present in the data (after platform scoping). */
+  availableObjectives: string[];
+  /** Objectives grouped by normalized platform key (used to scope the objective filter on platform pages). */
+  objectivesByPlatform: Partial<Record<PlatformKey, string[]>>;
 }
 
 export {
@@ -303,7 +308,7 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [] } = options;
+  const { selectedPlatformLabels = [], selectedCampaigns = [], selectedObjectives = [] } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const days = differenceInCalendarDays(range.end, range.start) + 1;
@@ -362,23 +367,30 @@ export function useDashboardDaily(
     [selectedCampaigns]
   );
 
+  const objectiveSet = useMemo(
+    () => (selectedObjectives.length ? new Set(selectedObjectives) : null),
+    [selectedObjectives]
+  );
+
   // Client-side filtering — avoids an extra BigQuery round-trip whenever the
   // unfiltered superset is already in memory.
   const rows = useMemo(() => {
-    if (!platformRawSet && !campaignSet) return allRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet) return allRows;
     return allRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
-      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name)))
+      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
+      (!objectiveSet   || (r.campaign_objective && objectiveSet.has(r.campaign_objective)))
     );
-  }, [allRows, platformRawSet, campaignSet]);
+  }, [allRows, platformRawSet, campaignSet, objectiveSet]);
 
   const filteredPrevRows = useMemo(() => {
-    if (!platformRawSet && !campaignSet) return prevRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet) return prevRows;
     return prevRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
-      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name)))
+      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
+      (!objectiveSet   || (r.campaign_objective && objectiveSet.has(r.campaign_objective)))
     );
-  }, [prevRows, platformRawSet, campaignSet]);
+  }, [prevRows, platformRawSet, campaignSet, objectiveSet]);
 
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
@@ -428,10 +440,38 @@ export function useDashboardDaily(
     return out;
   }, [allRows]);
 
+  const availableObjectives = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of allRows) {
+      if (!r.campaign_objective) continue;
+      if (platformRawSet && !platformRawSet.has(r.platform)) continue;
+      set.add(r.campaign_objective);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allRows, platformRawSet]);
+
+  const objectivesByPlatform = useMemo<Partial<Record<PlatformKey, string[]>>>(() => {
+    const buckets = new Map<PlatformKey, Set<string>>();
+    for (const r of allRows) {
+      if (!r.campaign_objective) continue;
+      const k = normalizePlatform(r.platform);
+      if (!k) continue;
+      let s = buckets.get(k);
+      if (!s) { s = new Set<string>(); buckets.set(k, s); }
+      s.add(r.campaign_objective);
+    }
+    const out: Partial<Record<PlatformKey, string[]>> = {};
+    buckets.forEach((set, k) => {
+      out[k] = Array.from(set).sort((a, b) => a.localeCompare(b));
+    });
+    return out;
+  }, [allRows]);
+
   return {
     loading, error, rows, previousRows: filteredPrevRows, totals, previousTotals,
     platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
     availablePlatforms, availableCampaigns, campaignsByPlatform,
+    availableObjectives, objectivesByPlatform,
   };
 }
 

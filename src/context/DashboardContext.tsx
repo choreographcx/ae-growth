@@ -55,6 +55,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const data = useDashboardDaily(dateRange, {
     selectedPlatformLabels: selectedPlatforms,
     selectedCampaigns,
+    selectedObjectives,
   });
 
   // Client settings cached so navigating between pages never refetches them.
@@ -172,6 +173,7 @@ const fallbackData: DashboardData = {
   spendSeries: [], conversionsSeries: [], cpaSeries: [], ctrSeries: [],
   range: { start: new Date(), end: new Date() },
   availablePlatforms: [], availableCampaigns: [], campaignsByPlatform: {},
+  availableObjectives: [], objectivesByPlatform: {},
 };
 
 const fallback: DashboardContextType = {
