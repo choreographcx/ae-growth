@@ -159,6 +159,18 @@ export function bootstrapBranding() {
   void hydratePublicBranding();
 }
 
+/** Notifies subscribers (e.g. AuthPage) when branding is updated at runtime. */
+const BRANDING_EVENT = 'app:branding-updated';
+export function subscribeBrandingUpdates(cb: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener(BRANDING_EVENT, cb);
+  return () => window.removeEventListener(BRANDING_EVENT, cb);
+}
+function emitBrandingUpdate() {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(BRANDING_EVENT));
+}
+
 const TITLE_KEY = 'app:clientName';
 
 export function cacheClientName(name: string | undefined | null) {
