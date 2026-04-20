@@ -93,7 +93,7 @@ export function PlatformPageShell({
 
   // Inject Budget & Pacing into the Spend card based on platform settings + active date range.
   const platformCfg = client.platforms?.[platformKey];
-  const cardsWithPacing = useMemo(() => {
+  const cardsWithPacing = (() => {
     if (!platformCfg || !platformCfg.budget || platformCfg.budget <= 0) return rawCards;
 
     const rangeDays = Math.max(1, Math.round((range.end.getTime() - range.start.getTime()) / 86400000) + 1);
@@ -128,7 +128,7 @@ export function PlatformPageShell({
       ];
       return { ...c, supporting };
     });
-  }, [rawCards, platformCfg, range.start, range.end, totals.spend, currency]);
+  })();
 
   const kpiCards = applyCurrencyToKPIGroups(cardsWithPacing, currency, 26);
 
