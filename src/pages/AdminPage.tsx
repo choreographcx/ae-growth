@@ -135,7 +135,6 @@ export default function AdminPage() {
           title="Platform Setup"
           subtitle="Enable platforms, set budgets, and manage account connections"
           badge={<Badge variant="secondary" className="text-[9px] font-normal">{enabledCount} / {allPlatforms.length} platforms</Badge>}
-          defaultOpen
         >
           {/* Platform summary strip */}
           <div className="flex flex-wrap items-center gap-4 py-3 mb-4 border-b border-border/50 text-xs text-muted-foreground">
