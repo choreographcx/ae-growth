@@ -319,8 +319,8 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
           ga4_property_id: client.ga4PropertyId || null,
           ga4_stream_id: client.ga4StreamId || null,
           gtm_container_id: client.gtmContainerId || null,
-          settings: reportingExtras,
-        },
+          settings: reportingExtras as any,
+        } as any,
         { onConflict: 'client_id' }
       );
     if (error) throw error;
