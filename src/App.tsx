@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,18 +8,20 @@ import { DashboardProvider } from "@/context/DashboardContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { loadCachedBranding } from "@/lib/branding";
-import OverviewPage from "./pages/OverviewPage";
-import MetaPage from "./pages/MetaPage";
-import GoogleAdsPage from "./pages/GoogleAdsPage";
-import TikTokPage from "./pages/TikTokPage";
-import SnapchatPage from "./pages/SnapchatPage";
-import LinkedInPage from "./pages/LinkedInPage";
-import XPage from "./pages/XPage";
-import ProgrammaticPage from "./pages/ProgrammaticPage";
-import AdminPage from "./pages/AdminPage";
-import TrackingHealthPage from "./pages/TrackingHealthPage";
-import AuthPage from "./pages/AuthPage";
-import NotFound from "./pages/NotFound";
+
+// Lazy-load all pages so the initial JS bundle ships only what's needed for the
+// first paint. Each page becomes its own chunk that downloads on demand.
+const OverviewPage = lazy(() => import("./pages/OverviewPage"));
+const MetaPage = lazy(() => import("./pages/MetaPage"));
+const GoogleAdsPage = lazy(() => import("./pages/GoogleAdsPage"));
+const TikTokPage = lazy(() => import("./pages/TikTokPage"));
+const SnapchatPage = lazy(() => import("./pages/SnapchatPage"));
+const LinkedInPage = lazy(() => import("./pages/LinkedInPage"));
+const XPage = lazy(() => import("./pages/XPage"));
+const ProgrammaticPage = lazy(() => import("./pages/ProgrammaticPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Tuned for an analytics dashboard backed by BigQuery RPCs:
 // keep results fresh for 5 min, cache for 30 min, no aggressive refetches.
@@ -34,15 +37,17 @@ const queryClient = new QueryClient({
   },
 });
 
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-muted-foreground text-sm">Loading...</div>
+  </div>
+);
+
 function ProtectedRoutes() {
   const { user, loading, isApproved, isAdmin } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">Loading...</div>
-      </div>
-    );
+    return <PageFallback />;
   }
 
   if (!user) {
@@ -79,19 +84,21 @@ function ProtectedRoutes() {
   return (
     <DashboardProvider>
       <AppShell>
-        <Routes>
-          <Route path="/" element={<OverviewPage />} />
-          <Route path="/meta" element={<MetaPage />} />
-          <Route path="/google" element={<GoogleAdsPage />} />
-          <Route path="/tiktok" element={<TikTokPage />} />
-          <Route path="/snapchat" element={<SnapchatPage />} />
-          <Route path="/linkedin" element={<LinkedInPage />} />
-          <Route path="/x" element={<XPage />} />
-          <Route path="/programmatic" element={<ProgrammaticPage />} />
-          <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
-          <Route path="/tracking-health" element={<Navigate to="/" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route path="/" element={<OverviewPage />} />
+            <Route path="/meta" element={<MetaPage />} />
+            <Route path="/google" element={<GoogleAdsPage />} />
+            <Route path="/tiktok" element={<TikTokPage />} />
+            <Route path="/snapchat" element={<SnapchatPage />} />
+            <Route path="/linkedin" element={<LinkedInPage />} />
+            <Route path="/x" element={<XPage />} />
+            <Route path="/programmatic" element={<ProgrammaticPage />} />
+            <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
+            <Route path="/tracking-health" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </AppShell>
     </DashboardProvider>
   );
@@ -102,7 +109,11 @@ function AuthGuard() {
 
   if (loading) return null;
   if (user) return <Navigate to="/" replace />;
-  return <AuthPage />;
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <AuthPage />
+    </Suspense>
+  );
 }
 
 const App = () => (
