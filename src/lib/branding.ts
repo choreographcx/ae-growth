@@ -210,29 +210,32 @@ export function applyCachedTitle() {
 }
 
 /**
- * Fetch the public branding row (logo, colors, client name, favicon) so the
- * login screen and pre-auth pages render with the correct branding for any
- * visitor — including incognito sessions that have no cached values.
+ * Fetch the public branding row (full config + client name) so EVERY user —
+ * including non-admins, logged-out visitors and incognito sessions — sees
+ * exactly what was saved in Admin → Branding & Theme.
  */
 export async function hydratePublicBranding() {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
     const { data, error } = await supabase
       .from('public_branding')
-      .select('client_name, logo_url, favicon_url, primary_hex')
+      .select('client_name, logo_url, favicon_url, primary_hex, branding_json')
       .eq('id', 'singleton')
       .maybeSingle();
     if (error || !data) return;
 
-    const branding: Partial<BrandingConfig> = {};
-    if (data.logo_url) branding.logoUrl = data.logo_url;
-    if (data.favicon_url) branding.faviconUrl = data.favicon_url;
-    if (isValidHex(data.primary_hex || '')) branding.primaryColor = data.primary_hex!;
+    // Prefer the full saved branding JSON; fall back to the individual columns.
+    const fullBranding = (data as any).branding_json as Partial<BrandingConfig> | null;
+    const branding: Partial<BrandingConfig> = fullBranding ? { ...fullBranding } : {};
+    if (!branding.logoUrl    && data.logo_url)                  branding.logoUrl     = data.logo_url;
+    if (!branding.faviconUrl && data.favicon_url)               branding.faviconUrl  = data.favicon_url;
+    if (!branding.primaryColor && isValidHex(data.primary_hex || '')) branding.primaryColor = data.primary_hex!;
+
     if (Object.keys(branding).length > 0) {
-      // Merge with whatever was already cached so we don't wipe other fields.
-      const merged = { ...(loadCachedBranding() || {}), ...branding };
-      applyBrandingToRoot(merged);
-      cacheBranding(merged);
+      // Public branding is the source of truth — replace the cached copy
+      // entirely so old per-user values don't shadow the admin's settings.
+      applyBrandingToRoot(branding);
+      cacheBranding(branding);
     }
     if (data.client_name) {
       applyClientNameToTitle(data.client_name);
@@ -254,9 +257,13 @@ export async function syncPublicBranding(input: {
     const payload: Record<string, unknown> = { id: 'singleton' };
     if (input.clientName !== undefined) payload.client_name = input.clientName;
     if (input.branding) {
-      if (input.branding.logoUrl !== undefined) payload.logo_url = input.branding.logoUrl;
-      if (input.branding.faviconUrl !== undefined) payload.favicon_url = input.branding.faviconUrl;
-      if (input.branding.primaryColor !== undefined) payload.primary_hex = input.branding.primaryColor;
+      // Mirror the visible columns (used by older code paths) AND store the
+      // full config so non-admin viewers can apply secondary/accent colors,
+      // sidebar style, chart palette, card radius and dark logo too.
+      if (input.branding.logoUrl !== undefined)      payload.logo_url     = input.branding.logoUrl;
+      if (input.branding.faviconUrl !== undefined)   payload.favicon_url  = input.branding.faviconUrl;
+      if (input.branding.primaryColor !== undefined) payload.primary_hex  = input.branding.primaryColor;
+      payload.branding_json = input.branding;
     }
     await supabase.from('public_branding').upsert(payload as any, { onConflict: 'id' });
   } catch {
