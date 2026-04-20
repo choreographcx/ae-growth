@@ -239,7 +239,7 @@ export async function syncPublicBranding(input: {
       if (input.branding.faviconUrl !== undefined) payload.favicon_url = input.branding.faviconUrl;
       if (input.branding.primaryColor !== undefined) payload.primary_hex = input.branding.primaryColor;
     }
-    await supabase.from('public_branding').upsert(payload, { onConflict: 'id' });
+    await supabase.from('public_branding').upsert(payload as any, { onConflict: 'id' });
   } catch {
     /* non-admins will be denied — silently ignore */
   }
