@@ -261,6 +261,13 @@ export interface UseDashboardDailyOptions {
    * When omitted or 1, no conversion is applied for that platform.
    */
   costMultiplierByPlatform?: Partial<Record<PlatformKey, number>>;
+  /**
+   * Per-platform list of case-insensitive substrings. Any row whose
+   * `campaign_name` contains one of its platform's tokens is dropped from
+   * every aggregation, table and chart. Configured in Admin → Platform →
+   * Excluded Campaign Filter.
+   */
+  excludedCampaignTokensByPlatform?: Partial<Record<PlatformKey, string[]>>;
 }
 
 interface UseDashboardDailyResult {
