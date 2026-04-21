@@ -11,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   isApproved: boolean;
+  profileLoading: boolean;
   profile: { email: string; full_name: string; is_approved: boolean } | null;
   onlineUserIds: Set<string>;
   signOut: () => Promise<void>;
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isSuperAdmin: false,
   isApproved: false,
+  profileLoading: true,
   profile: null,
   onlineUserIds: new Set(),
   signOut: async () => {},
