@@ -56,6 +56,12 @@ function TrendTooltip({ active, payload, label, title, currency, valuePrefix = '
   if (!active || !payload?.length) return null;
 
   const value = Number(payload[0]?.value ?? 0);
+  // Spend (currency) and Conversions are always whole numbers in tooltips —
+  // suppress trailing decimals introduced by FX conversion or daily aggregates.
+  const isWholeMetric = !!currency || /conversion/i.test(title);
+  const formatted = isWholeMetric
+    ? Math.round(value).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : value.toLocaleString();
 
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-sm">
@@ -64,7 +70,7 @@ function TrendTooltip({ active, payload, label, title, currency, valuePrefix = '
         <span className="text-card-foreground">{title}</span>
         <span className="inline-flex items-baseline font-medium text-card-foreground">
           {currency ? <CurrencySymbol currency={currency} size={11} /> : valuePrefix ? <span>{valuePrefix}</span> : null}
-          <span>{value.toLocaleString()}{valueSuffix}</span>
+          <span>{formatted}{valueSuffix}</span>
         </span>
       </div>
     </div>
