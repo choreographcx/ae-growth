@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.diag_conv_events(date, date);
