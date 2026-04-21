@@ -47,6 +47,7 @@ const DEFAULT_SECTION_ORDER = [
   'contribution',
   'trends',
   'funnel',
+  'breakdowns',
   'platforms',
   'campaigns',
   'insights',
