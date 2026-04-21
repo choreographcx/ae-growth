@@ -162,6 +162,8 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
     name: clientRow.name,
     code: clientRow.code ?? defaultClient.code,
     currency: clientRow.currency,
+    usdToSarRate: Number((clientRow as any).usd_to_sar_rate ?? defaultClient.usdToSarRate),
+    usdToAedRate: Number((clientRow as any).usd_to_aed_rate ?? defaultClient.usdToAedRate),
     timezone: clientRow.timezone,
     websiteDomain: clientRow.website_domain ?? '',
     defaultDateRange: reporting?.default_date_range ?? defaultClient.defaultDateRange,
@@ -219,7 +221,9 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
         currency: client.currency,
         timezone: client.timezone,
         website_domain: client.websiteDomain || null,
-      })
+        usd_to_sar_rate: Number(client.usdToSarRate ?? 0) || 0,
+        usd_to_aed_rate: Number(client.usdToAedRate ?? 0) || 0,
+      } as any)
       .eq('id', clientId);
     if (error) throw error;
   } else {
@@ -235,7 +239,9 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
         timezone: client.timezone,
         website_domain: client.websiteDomain || null,
         is_singleton: true,
-      })
+        usd_to_sar_rate: Number(client.usdToSarRate ?? 0) || 0,
+        usd_to_aed_rate: Number(client.usdToAedRate ?? 0) || 0,
+      } as any)
       .select('id')
       .single();
     if (error) throw error;
