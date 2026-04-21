@@ -33,7 +33,6 @@ export default function SnapchatPage() {
     },
     {
       title: 'Conversions', icon: 'Target',
-      tooltip: cur.spend >= 1000 && cur.conversionsLowerFunnel === 0 ? 'Significant spend with zero lower-funnel conversions — expected for awareness-led activity.' : undefined,
       primary: { label: 'LF Conversions', value: cur.conversionsLowerFunnel, formattedValue: formatCompact(cur.conversionsLowerFunnel), change: pctChange(cur.conversionsLowerFunnel, prev?.conversionsLowerFunnel), trend: [] },
       supporting: [
         { label: 'CPA (LF)', formattedValue: cur.cpaLowerFunnel > 0 ? moneyKpi(cur.cpaLowerFunnel, currency) : '—', change: pctChange(cur.cpaLowerFunnel, prev?.cpaLowerFunnel) },
@@ -44,7 +43,6 @@ export default function SnapchatPage() {
     },
     {
       title: 'Reach', icon: 'Users',
-      tooltip: 'Snapchat is primarily awareness — measure on reach, not direct response.',
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
       supporting: [],
     },
