@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
 import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
 import { MobileFilterSheet } from '@/components/dashboard/MobileFilterSheet';
+import { FilterClearIcon } from '@/components/icons/FilterClearIcon';
 import { useDashboard } from '@/context/DashboardContext';
 import { PlatformKey } from '@/types/dashboard';
 
@@ -204,9 +205,11 @@ function DesktopInlineFilters({
         <button
           type="button"
           onClick={clearAll}
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors px-1"
+          aria-label="Clear filters"
+          title="Clear filters"
+          className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors px-1"
         >
-          Clear
+          <FilterClearIcon size={14} />
         </button>
       )}
       <div className="h-3.5 w-px bg-border mx-1" />

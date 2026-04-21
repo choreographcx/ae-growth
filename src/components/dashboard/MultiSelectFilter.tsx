@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { FilterClearIcon } from '@/components/icons/FilterClearIcon';
 
 interface MultiSelectFilterProps {
   label: string;
@@ -66,8 +67,13 @@ export function MultiSelectFilter({ label, options, selected, onChange }: MultiS
         {selected.length > 0 && (
           <div className="flex items-center justify-between px-3 py-2 border-b border-border">
             <span className="text-xs text-muted-foreground">{selected.length} selected</span>
-            <button onClick={clearAll} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Clear
+            <button
+              onClick={clearAll}
+              aria-label="Clear selection"
+              title="Clear selection"
+              className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <FilterClearIcon size={12} />
             </button>
           </div>
         )}
