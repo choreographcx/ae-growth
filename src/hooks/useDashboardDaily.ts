@@ -167,8 +167,17 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     : t.conversionsAll;
 
   // Use the platform-reported frequency (impression-weighted average across rows).
-  // No fallback to impressions/reach — if the platform doesn't report it, show 0.
-  const frequency = freqImpressions > 0 ? freqWeightedSum / freqImpressions : 0;
+  // Snapchat exception: their API does not export `frequency` directly, but per Snap's
+  // own docs frequency = impressions / reach (reach is unique users). When the only
+  // platform present in the aggregate is Snapchat and source frequency is missing,
+  // derive it from totals so the KPI populates.
+  let frequency = freqImpressions > 0 ? freqWeightedSum / freqImpressions : 0;
+  if (frequency === 0 && t.reach > 0 && t.impressions > 0) {
+    const platformsInScope = new Set(rows.map(r => normalizePlatform(r.platform)).filter(Boolean));
+    if (platformsInScope.size === 1 && platformsInScope.has('snapchat')) {
+      frequency = t.impressions / t.reach;
+    }
+  }
 
   return {
     ...t,
