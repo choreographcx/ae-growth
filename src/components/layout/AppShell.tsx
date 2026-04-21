@@ -1,9 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useRef } from 'react';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { MobileDrawer } from './MobileDrawer';
 import { BackToTop } from './BackToTop';
 import { DocumentTitle } from './DocumentTitle';
+import { LoadingOverlay } from './LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 
@@ -31,6 +32,15 @@ function PrintReportHeader() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { configLoaded, data } = useDashboard();
+
+  // Keep the loading overlay visible until BOTH client settings AND the first
+  // dashboard data fetch have resolved — so users see one continuous loading
+  // state instead of a flash between phases. After the first successful load
+  // we never re-show the blocking overlay (subsequent refetches are seamless).
+  const firstLoadDoneRef = useRef(false);
+  const initialLoading = !firstLoadDoneRef.current && (!configLoaded || data.loading);
+  if (configLoaded && !data.loading) firstLoadDoneRef.current = true;
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -53,6 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="hidden lg:block">
         <BackToTop />
       </div>
+      {initialLoading && <LoadingOverlay fixed message="Loading dashboard…" />}
     </div>
   );
 }
