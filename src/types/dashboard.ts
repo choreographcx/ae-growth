@@ -114,7 +114,6 @@ export interface CampaignRow {
   cpa: number;
   conversionRate: number;
   reach?: number;
-  frequency?: number;
   videoViews?: number;
   completionRate?: number;
   platform?: PlatformKey;
