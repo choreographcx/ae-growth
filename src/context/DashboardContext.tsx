@@ -52,6 +52,25 @@ export interface LayoutEditControls {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+const PERSIST_PREFIX = 'dashboard.filters.';
+function persistKey(k: string) { return PERSIST_PREFIX + k; }
+function hasPersisted(k: string): boolean {
+  try { return typeof window !== 'undefined' && window.localStorage.getItem(persistKey(k)) !== null; }
+  catch { return false; }
+}
+function loadPersisted<T>(k: string, fallback: T): T {
+  try {
+    if (typeof window === 'undefined') return fallback;
+    const raw = window.localStorage.getItem(persistKey(k));
+    if (raw === null) return fallback;
+    return JSON.parse(raw) as T;
+  } catch { return fallback; }
+}
+function savePersisted(k: string, v: unknown): void {
+  try { if (typeof window !== 'undefined') window.localStorage.setItem(persistKey(k), JSON.stringify(v)); }
+  catch { /* ignore quota / private mode errors */ }
+}
+
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ClientProfile>(defaultClient);
   const [dateRange, setDateRange] = useState<string>(() => loadPersisted('dateRange', 'Last 30 Days'));
