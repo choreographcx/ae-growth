@@ -100,6 +100,22 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <Field label="Client Name" value={client.name} onChange={v => updateClient({ name: v })} required />
               <CurrencySelectField label="Reporting Currency" value={client.currency} onChange={v => updateClient({ currency: v })} />
+              {client.currency === 'SAR' && (
+                <RateField
+                  label="USD → SAR Rate"
+                  value={client.usdToSarRate}
+                  onChange={v => updateClient({ usdToSarRate: v })}
+                  helper="Applied to platforms reporting in USD."
+                />
+              )}
+              {client.currency === 'AED' && (
+                <RateField
+                  label="USD → AED Rate"
+                  value={client.usdToAedRate}
+                  onChange={v => updateClient({ usdToAedRate: v })}
+                  helper="Applied to platforms reporting in USD."
+                />
+              )}
               <SelectField label="Time Zone" value={client.timezone} options={['Asia/Dubai', 'Asia/Riyadh']} onChange={v => updateClient({ timezone: v })} />
               <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} onChange={v => updateClient({ defaultDateRange: v })} />
               <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
