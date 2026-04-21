@@ -58,7 +58,9 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
         lfConv: a.conversionsLowerFunnel,
         cpa: a.cpaLowerFunnel,
       };
-    }).sort((a, b) => b.spend - a.spend);
+    })
+    .filter(g => g.spend > 0 || g.share > 0 || g.impressions > 0 || g.ctr > 0 || g.lfConv > 0 || g.cpa > 0)
+    .sort((a, b) => b.spend - a.spend);
   }, [rows, pick]);
 
   const allUnspecified = grouped.length === 1 && grouped[0].name === 'Unspecified';
