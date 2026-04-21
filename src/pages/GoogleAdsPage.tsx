@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
+import { getCampaignObjective } from '@/lib/campaignNaming';
 
 export default function GoogleAdsPage() {
   const { data } = useDashboard();
@@ -80,7 +81,7 @@ export default function GoogleAdsPage() {
             <SectionHeader title="Campaign Objective" />
             <DimensionBreakdownTable
               rows={scoped}
-              pick={r => r.campaign_objective}
+              pick={r => r.campaign_objective || getCampaignObjective(r.campaign_name)}
               title="By Objective"
               hideIfAllUnspecified
             />

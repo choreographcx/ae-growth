@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
+import { getCampaignObjective } from '@/lib/campaignNaming';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Facebook, Instagram } from 'lucide-react';
 
@@ -138,7 +139,7 @@ export default function MetaPage() {
             <SectionHeader title="Campaign Objective" />
             <DimensionBreakdownTable
               rows={scoped}
-              pick={r => r.campaign_objective}
+              pick={r => r.campaign_objective || getCampaignObjective(r.campaign_name)}
               title="By Objective"
               hideIfAllUnspecified
             />
