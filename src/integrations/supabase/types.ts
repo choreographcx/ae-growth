@@ -536,6 +536,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      diag_conversion_breakdown_source: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          conv_all: number
+          conv_lower: number
+          conv_upper: number
+          conversion_funnel_group: string
+          conversion_name: string
+          platform: string
+          rows_count: number
+        }[]
+      }
       diag_frequency_signal: {
         Args: { p_end?: string; p_start?: string }
         Returns: {
