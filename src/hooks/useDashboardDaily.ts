@@ -383,7 +383,7 @@ export function useDashboardDaily(
 
   const allRows  = useMemo(() => applyMultiplier(currentQ.data ?? []),  [currentQ.data, multiplierKey]);
   const prevRows = useMemo(() => applyMultiplier(previousQ.data ?? []), [previousQ.data, multiplierKey]);
-  const prevRows = previousQ.data ?? [];
+  
   const loading = currentQ.isLoading;
   const error = currentQ.error ? (currentQ.error as Error).message : null;
 
