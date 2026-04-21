@@ -51,6 +51,7 @@ const DEFAULT_SECTION_ORDER = [
   'trends',
   'funnel',
   'breakdowns',
+  'channelBreakdown',
   'conversionBreakdown',
   'platforms',
   'campaigns',
@@ -251,6 +252,19 @@ export default function OverviewPage() {
       node: (
         <div className="print-break-before">
           <BreakdownDimensionCard rows={rows} />
+        </div>
+      ),
+    },
+    channelBreakdown: {
+      label: 'Channel Breakdown',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Channel Breakdown" subtitle="Performance grouped by channel parsed from campaign names" />
+          <DimensionBreakdownTable
+            rows={rows}
+            pick={(r) => getCampaignChannel(r.campaign_name)}
+            title="By Channel"
+          />
         </div>
       ),
     },
