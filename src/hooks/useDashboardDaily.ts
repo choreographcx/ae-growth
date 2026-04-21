@@ -243,16 +243,6 @@ function buildRoasSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
     .map(([date, { spend, value }]) => ({ date, value: spend > 0 ? +(value / spend).toFixed(2) : 0 }));
 }
 
-function buildFrequencySeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
-  const byDate = new Map<string, { imps: number; reach: number }>();
-  for (const r of rows) {
-    const cur = byDate.get(r.date) || { imps: 0, reach: 0 };
-    cur.imps += +r.impressions || 0; cur.reach += +r.reach || 0;
-    byDate.set(r.date, cur);
-  }
-  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, { imps, reach }]) => ({ date, value: reach > 0 ? +(imps / reach).toFixed(2) : 0 }));
-}
 
 export interface PlatformOption { key: PlatformKey; label: string; raw: string; }
 
