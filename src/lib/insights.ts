@@ -23,7 +23,6 @@ interface InsightContext {
 
 const DEFAULTS = {
   minSpendUSD: 1000,
-  highFrequency: 4,
   weakLpvRate: 30, // %
   strongCtr: 1.5,  // %
   contributionGap: 1.5, // platform's spend share / conv share > 1.5 = inefficient
