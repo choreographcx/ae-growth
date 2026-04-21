@@ -330,6 +330,7 @@ export function useDashboardDaily(
     selectedMarkets = [],
     selectedChannels = [],
     costMultiplierByPlatform,
+    excludedCampaignTokensByPlatform,
   } = options;
   // Stable hash of the multiplier map so memo deps don't churn on every render.
   const multiplierKey = useMemo(
@@ -337,6 +338,13 @@ export function useDashboardDaily(
       ? Object.entries(costMultiplierByPlatform).map(([k, v]) => `${k}:${v}`).sort().join('|')
       : '',
     [costMultiplierByPlatform]
+  );
+  // Stable hash of the per-platform exclusion-token map.
+  const exclusionKey = useMemo(
+    () => excludedCampaignTokensByPlatform
+      ? Object.entries(excludedCampaignTokensByPlatform).map(([k, v]) => `${k}:${(v || []).join(',')}`).sort().join('|')
+      : '',
+    [excludedCampaignTokensByPlatform]
   );
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
@@ -379,8 +387,27 @@ export function useDashboardDaily(
     });
   };
 
-  const allRows  = useMemo(() => applyMultiplier(currentQ.data ?? []),  [currentQ.data, multiplierKey]);
-  const prevRows = useMemo(() => applyMultiplier(previousQ.data ?? []), [previousQ.data, multiplierKey]);
+  // Drop rows whose campaign name matches any of the per-platform exclusion
+  // tokens configured in Admin. Substring match is case-insensitive.
+  const applyExclusions = (rawRows: DashboardDailyRow[]): DashboardDailyRow[] => {
+    if (!excludedCampaignTokensByPlatform) return rawRows;
+    const hasAny = Object.values(excludedCampaignTokensByPlatform).some(arr => (arr?.length ?? 0) > 0);
+    if (!hasAny) return rawRows;
+    return rawRows.filter(r => {
+      const k = normalizePlatform(r.platform);
+      if (!k) return true;
+      const tokens = excludedCampaignTokensByPlatform[k];
+      if (!tokens || tokens.length === 0) return true;
+      const name = (r.campaign_name || '').toLowerCase();
+      for (const t of tokens) {
+        if (t && name.includes(t)) return false;
+      }
+      return true;
+    });
+  };
+
+  const allRows  = useMemo(() => applyExclusions(applyMultiplier(currentQ.data ?? [])),  [currentQ.data, multiplierKey, exclusionKey]);
+  const prevRows = useMemo(() => applyExclusions(applyMultiplier(previousQ.data ?? [])), [previousQ.data, multiplierKey, exclusionKey]);
   
   const loading = currentQ.isLoading;
   const error = currentQ.error ? (currentQ.error as Error).message : null;
