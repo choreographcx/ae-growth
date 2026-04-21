@@ -131,28 +131,29 @@ export function pickConversions(r: DashboardDailyRow, mode: ConversionMode): num
 }
 
 function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): DashboardTotals {
-  // Impression-weighted accumulators for platform-reported frequency.
-  let freqWeightedSum = 0;
-  let freqImpressions = 0;
+  // Frequency accumulators: only include rows that have BOTH impressions and reach > 0.
+  // Frequency is then derived as (sum impressions with reach) / (sum reach).
+  let freqImpressionsWithReach = 0;
+  let freqReach = 0;
 
   const t = rows.reduce((a, r) => {
+    const imps = +r.impressions || 0;
+    const rch = +r.reach || 0;
     a.spend += +r.cost || 0;
-    a.impressions += +r.impressions || 0;
+    a.impressions += imps;
     a.clicks += +r.clicks || 0;
     a.conversionsAll += +r.conversions_all || +r.conversions || 0;
     a.conversionsLowerFunnel += +r.conversions_lower_funnel || 0;
     a.conversionsUpperFunnel += +r.conversions_upper_funnel || 0;
     a.conversionValue += +r.conversion_value || 0;
-    a.reach += +r.reach || 0;
+    a.reach += rch;
     a.landingPageViews += +r.landing_page_views || 0;
     a.outboundClicks += +r.outbound_clicks || 0;
     a.videoViews += +r.video_views || 0;
     a.videoP100 += +r.video_p100 || 0;
-    const f = r.frequency == null ? null : +r.frequency;
-    const imps = +r.impressions || 0;
-    if (f != null && isFinite(f) && f > 0 && imps > 0) {
-      freqWeightedSum += f * imps;
-      freqImpressions += imps;
+    if (imps > 0 && rch > 0) {
+      freqImpressionsWithReach += imps;
+      freqReach += rch;
     }
     return a;
   }, {
@@ -166,23 +167,9 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     ? (t.conversionsLowerFunnel > 0 ? t.conversionsLowerFunnel : t.conversionsAll)
     : t.conversionsAll;
 
-  // Use the platform-reported frequency (impression-weighted average across rows).
-  // Source-data fallback: several platforms (Snapchat, Meta, TikTok, X) report
-  // reach as unique users but occasionally export `frequency` as 0/null in the
-  // upstream BigQuery dataset. By definition frequency = impressions / reach for
-  // these platforms, so when the aggregate is scoped to a single such platform
-  // and source frequency is missing, derive it from totals so the KPI populates.
-  let frequency = freqImpressions > 0 ? freqWeightedSum / freqImpressions : 0;
-  if (frequency === 0 && t.reach > 0 && t.impressions > 0) {
-    const platformsInScope = new Set(rows.map(r => normalizePlatform(r.platform)).filter(Boolean));
-    const reachPlatforms = new Set(['snapchat', 'meta', 'tiktok', 'x']);
-    if (platformsInScope.size === 1) {
-      const [only] = [...platformsInScope];
-      if (reachPlatforms.has(only)) {
-        frequency = t.impressions / t.reach;
-      }
-    }
-  }
+  // Frequency = total impressions (from rows with reach) / total reach (from same rows).
+  // Rows with impressions but no reach are excluded from BOTH sides of the calculation.
+  const frequency = freqReach > 0 ? freqImpressionsWithReach / freqReach : 0;
 
   return {
     ...t,
