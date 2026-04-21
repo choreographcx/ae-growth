@@ -215,6 +215,25 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Convert the admin Default Date Range value (e.g. `last_30_days`) to the
+ * label used by the date picker / `resolveDateRange` (e.g. `Last 30 Days`).
+ * Returns null if the value isn't a known preset — caller keeps current state.
+ */
+function mapDefaultDateRange(v: string | undefined | null): string | null {
+  switch (v) {
+    case 'last_7_days':  return 'Last 7 Days';
+    case 'last_14_days': return 'Last 14 Days';
+    case 'last_30_days': return 'Last 30 Days';
+    case 'last_90_days': return 'Last 90 Days';
+    case 'this_month':   return 'This Month';
+    case 'last_month':   return 'Last Month';
+    case 'this_year':    return 'This Year';
+    case 'last_year':    return 'Last Year';
+    default:             return null;
+  }
+}
+
 const emptyTotals = {
   spend: 0, impressions: 0, clicks: 0,
   conversions: 0, conversionsAll: 0, conversionsLowerFunnel: 0, conversionsUpperFunnel: 0,
