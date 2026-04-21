@@ -62,6 +62,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedPlatformLabels: selectedPlatforms,
     selectedCampaigns,
     selectedObjectives,
+    selectedMarkets,
+    selectedChannels,
   });
 
   // Client settings cached so navigating between pages never refetches them.
@@ -151,6 +153,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedPlatforms, setSelectedPlatforms,
       selectedCampaigns, setSelectedCampaigns,
       selectedObjectives, setSelectedObjectives,
+      selectedMarkets, setSelectedMarkets,
+      selectedChannels, setSelectedChannels,
       saveConfig, isSaving, configLoaded, lastSavedAt,
       data,
     }}>
@@ -180,6 +184,8 @@ const fallbackData: DashboardData = {
   range: { start: new Date(), end: new Date() },
   availablePlatforms: [], availableCampaigns: [], campaignsByPlatform: {},
   availableObjectives: [], objectivesByPlatform: {},
+  availableMarkets: [], marketsByPlatform: {},
+  availableChannels: [], channelsByPlatform: {},
 };
 
 const fallback: DashboardContextType = {
