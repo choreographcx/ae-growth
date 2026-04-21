@@ -144,6 +144,7 @@ export default function Ga4Page() {
         subtitle={`Live data from the GA4 Data API · Property ${propertyId}`}
         showMobileDatePicker
         showFilters
+        hideFiltersButton
       />
 
       {anyError && (

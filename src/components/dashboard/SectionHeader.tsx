@@ -17,6 +17,8 @@ interface SectionHeaderProps {
   showPlatformsFilter?: boolean;
   /** When set, the Campaigns filter is restricted to campaigns belonging to this platform. */
   scopeToPlatform?: PlatformKey;
+  /** When true, suppress the filters button (keeps date picker). */
+  hideFiltersButton?: boolean;
   /**
    * When true, render `action` on its own row below the title/filters (desktop).
    * Useful for page-specific filters (e.g. Facebook/Instagram toggles on Meta).
@@ -30,6 +32,7 @@ export function SectionHeader({
   showFilters = false,
   showPlatformsFilter = false,
   scopeToPlatform,
+  hideFiltersButton = false,
   actionBelow = false,
 }: SectionHeaderProps) {
   const inlineAction = !actionBelow ? action : undefined;
@@ -45,7 +48,7 @@ export function SectionHeader({
           </div>
           {showMobileDatePicker && (
             <div className="lg:hidden flex items-center gap-1.5 shrink-0">
-              {showFilters && (
+              {showFilters && !hideFiltersButton && (
                 <MobileFilterSheet
                   showPlatformsFilter={showPlatformsFilter}
                   scopeToPlatform={scopeToPlatform}
@@ -59,11 +62,15 @@ export function SectionHeader({
         {showFilters ? (
           <div className="hidden lg:flex items-center gap-1.5 lg:shrink-0">
             {inlineAction}
-            <MobileFilterSheet
-              showPlatformsFilter={showPlatformsFilter}
-              scopeToPlatform={scopeToPlatform}
-            />
-            <div className="h-3.5 w-px bg-border mx-1" />
+            {!hideFiltersButton && (
+              <>
+                <MobileFilterSheet
+                  showPlatformsFilter={showPlatformsFilter}
+                  scopeToPlatform={scopeToPlatform}
+                />
+                <div className="h-3.5 w-px bg-border mx-1" />
+              </>
+            )}
             <DateRangePicker />
           </div>
         ) : (
