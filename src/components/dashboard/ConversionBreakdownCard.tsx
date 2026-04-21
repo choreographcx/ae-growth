@@ -123,7 +123,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
       )}
       {!loading && !error && sorted.length === 0 && (
         <div className="px-5 py-6 text-xs text-muted-foreground">
-          No conversion events recorded for this platform in the selected period.
+          No conversion events recorded {platform ? 'for this platform' : 'across platforms'} in the selected period.
         </div>
       )}
 
