@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { applyBrandingToRoot, cacheBranding, cacheClientName, applyClientNameToTitle } from '@/lib/branding';
 import { useDashboardDaily } from '@/hooks/useDashboardDaily';
 import { loadClientSettings, saveClientSettings } from '@/lib/clientSettings';
+import { platformConvertRate } from '@/lib/currencyConvert';
 
 type DashboardData = ReturnType<typeof useDashboardDaily>;
 
@@ -57,6 +58,19 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
+  // Per-platform USD→reporting-currency multipliers, recomputed when client
+  // currency, rates, or any platform's reportingCurrency changes.
+  const costMultiplierByPlatform = useMemo(() => {
+    const out: Partial<Record<PlatformKey, number>> = {};
+    for (const k of PLATFORM_ORDER) out[k] = platformConvertRate(client, k);
+    return out;
+  }, [
+    client.currency,
+    client.usdToSarRate,
+    client.usdToAedRate,
+    ...PLATFORM_ORDER.map(k => client.platforms[k]?.reportingCurrency),
+  ]);
+
   // Single source of truth for dashboard data — shared with header and pages
   const data = useDashboardDaily(dateRange, {
     selectedPlatformLabels: selectedPlatforms,
@@ -64,6 +78,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedObjectives,
     selectedMarkets,
     selectedChannels,
+    costMultiplierByPlatform,
   });
 
   // Client settings cached so navigating between pages never refetches them.

@@ -19,6 +19,10 @@ export interface PlatformConfig {
   conversionSource: string;
   includeInOverview: boolean;
   includeInDiagnostics: boolean;
+  /** Currency this platform reports spend in (USD/SAR/AED). When the
+   *  reporting currency differs, the matching client conversion rate is
+   *  applied to all money metrics. */
+  reportingCurrency: string;
   // Advanced settings
   sourceLabel: string;
   namingConvention: string;
@@ -31,6 +35,10 @@ export interface ClientProfile {
   name: string;
   code: string;
   currency: string;
+  /** Multiplier applied to convert USD spend into SAR for display. */
+  usdToSarRate: number;
+  /** Multiplier applied to convert USD spend into AED for display. */
+  usdToAedRate: number;
   timezone: string;
   defaultDateRange: string;
   weekStartDay: string;

@@ -393,6 +393,8 @@ export type Database = {
           status: string
           timezone: string
           updated_at: string
+          usd_to_aed_rate: number
+          usd_to_sar_rate: number
           website_domain: string | null
         }
         Insert: {
@@ -407,6 +409,8 @@ export type Database = {
           status?: string
           timezone?: string
           updated_at?: string
+          usd_to_aed_rate?: number
+          usd_to_sar_rate?: number
           website_domain?: string | null
         }
         Update: {
@@ -421,6 +425,8 @@ export type Database = {
           status?: string
           timezone?: string
           updated_at?: string
+          usd_to_aed_rate?: number
+          usd_to_sar_rate?: number
           website_domain?: string | null
         }
         Relationships: []
@@ -648,6 +654,8 @@ export type Database = {
           status: string
           timezone: string
           updated_at: string
+          usd_to_aed_rate: number
+          usd_to_sar_rate: number
           website_domain: string | null
         }
         SetofOptions: {
@@ -672,6 +680,8 @@ export type Database = {
           status: string
           timezone: string
           updated_at: string
+          usd_to_aed_rate: number
+          usd_to_sar_rate: number
           website_domain: string | null
         }[]
         SetofOptions: {

@@ -74,7 +74,7 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
   // Step 1 — singleton client (anyone can read)
   const { data: clientRow } = await supabase
     .from('clients')
-    .select('id, name, code, currency, timezone, website_domain, updated_at')
+    .select('id, name, code, currency, timezone, website_domain, updated_at, usd_to_sar_rate, usd_to_aed_rate')
     .eq('is_singleton', true)
     .maybeSingle();
 
@@ -113,6 +113,7 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
       conversionSource: row.conversion_source ?? 'pixel',
       includeInOverview: row.include_in_overview,
       includeInDiagnostics: row.include_in_diagnostics,
+      reportingCurrency: row.currency ?? 'USD',
       sourceLabel: row.source_label ?? '',
       namingConvention: row.naming_convention ?? '',
       excludedCampaignFilter: row.excluded_campaign_filter ?? '',
@@ -161,6 +162,8 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
     name: clientRow.name,
     code: clientRow.code ?? defaultClient.code,
     currency: clientRow.currency,
+    usdToSarRate: Number((clientRow as any).usd_to_sar_rate ?? defaultClient.usdToSarRate),
+    usdToAedRate: Number((clientRow as any).usd_to_aed_rate ?? defaultClient.usdToAedRate),
     timezone: clientRow.timezone,
     websiteDomain: clientRow.website_domain ?? '',
     defaultDateRange: reporting?.default_date_range ?? defaultClient.defaultDateRange,
@@ -218,7 +221,9 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
         currency: client.currency,
         timezone: client.timezone,
         website_domain: client.websiteDomain || null,
-      })
+        usd_to_sar_rate: Number(client.usdToSarRate ?? 0) || 0,
+        usd_to_aed_rate: Number(client.usdToAedRate ?? 0) || 0,
+      } as any)
       .eq('id', clientId);
     if (error) throw error;
   } else {
@@ -234,7 +239,9 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
         timezone: client.timezone,
         website_domain: client.websiteDomain || null,
         is_singleton: true,
-      })
+        usd_to_sar_rate: Number(client.usdToSarRate ?? 0) || 0,
+        usd_to_aed_rate: Number(client.usdToAedRate ?? 0) || 0,
+      } as any)
       .select('id')
       .single();
     if (error) throw error;
@@ -277,7 +284,7 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
       is_enabled: cfg.enabled,
       monthly_budget: cfg.budget || null,
       budget_type: cfg.budgetType || 'annual',
-      currency: client.currency,
+      currency: cfg.reportingCurrency || client.currency,
       primary_kpi: cfg.primaryKpi || 'conversions',
       conversion_source: cfg.conversionSource || 'pixel',
       account_ids: cfg.accountIds ?? [],
