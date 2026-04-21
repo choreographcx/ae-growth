@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
 import { MultiSelectFilter } from '@/components/dashboard/MultiSelectFilter';
+import { MobileFilterSheet } from '@/components/dashboard/MobileFilterSheet';
 import { useDashboard } from '@/context/DashboardContext';
 import { PlatformKey } from '@/types/dashboard';
 
@@ -45,7 +46,13 @@ export function SectionHeader({
             {subtitle && <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>}
           </div>
           {showMobileDatePicker && (
-            <div className="lg:hidden flex items-center min-w-0 max-w-[180px] shrink-0">
+            <div className="lg:hidden flex items-center gap-1.5 shrink-0">
+              {showFilters && (
+                <MobileFilterSheet
+                  showPlatformsFilter={showPlatformsFilter}
+                  scopeToPlatform={scopeToPlatform}
+                />
+              )}
               <DateRangePicker compact />
             </div>
           )}
