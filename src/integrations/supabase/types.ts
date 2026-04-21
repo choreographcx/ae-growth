@@ -532,42 +532,34 @@ export type Database = {
       }
     }
     Views: {
+      public_singleton_branding: {
+        Row: {
+          accent_hex: string | null
+          card_radius: string | null
+          chart_palette: string | null
+          dark_logo_url: string | null
+          favicon_url: string | null
+          font_family: string | null
+          logo_url: string | null
+          primary_hex: string | null
+          secondary_hex: string | null
+          sidebar_style: string | null
+          theme_mode: string | null
+        }
+        Relationships: []
+      }
       public_singleton_client: {
         Row: {
-          code: string | null
-          created_at: string | null
-          currency: string | null
           id: string | null
           name: string | null
-          slug: string | null
-          status: string | null
-          timezone: string | null
-          updated_at: string | null
-          website_domain: string | null
         }
         Insert: {
-          code?: string | null
-          created_at?: string | null
-          currency?: string | null
           id?: string | null
           name?: string | null
-          slug?: string | null
-          status?: string | null
-          timezone?: string | null
-          updated_at?: string | null
-          website_domain?: string | null
         }
         Update: {
-          code?: string | null
-          created_at?: string | null
-          currency?: string | null
           id?: string | null
           name?: string | null
-          slug?: string | null
-          status?: string | null
-          timezone?: string | null
-          updated_at?: string | null
-          website_domain?: string | null
         }
         Relationships: []
       }
