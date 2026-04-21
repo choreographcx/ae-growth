@@ -677,6 +677,14 @@ export type Database = {
         Returns: boolean
       }
       internal_get_google_sa_json: { Args: never; Returns: string }
+      internal_grant_superadmin: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
+      internal_revoke_superadmin: {
+        Args: { _target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "superadmin"
