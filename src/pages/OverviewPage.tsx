@@ -244,6 +244,31 @@ export default function OverviewPage() {
       label: 'Funnel',
       node: <EnhancedFunnelCard steps={funnelSteps} />,
     },
+    breakdowns: {
+      label: 'Market / Channel / Objective Breakdown',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Breakdowns" subtitle="Spend, conversions, and CPA split by parsed campaign segments" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 md:gap-3">
+            <DimensionBreakdownTable
+              rows={rows}
+              pick={(r) => getCampaignMarket(r.campaign_name)}
+              title="By Market"
+            />
+            <DimensionBreakdownTable
+              rows={rows}
+              pick={(r) => getCampaignChannel(r.campaign_name)}
+              title="By Channel"
+            />
+            <DimensionBreakdownTable
+              rows={rows}
+              pick={(r) => getCampaignObjective(r.campaign_name)}
+              title="By Objective"
+            />
+          </div>
+        </div>
+      ),
+    },
     platforms: {
       label: 'Platform Performance',
       node: (
