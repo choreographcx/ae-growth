@@ -60,7 +60,6 @@ export interface DashboardTotals {
   costPerLPV: number;
   lpvRate: number;
   cvrLowerFunnel: number;
-  frequency: number;
   roas: number;
   outboundCtr: number;
   costPerVideoView: number;
