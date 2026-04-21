@@ -441,17 +441,7 @@ function ModularPlatformCard({
             </div>
           </div>
 
-          {/* Toggles row */}
-          <div className="flex items-center gap-6 pt-1">
-            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-              <Switch checked={cfg.includeInOverview ?? true} onCheckedChange={v => updatePlatform(p.key, { includeInOverview: v })} className="scale-75 origin-left" />
-              <Eye size={12} /> Overview
-            </label>
-            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-              <Switch checked={cfg.includeInDiagnostics ?? true} onCheckedChange={v => updatePlatform(p.key, { includeInDiagnostics: v })} className="scale-75 origin-left" />
-              <Activity size={12} /> Diagnostics
-            </label>
-          </div>
+          {/* Toggles row removed — Overview/Diagnostics inclusion is implicit when the platform is enabled. */}
 
           {/* Footer status line */}
           <div className="flex items-center justify-between pt-2 border-t border-border/30">
@@ -472,28 +462,17 @@ function ModularPlatformCard({
           {/* Advanced Settings */}
           {advancedOpen && (
             <div className="pt-3 border-t border-border/30 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Source Label Override</Label>
-                  <Input
-                    value={cfg.sourceLabel || ''}
-                    onChange={e => updatePlatform(p.key, { sourceLabel: e.target.value })}
-                    placeholder={p.label}
-                    className="mt-1 h-7 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Naming Convention</Label>
-                  <Select value={cfg.namingConvention || ''} onValueChange={v => updatePlatform(p.key, { namingConvention: v })}>
-                    <SelectTrigger className="mt-1 h-7 text-xs"><SelectValue placeholder="Default" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pipe_delimited">Pipe Delimited</SelectItem>
-                      <SelectItem value="underscore">Underscore</SelectItem>
-                      <SelectItem value="dash">Dash</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Naming Convention</Label>
+                <Select value={cfg.namingConvention || ''} onValueChange={v => updatePlatform(p.key, { namingConvention: v })}>
+                  <SelectTrigger className="mt-1 h-7 text-xs"><SelectValue placeholder="Default" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pipe_delimited">Pipe Delimited</SelectItem>
+                    <SelectItem value="underscore">Underscore</SelectItem>
+                    <SelectItem value="dash">Dash</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Excluded Campaign Filter</Label>
