@@ -21,6 +21,8 @@ export const defaultClient: ClientProfile = {
   name: 'Acme Corp',
   code: 'ACME',
   currency: 'USD',
+  usdToSarRate: 3.75,
+  usdToAedRate: 3.67,
   timezone: 'Asia/Dubai',
   defaultDateRange: 'last_30_days',
   weekStartDay: 'Monday',
