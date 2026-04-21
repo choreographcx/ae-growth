@@ -248,18 +248,15 @@ export async function hydratePublicBranding() {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
 
-    const { data: clientRow } = await supabase
-      .from('clients')
-      .select('id, name')
-      .eq('is_singleton', true)
-      .maybeSingle();
+    // Use SECURITY DEFINER RPCs that expose only safe public columns.
+    // These work for anonymous visitors without leaking internal IDs
+    // (owner_user_id, client_id, currency rates, slug, etc.).
+    const { data: clientRows } = await (supabase as any).rpc('get_public_client_info');
+    const clientRow = Array.isArray(clientRows) ? clientRows[0] : null;
     if (!clientRow) return;
 
-    const { data: b } = await supabase
-      .from('client_branding')
-      .select('logo_url, dark_logo_url, favicon_url, primary_hex, secondary_hex, accent_hex, sidebar_style, chart_palette, card_radius, font_family')
-      .eq('client_id', clientRow.id)
-      .maybeSingle();
+    const { data: brandingRows } = await (supabase as any).rpc('get_public_branding');
+    const b = Array.isArray(brandingRows) ? brandingRows[0] : null;
 
     const branding: Partial<BrandingConfig> = {};
     if (b) {
