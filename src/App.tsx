@@ -44,9 +44,9 @@ const PageFallback = () => (
 );
 
 function ProtectedRoutes() {
-  const { user, loading, isApproved, isAdmin } = useAuth();
+  const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
 
-  if (loading) {
+  if (loading || (user && profileLoading)) {
     return <PageFallback />;
   }
 
