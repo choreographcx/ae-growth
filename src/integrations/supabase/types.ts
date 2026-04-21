@@ -660,6 +660,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      internal_get_google_sa_json: { Args: never; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user" | "superadmin"
