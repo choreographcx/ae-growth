@@ -565,3 +565,20 @@ function ThresholdField({ label, value, onChange, helper }: { label: string; val
     </div>
   );
 }
+
+function RateField({ label, value, onChange, helper }: { label: string; value: number; onChange: (v: number) => void; helper?: string }) {
+  return (
+    <div>
+      <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</Label>
+      <Input
+        type="number"
+        step="0.0001"
+        min="0"
+        className="mt-1.5 h-9 text-sm tabular-nums"
+        value={Number.isFinite(value) ? value : 0}
+        onChange={e => onChange(Number(e.target.value) || 0)}
+      />
+      {helper && <p className="text-[10px] text-muted-foreground mt-1">{helper}</p>}
+    </div>
+  );
+}
