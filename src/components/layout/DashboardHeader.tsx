@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LayoutEditToggle } from '@/components/dashboard/LayoutEditToggle';
 
 import { cn } from '@/lib/utils';
@@ -347,10 +348,15 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </Link>
           )}
           <div className="ml-auto flex items-center gap-1.5">
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={handleExportPDF} disabled={isExporting}>
-              {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-              {isExporting ? 'Exporting…' : 'Export PDF'}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs px-2 xl:px-3" onClick={handleExportPDF} disabled={isExporting} aria-label={isExporting ? 'Exporting PDF' : 'Export PDF'}>
+                  {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                  <span className="hidden xl:inline">{isExporting ? 'Exporting…' : 'Export PDF'}</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="xl:hidden">{isExporting ? 'Exporting…' : 'Export PDF'}</TooltipContent>
+            </Tooltip>
             {layoutEdit && (
               <LayoutEditToggle
                 isEditing={layoutEdit.isEditing}
@@ -359,9 +365,14 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               />
             )}
             <div className="h-3.5 w-px bg-border mx-1" />
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={signOut}>
-              <LogOut size={12} /> Sign Out
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs px-2 xl:px-3" onClick={signOut} aria-label="Sign Out">
+                  <LogOut size={12} /> <span className="hidden xl:inline">Sign Out</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="xl:hidden">Sign Out</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
