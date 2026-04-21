@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      _debug_snap_stats: {
+        Row: {
+          captured_at: string | null
+          conv_rows: number | null
+          conv_rows_with_reach: number | null
+          id: number
+          noconv_rows: number | null
+          noconv_rows_with_reach: number | null
+          platform: string | null
+          rows_with_reach: number | null
+          total_imp: number | null
+          total_reach: number | null
+          total_rows: number | null
+        }
+        Insert: {
+          captured_at?: string | null
+          conv_rows?: number | null
+          conv_rows_with_reach?: number | null
+          id?: number
+          noconv_rows?: number | null
+          noconv_rows_with_reach?: number | null
+          platform?: string | null
+          rows_with_reach?: number | null
+          total_imp?: number | null
+          total_reach?: number | null
+          total_rows?: number | null
+        }
+        Update: {
+          captured_at?: string | null
+          conv_rows?: number | null
+          conv_rows_with_reach?: number | null
+          id?: number
+          noconv_rows?: number | null
+          noconv_rows_with_reach?: number | null
+          platform?: string | null
+          rows_with_reach?: number | null
+          total_imp?: number | null
+          total_reach?: number | null
+          total_rows?: number | null
+        }
+        Relationships: []
+      }
       client_branding: {
         Row: {
           accent_hex: string | null
@@ -500,6 +542,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _debug_snap_capture: { Args: never; Returns: undefined }
       debug_snapchat_reach: {
         Args: { p_end: string; p_start: string }
         Returns: {
