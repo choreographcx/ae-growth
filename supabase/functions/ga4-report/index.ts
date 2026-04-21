@@ -169,6 +169,19 @@ function parseServiceAccount(raw: string): ServiceAccount {
   const private_key = typeof record.private_key === 'string' ? record.private_key : '';
   const token_uri = typeof record.token_uri === 'string' ? record.token_uri : undefined;
 
+  const looksLikePlaceholder = [
+    typeof record.project_id === 'string' ? record.project_id : '',
+    typeof record.private_key_id === 'string' ? record.private_key_id : '',
+    client_email,
+    private_key,
+    typeof record.client_id === 'string' ? record.client_id : '',
+    typeof record.client_x509_cert_url === 'string' ? record.client_x509_cert_url : '',
+  ].some((value) => value.includes('YOUR_'));
+
+  if (looksLikePlaceholder) {
+    throw new Error('Vault secret bigquery_sa_json contains Google sample placeholder values; replace it with the real service-account JSON key');
+  }
+
   if (!client_email || !private_key) {
     throw new Error('Service account JSON missing client_email/private_key');
   }
