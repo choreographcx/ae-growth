@@ -82,18 +82,11 @@ async function mintAccessToken(sa: ServiceAccount): Promise<string> {
 
 async function loadServiceAccount(serviceClient: ReturnType<typeof createClient>): Promise<ServiceAccount> {
   if (cachedSA) return cachedSA;
-  // Use service-role client to read the vault — bypasses the admin RPC's
-  // role check so any authenticated, approved user can view GA4 metrics.
-  const { data, error } = await serviceClient
-    .schema('vault' as any)
-    .from('decrypted_secrets')
-    .select('decrypted_secret')
-    .eq('name', 'bigquery_sa_json')
-    .maybeSingle();
+  // Service-role-only RPC that decrypts the bigquery_sa_json vault secret.
+  const { data, error } = await serviceClient.rpc('internal_get_google_sa_json');
   if (error) throw new Error(`Vault read failed: ${error.message}`);
-  const raw = (data as any)?.decrypted_secret;
-  if (!raw || typeof raw !== 'string') throw new Error('Service account secret not found in vault');
-  const parsed = JSON.parse(raw) as ServiceAccount;
+  if (!data || typeof data !== 'string') throw new Error('Service account secret not found in vault');
+  const parsed = JSON.parse(data) as ServiceAccount;
   if (!parsed.client_email || !parsed.private_key) {
     throw new Error('Service account JSON missing client_email/private_key');
   }
