@@ -59,7 +59,6 @@ export interface ClientProfile {
 export interface AlertThresholds {
   cpaSpike: number;
   ctrDrop: number;
-  frequencyThreshold: number;
   zeroConversionSpend: number;
   viewabilityThreshold: number;
 }
