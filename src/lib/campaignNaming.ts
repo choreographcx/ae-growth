@@ -52,7 +52,11 @@ export function parseCampaignName(name: string | null | undefined): ParsedCampai
 
 export function getCampaignMarket(name: string | null | undefined): string {
   const m = parseCampaignName(name).market;
-  return m === UNKNOWN ? m : m.toLowerCase();
+  if (m === UNKNOWN) return m;
+  const lower = m.toLowerCase();
+  // Treat the placeholder "0000" segment as SA (Saudi Arabia).
+  if (lower === '0000') return 'SA';
+  return lower.toUpperCase();
 }
 export function getCampaignObjective(name: string | null | undefined): string {
   return parseCampaignName(name).objective;
