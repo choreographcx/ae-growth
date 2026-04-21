@@ -378,15 +378,21 @@ export function useDashboardDaily(
   const pEndKey   = format(prevEnd, 'yyyy-MM-dd');
 
   // Current period — blocks first paint.
+  // NOTE: queryKey version "v2" was bumped after the BigQuery fix that made
+  // `campaign_name` reflect the latest canonical name per
+  // (platform, account_id, campaign_id). Bumping the key invalidates any
+  // cached rows that still carried older raw historical names, so Market
+  // (and other parsed dimensions) is always derived from the current
+  // canonical name and never from stale parsed values.
   const currentQ = useQuery({
-    queryKey: ['dashboard-daily', startKey, endKey],
+    queryKey: ['dashboard-daily', 'v2', startKey, endKey],
     queryFn: () => fetchDashboardRange(range.start, range.end),
   });
 
   // Previous period — fired in parallel but does NOT gate the loading flag.
   // We don't need it for the first paint of charts/KPIs.
   const previousQ = useQuery({
-    queryKey: ['dashboard-daily', pStartKey, pEndKey],
+    queryKey: ['dashboard-daily', 'v2', pStartKey, pEndKey],
     queryFn: () => fetchDashboardRange(prevStart, prevEnd),
     enabled: !currentQ.isLoading,
   });
