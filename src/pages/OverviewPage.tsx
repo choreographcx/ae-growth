@@ -19,7 +19,7 @@ import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { pctChange, aggregateRows, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
 import { generateInsights, sortInsights } from '@/lib/insights';
 import { useUserLayout } from '@/hooks/useUserLayout';
-import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
+
 import {
   DndContext,
   closestCenter,
