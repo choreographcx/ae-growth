@@ -567,6 +567,7 @@ export type Database = {
               video_views: number
             }[]
           }
+      get_google_service_account_json: { Args: never; Returns: string }
       get_or_create_active_client: {
         Args: never
         Returns: {
