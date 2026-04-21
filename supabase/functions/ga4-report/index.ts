@@ -21,17 +21,28 @@ let cachedSA: ServiceAccount | null = null;
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 function pemToArrayBuffer(pem: string): ArrayBuffer {
-  // Normalize escaped newlines (\n as literal characters) that often appear
-  // when a service-account JSON is stored as a string in the vault.
-  const normalized = pem.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
+  // Normalize escaped newlines (\n / \r as literal characters) and stray quotes
+  // that often appear when a service-account private key is stored as a JSON
+  // string in the vault. Then strip anything that isn't valid base64.
+  const normalized = pem
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/^"+|"+$/g, '');
   const b64 = normalized
     .replace(/-----BEGIN [^-]+-----/g, '')
     .replace(/-----END [^-]+-----/g, '')
-    .replace(/[\s\r\n]+/g, '');
-  const bin = atob(b64);
-  const buf = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-  return buf.buffer;
+    .replace(/[^A-Za-z0-9+/=]/g, '');
+  if (!b64) throw new Error('PEM body empty after stripping headers');
+  try {
+    const bin = atob(b64);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf.buffer;
+  } catch (e) {
+    throw new Error(
+      `PEM decode failed (b64 len=${b64.length}, head="${b64.slice(0, 16)}", tail="${b64.slice(-16)}"): ${(e as Error).message}`,
+    );
+  }
 }
 
 function base64UrlEncode(input: string | Uint8Array): string {
