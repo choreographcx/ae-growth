@@ -51,7 +51,8 @@ export function parseCampaignName(name: string | null | undefined): ParsedCampai
 }
 
 export function getCampaignMarket(name: string | null | undefined): string {
-  return parseCampaignName(name).market;
+  const m = parseCampaignName(name).market;
+  return m === UNKNOWN ? m : m.toLowerCase();
 }
 export function getCampaignObjective(name: string | null | undefined): string {
   return parseCampaignName(name).objective;
