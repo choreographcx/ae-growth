@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear, differenceInCalendarDays, parse, isValid } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
+import { parseCampaignName, UNKNOWN } from '@/lib/campaignNaming';
 
 export type ConversionMode = 'all' | 'lower_funnel';
 
@@ -261,6 +262,8 @@ export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
   selectedObjectives?: string[];
+  selectedMarkets?: string[];
+  selectedChannels?: string[];
 }
 
 interface UseDashboardDailyResult {
@@ -284,6 +287,14 @@ interface UseDashboardDailyResult {
   availableObjectives: string[];
   /** Objectives grouped by normalized platform key (used to scope the objective filter on platform pages). */
   objectivesByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct markets parsed from campaign names. */
+  availableMarkets: string[];
+  /** Markets grouped by normalized platform key. */
+  marketsByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct channels parsed from campaign names. */
+  availableChannels: string[];
+  /** Channels grouped by normalized platform key. */
+  channelsByPlatform: Partial<Record<PlatformKey, string[]>>;
 }
 
 export {
@@ -308,7 +319,13 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [], selectedObjectives = [] } = options;
+  const {
+    selectedPlatformLabels = [],
+    selectedCampaigns = [],
+    selectedObjectives = [],
+    selectedMarkets = [],
+    selectedChannels = [],
+  } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const days = differenceInCalendarDays(range.end, range.start) + 1;
@@ -372,25 +389,60 @@ export function useDashboardDaily(
     [selectedObjectives]
   );
 
+  const marketSet = useMemo(
+    () => (selectedMarkets.length ? new Set(selectedMarkets) : null),
+    [selectedMarkets]
+  );
+
+  const channelSet = useMemo(
+    () => (selectedChannels.length ? new Set(selectedChannels) : null),
+    [selectedChannels]
+  );
+
+  // Parsed segments cached per row to avoid re-splitting on every filter pass.
+  const parsedByName = useMemo(() => {
+    const m = new Map<string, ReturnType<typeof parseCampaignName>>();
+    for (const r of allRows) {
+      const name = r.campaign_name || '';
+      if (m.has(name)) continue;
+      m.set(name, parseCampaignName(name));
+    }
+    for (const r of prevRows) {
+      const name = r.campaign_name || '';
+      if (m.has(name)) continue;
+      m.set(name, parseCampaignName(name));
+    }
+    return m;
+  }, [allRows, prevRows]);
+
+  const matchesDimensionFilters = (r: DashboardDailyRow) => {
+    if (!objectiveSet && !marketSet && !channelSet) return true;
+    const p = parsedByName.get(r.campaign_name || '') ?? parseCampaignName(r.campaign_name);
+    if (objectiveSet && !objectiveSet.has(p.objective)) return false;
+    if (marketSet && !marketSet.has(p.market)) return false;
+    if (channelSet && !channelSet.has(p.channel)) return false;
+    return true;
+  };
+
   // Client-side filtering — avoids an extra BigQuery round-trip whenever the
   // unfiltered superset is already in memory.
   const rows = useMemo(() => {
-    if (!platformRawSet && !campaignSet && !objectiveSet) return allRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return allRows;
     return allRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
       (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
-      (!objectiveSet   || (r.campaign_objective && objectiveSet.has(r.campaign_objective)))
+      matchesDimensionFilters(r)
     );
-  }, [allRows, platformRawSet, campaignSet, objectiveSet]);
+  }, [allRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
 
   const filteredPrevRows = useMemo(() => {
-    if (!platformRawSet && !campaignSet && !objectiveSet) return prevRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return prevRows;
     return prevRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
       (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
-      (!objectiveSet   || (r.campaign_objective && objectiveSet.has(r.campaign_objective)))
+      matchesDimensionFilters(r)
     );
-  }, [prevRows, platformRawSet, campaignSet, objectiveSet]);
+  }, [prevRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
 
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(
@@ -440,38 +492,54 @@ export function useDashboardDaily(
     return out;
   }, [allRows]);
 
-  const availableObjectives = useMemo(() => {
+  // Helpers to build dimension option lists from parsed campaign names.
+  // 'Unknown' is sorted last so the most informative buckets surface first.
+  const sortDim = (arr: string[]) =>
+    arr.sort((a, b) => {
+      if (a === UNKNOWN && b !== UNKNOWN) return 1;
+      if (b === UNKNOWN && a !== UNKNOWN) return -1;
+      return a.localeCompare(b);
+    });
+
+  const buildDimensionOptions = (extract: (p: ReturnType<typeof parseCampaignName>) => string) => {
     const set = new Set<string>();
     for (const r of allRows) {
-      if (!r.campaign_objective) continue;
       if (platformRawSet && !platformRawSet.has(r.platform)) continue;
-      set.add(r.campaign_objective);
+      const p = parsedByName.get(r.campaign_name || '') ?? parseCampaignName(r.campaign_name);
+      set.add(extract(p));
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allRows, platformRawSet]);
+    return sortDim(Array.from(set));
+  };
 
-  const objectivesByPlatform = useMemo<Partial<Record<PlatformKey, string[]>>>(() => {
+  const buildDimensionByPlatform = (extract: (p: ReturnType<typeof parseCampaignName>) => string) => {
     const buckets = new Map<PlatformKey, Set<string>>();
     for (const r of allRows) {
-      if (!r.campaign_objective) continue;
       const k = normalizePlatform(r.platform);
       if (!k) continue;
       let s = buckets.get(k);
       if (!s) { s = new Set<string>(); buckets.set(k, s); }
-      s.add(r.campaign_objective);
+      const p = parsedByName.get(r.campaign_name || '') ?? parseCampaignName(r.campaign_name);
+      s.add(extract(p));
     }
     const out: Partial<Record<PlatformKey, string[]>> = {};
-    buckets.forEach((set, k) => {
-      out[k] = Array.from(set).sort((a, b) => a.localeCompare(b));
-    });
+    buckets.forEach((set, k) => { out[k] = sortDim(Array.from(set)); });
     return out;
-  }, [allRows]);
+  };
+
+  const availableObjectives  = useMemo(() => buildDimensionOptions(p => p.objective), [allRows, platformRawSet, parsedByName]);
+  const objectivesByPlatform = useMemo(() => buildDimensionByPlatform(p => p.objective), [allRows, parsedByName]);
+  const availableMarkets     = useMemo(() => buildDimensionOptions(p => p.market), [allRows, platformRawSet, parsedByName]);
+  const marketsByPlatform    = useMemo(() => buildDimensionByPlatform(p => p.market), [allRows, parsedByName]);
+  const availableChannels    = useMemo(() => buildDimensionOptions(p => p.channel), [allRows, platformRawSet, parsedByName]);
+  const channelsByPlatform   = useMemo(() => buildDimensionByPlatform(p => p.channel), [allRows, parsedByName]);
 
   return {
     loading, error, rows, previousRows: filteredPrevRows, totals, previousTotals,
     platformSummaries, spendSeries, conversionsSeries, cpaSeries, ctrSeries, range,
     availablePlatforms, availableCampaigns, campaignsByPlatform,
     availableObjectives, objectivesByPlatform,
+    availableMarkets, marketsByPlatform,
+    availableChannels, channelsByPlatform,
   };
 }
 

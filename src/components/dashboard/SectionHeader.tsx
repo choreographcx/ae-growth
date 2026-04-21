@@ -90,6 +90,8 @@ function DesktopInlineFilters({
     selectedPlatforms, setSelectedPlatforms,
     selectedCampaigns, setSelectedCampaigns,
     selectedObjectives, setSelectedObjectives,
+    selectedMarkets, setSelectedMarkets,
+    selectedChannels, setSelectedChannels,
   } = useDashboard();
 
   const platformOptions = useMemo(() => data.availablePlatforms.map(p => p.label), [data.availablePlatforms]);
@@ -105,6 +107,16 @@ function DesktopInlineFilters({
     if (scopeToPlatform) return data.objectivesByPlatform[scopeToPlatform] ?? [];
     return data.availableObjectives;
   }, [scopeToPlatform, data.objectivesByPlatform, data.availableObjectives]);
+
+  const marketOptions = useMemo(() => {
+    if (scopeToPlatform) return data.marketsByPlatform[scopeToPlatform] ?? [];
+    return data.availableMarkets;
+  }, [scopeToPlatform, data.marketsByPlatform, data.availableMarkets]);
+
+  const channelOptions = useMemo(() => {
+    if (scopeToPlatform) return data.channelsByPlatform[scopeToPlatform] ?? [];
+    return data.availableChannels;
+  }, [scopeToPlatform, data.channelsByPlatform, data.availableChannels]);
 
   // On platform pages, force the hidden global platform filter to match the current page.
   // Without this, a stale selection from Overview (e.g. Meta only) can silently blank the X page.
@@ -132,17 +144,37 @@ function DesktopInlineFilters({
     if (filtered.length !== selectedObjectives.length) setSelectedObjectives(filtered);
   }, [scopeToPlatform, objectiveOptions, selectedObjectives, setSelectedObjectives]);
 
+  // Drop any selected markets no longer in scope.
+  useEffect(() => {
+    if (!scopeToPlatform || selectedMarkets.length === 0) return;
+    const allowed = new Set(marketOptions);
+    const filtered = selectedMarkets.filter(o => allowed.has(o));
+    if (filtered.length !== selectedMarkets.length) setSelectedMarkets(filtered);
+  }, [scopeToPlatform, marketOptions, selectedMarkets, setSelectedMarkets]);
+
+  // Drop any selected channels no longer in scope.
+  useEffect(() => {
+    if (!scopeToPlatform || selectedChannels.length === 0) return;
+    const allowed = new Set(channelOptions);
+    const filtered = selectedChannels.filter(o => allowed.has(o));
+    if (filtered.length !== selectedChannels.length) setSelectedChannels(filtered);
+  }, [scopeToPlatform, channelOptions, selectedChannels, setSelectedChannels]);
+
   // When the Platforms filter is hidden (platform pages), the platform selection is
   // implicit and shouldn't influence the visible "Clear" affordance.
   const hasFilters =
     (showPlatformsFilter && selectedPlatforms.length > 0) ||
     selectedCampaigns.length > 0 ||
-    selectedObjectives.length > 0;
+    selectedObjectives.length > 0 ||
+    selectedMarkets.length > 0 ||
+    selectedChannels.length > 0;
 
   const clearAll = () => {
     setSelectedPlatforms(scopeToPlatform ? [scopeToPlatform === 'google' ? 'Google Ads' : scopeToPlatform === 'linkedin' ? 'LinkedIn' : scopeToPlatform === 'programmatic' ? 'Programmatic' : scopeToPlatform === 'snapchat' ? 'Snapchat' : scopeToPlatform === 'tiktok' ? 'TikTok' : scopeToPlatform === 'meta' ? 'Meta' : 'X'] : []);
     setSelectedCampaigns([]);
     setSelectedObjectives([]);
+    setSelectedMarkets([]);
+    setSelectedChannels([]);
   };
 
   return (
@@ -150,6 +182,12 @@ function DesktopInlineFilters({
       {extraAction}
       {showPlatformsFilter && (
         <MultiSelectFilter label="Platforms" options={platformOptions} selected={selectedPlatforms} onChange={setSelectedPlatforms} />
+      )}
+      {marketOptions.length > 0 && (
+        <MultiSelectFilter label="Markets" options={marketOptions} selected={selectedMarkets} onChange={setSelectedMarkets} />
+      )}
+      {channelOptions.length > 0 && (
+        <MultiSelectFilter label="Channels" options={channelOptions} selected={selectedChannels} onChange={setSelectedChannels} />
       )}
       <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
       {objectiveOptions.length > 0 && (

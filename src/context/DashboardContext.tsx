@@ -28,6 +28,10 @@ interface DashboardContextType {
   setSelectedCampaigns: (v: string[]) => void;
   selectedObjectives: string[];
   setSelectedObjectives: (v: string[]) => void;
+  selectedMarkets: string[];
+  setSelectedMarkets: (v: string[]) => void;
+  selectedChannels: string[];
+  setSelectedChannels: (v: string[]) => void;
   saveConfig: () => Promise<void>;
   isSaving: boolean;
   configLoaded: boolean;
@@ -47,6 +51,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -56,6 +62,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedPlatformLabels: selectedPlatforms,
     selectedCampaigns,
     selectedObjectives,
+    selectedMarkets,
+    selectedChannels,
   });
 
   // Client settings cached so navigating between pages never refetches them.
@@ -145,6 +153,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedPlatforms, setSelectedPlatforms,
       selectedCampaigns, setSelectedCampaigns,
       selectedObjectives, setSelectedObjectives,
+      selectedMarkets, setSelectedMarkets,
+      selectedChannels, setSelectedChannels,
       saveConfig, isSaving, configLoaded, lastSavedAt,
       data,
     }}>
@@ -174,6 +184,8 @@ const fallbackData: DashboardData = {
   range: { start: new Date(), end: new Date() },
   availablePlatforms: [], availableCampaigns: [], campaignsByPlatform: {},
   availableObjectives: [], objectivesByPlatform: {},
+  availableMarkets: [], marketsByPlatform: {},
+  availableChannels: [], channelsByPlatform: {},
 };
 
 const fallback: DashboardContextType = {
@@ -194,6 +206,10 @@ const fallback: DashboardContextType = {
   setSelectedCampaigns: () => {},
   selectedObjectives: [],
   setSelectedObjectives: () => {},
+  selectedMarkets: [],
+  setSelectedMarkets: () => {},
+  selectedChannels: [],
+  setSelectedChannels: () => {},
   saveConfig: async () => {},
   isSaving: false,
   configLoaded: false,
