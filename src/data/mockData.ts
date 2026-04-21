@@ -161,7 +161,7 @@ export const alerts: AlertItem[] = [
   { id: '2', type: 'error', title: 'Meta tracking gap detected', description: '12% drop in attributed conversions. Check pixel and CAPI.', platform: 'meta', timestamp: '4h ago' },
   { id: '6', type: 'error', title: 'Snapchat zero conversions', description: '3 campaigns spent $420 with 0 conversions in past 48 hours.', platform: 'snapchat', timestamp: '1d ago' },
   { id: '1', type: 'warning', title: 'Rising CPA on TikTok', description: 'CPA increased 18% over the past 7 days. Review creative performance.', platform: 'tiktok', timestamp: '2h ago' },
-  { id: '4', type: 'warning', title: 'High frequency on Meta retargeting', description: 'Frequency hit 4.2 on retargeting campaigns. Rotate creative.', platform: 'meta', timestamp: '8h ago' },
+  
   { id: '5', type: 'success', title: 'Google Search CPA improved', description: 'Non-brand CPA decreased 12% week over week.', platform: 'google', timestamp: '12h ago' },
   { id: '3', type: 'info', title: 'LinkedIn pacing ahead', description: 'Projected to overspend by 5%. Consider reducing bids.', platform: 'linkedin', timestamp: '6h ago' },
 ];
