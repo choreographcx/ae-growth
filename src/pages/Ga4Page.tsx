@@ -35,10 +35,14 @@ function Tile({ label, value, subtitle }: { label: string; value: string; subtit
 }
 
 export default function Ga4Page() {
-  const { data: dashData } = useDashboard();
+  const { client, data: dashData } = useDashboard();
   const { start, end } = dashData.range;
 
+  const propertyId = (client.ga4PropertyId || '').trim();
+  const enabled = propertyId.length > 0;
+
   const totalsQ = useGa4Report({
+    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['date'],
     metrics: [
@@ -46,30 +50,37 @@ export default function Ga4Page() {
       'engagementRate', 'averageSessionDuration', 'bounceRate',
       'screenPageViews', 'conversions', 'totalRevenue',
     ],
+    enabled,
   });
 
   const channelsQ = useGa4Report({
+    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['sessionDefaultChannelGroup'],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
+    enabled,
   });
 
   const sourcesQ = useGa4Report({
+    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['sessionSource', 'sessionMedium'],
     metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
+    enabled,
   });
 
   const pagesQ = useGa4Report({
+    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['pagePath'],
     metrics: ['screenPageViews', 'totalUsers', 'averageSessionDuration', 'bounceRate'],
     orderBys: [{ metric: 'screenPageViews', desc: true }],
     limit: 20,
+    enabled,
   });
 
   const totals = totalsQ.data?.totals ?? [];
