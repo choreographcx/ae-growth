@@ -34,13 +34,18 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
 
   const grouped = useMemo(() => {
     const m = new Map<string, DashboardDailyRow[]>();
+    const includedRows: DashboardDailyRow[] = [];
     for (const r of rows) {
       const v = pick(r);
+      // Explicit null from the picker means "exclude this row entirely"
+      // (e.g. market dimension drops rows with no campaign_name).
+      if (v === null) continue;
       const key = v && String(v).trim() ? String(v) : 'Unspecified';
       if (!m.has(key)) m.set(key, []);
       m.get(key)!.push(r);
+      includedRows.push(r);
     }
-    const totals = aggregateRows(rows, 'lower_funnel');
+    const totals = aggregateRows(includedRows, 'lower_funnel');
     return Array.from(m.entries()).map(([name, rs]) => {
       const a = aggregateRows(rs, 'lower_funnel');
       return {
