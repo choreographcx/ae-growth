@@ -39,6 +39,15 @@ interface DashboardContextType {
   lastSavedAt: string | null;
   /** Live BigQuery dashboard data, filtered by date + platform + campaign selections. */
   data: DashboardData;
+  /** Layout-edit controls registered by the current page (e.g. Overview). */
+  layoutEdit: LayoutEditControls | null;
+  setLayoutEdit: (c: LayoutEditControls | null) => void;
+}
+
+export interface LayoutEditControls {
+  isEditing: boolean;
+  onToggle: () => void;
+  onReset: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -57,6 +66,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [layoutEdit, setLayoutEdit] = useState<LayoutEditControls | null>(null);
 
   // Per-platform USD→reporting-currency multipliers, recomputed when client
   // currency, rates, or any platform's reportingCurrency changes.
@@ -172,6 +182,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedChannels, setSelectedChannels,
       saveConfig, isSaving, configLoaded, lastSavedAt,
       data,
+      layoutEdit, setLayoutEdit,
     }}>
       {children}
     </DashboardContext.Provider>
@@ -230,6 +241,8 @@ const fallback: DashboardContextType = {
   configLoaded: false,
   lastSavedAt: null,
   data: fallbackData,
+  layoutEdit: null,
+  setLayoutEdit: () => {},
 };
 
 export function useDashboard() {

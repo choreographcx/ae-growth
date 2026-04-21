@@ -7,10 +7,9 @@ import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
-import { LayoutEditToggle } from '@/components/dashboard/LayoutEditToggle';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
@@ -54,7 +53,7 @@ const DEFAULT_SECTION_ORDER = [
 ] as const;
 
 export default function OverviewPage() {
-  const { client, data } = useDashboard();
+  const { client, data, setLayoutEdit } = useDashboard();
   const currency = client.currency;
   const {
     loading, error, rows, previousRows, totals, previousTotals,
@@ -193,6 +192,17 @@ export default function OverviewPage() {
   const defaultOrder = useMemo(() => [...DEFAULT_SECTION_ORDER], []);
   const { order, setOrder, resetLayout, isEditing, setEditing } = useUserLayout('overview', defaultOrder);
 
+  // Expose layout-edit controls to the global header (so the toggle lives next
+  // to Export PDF). Cleared when the page unmounts.
+  useEffect(() => {
+    setLayoutEdit({
+      isEditing,
+      onToggle: () => setEditing(!isEditing),
+      onReset: resetLayout,
+    });
+    return () => setLayoutEdit(null);
+  }, [isEditing, setEditing, resetLayout, setLayoutEdit]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -309,13 +319,6 @@ export default function OverviewPage() {
         showMobileDatePicker
         showFilters
         showPlatformsFilter
-        action={
-          <LayoutEditToggle
-            isEditing={isEditing}
-            onToggle={() => setEditing(!isEditing)}
-            onReset={resetLayout}
-          />
-        }
       />
 
       {error && (

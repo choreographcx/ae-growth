@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { LayoutEditToggle } from '@/components/dashboard/LayoutEditToggle';
 
 import { cn } from '@/lib/utils';
 
@@ -286,7 +287,7 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
 }
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
-  const { client } = useDashboard();
+  const { client, layoutEdit } = useDashboard();
   const { signOut } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
 
@@ -350,9 +351,16 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               {isExporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
               {isExporting ? 'Exporting…' : 'Export PDF'}
             </Button>
+            {layoutEdit && (
+              <LayoutEditToggle
+                isEditing={layoutEdit.isEditing}
+                onToggle={layoutEdit.onToggle}
+                onReset={layoutEdit.onReset}
+              />
+            )}
             <div className="h-3.5 w-px bg-border mx-1" />
             <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={signOut}>
-              <LogOut size={12} /> Sign out
+              <LogOut size={12} /> Sign Out
             </Button>
           </div>
         </div>
