@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear, differenceInCalendarDays, parse, isValid } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
+import { parseCampaignName, UNKNOWN } from '@/lib/campaignNaming';
 
 export type ConversionMode = 'all' | 'lower_funnel';
 
