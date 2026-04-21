@@ -164,7 +164,7 @@ function MobileRowCard({ row, currency }: { row: CampaignRow; currency: string }
             <DRow label="Impressions" value={row.impressions >= 1e6 ? `${(row.impressions / 1e6).toFixed(1)}M` : row.impressions.toLocaleString()} />
             <DRow label="Conv. Rate" value={`${row.conversionRate}%`} />
             {row.reach != null && <DRow label="Reach" value={row.reach >= 1e6 ? `${(row.reach / 1e6).toFixed(1)}M` : row.reach.toLocaleString()} />}
-            {row.frequency != null && <DRow label="Frequency" value={`${row.frequency}`} />}
+            
             {row.videoViews != null && <DRow label="Video Views" value={row.videoViews.toLocaleString()} />}
             {row.completionRate != null && <DRow label="Completion" value={`${row.completionRate}%`} />}
           </div>
