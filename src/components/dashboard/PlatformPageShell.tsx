@@ -83,11 +83,15 @@ export function PlatformPageShell({
 
   const hasConversions = (totals.conversionsLowerFunnel + totals.conversionsUpperFunnel + totals.conversionsAll) > 0;
   const hasLPV = totals.landingPageViews > 0;
+  const hasReach = totals.reach > 0;
+  const hasVideo = totals.videoViews > 0;
 
   const rawCards = buildKpiCards(totals, prevTotals, currency).filter(c => {
     const t = c.title.toLowerCase();
     if (!hasConversions && t.includes('conversion')) return false;
     if (!hasLPV && t.includes('landing page')) return false;
+    if (!hasReach && t === 'reach') return false;
+    if (!hasVideo && (t.includes('video'))) return false;
     return true;
   });
 
