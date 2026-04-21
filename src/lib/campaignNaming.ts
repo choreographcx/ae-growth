@@ -2,17 +2,18 @@
  * Campaign naming convention parser.
  *
  * Expected format (underscore-separated, 1-indexed positions):
- *   1: Market
- *   2: Client
- *   3: Campaign
- *   4: Start date
- *   5: End date
- *   6: Objective
- *   7: Channel
- *   8: Platform
- *   9: BO#
+ *   1:  Market
+ *   2:  Client
+ *   3:  Campaign
+ *   4:  Phase / sub-campaign tag (e.g. Phase2, AO)
+ *   5:  Start date
+ *   6:  End date
+ *   7:  Objective (CPm, CPL, CPC, etc.)
+ *   8:  Channel (paidsocial, etc.)
+ *   9:  Platform (Facebook, Instagram, etc.)
+ *   10: BO#
  *
- * Non-conforming names (fewer than 9 segments) yield 'Unknown' for missing
+ * Non-conforming names (fewer than 10 segments) yield 'Unknown' for missing
  * positions, so they remain visible in filters and breakdowns under that label.
  */
 
@@ -22,6 +23,7 @@ export interface ParsedCampaignName {
   market: string;
   client: string;
   campaign: string;
+  phase: string;
   startDate: string;
   endDate: string;
   objective: string;
@@ -30,11 +32,11 @@ export interface ParsedCampaignName {
   bo: string;
 }
 
-const POSITIONS = ['market', 'client', 'campaign', 'startDate', 'endDate', 'objective', 'channel', 'platform', 'bo'] as const;
+const POSITIONS = ['market', 'client', 'campaign', 'phase', 'startDate', 'endDate', 'objective', 'channel', 'platform', 'bo'] as const;
 
 export function parseCampaignName(name: string | null | undefined): ParsedCampaignName {
   const empty: ParsedCampaignName = {
-    market: UNKNOWN, client: UNKNOWN, campaign: UNKNOWN,
+    market: UNKNOWN, client: UNKNOWN, campaign: UNKNOWN, phase: UNKNOWN,
     startDate: UNKNOWN, endDate: UNKNOWN, objective: UNKNOWN,
     channel: UNKNOWN, platform: UNKNOWN, bo: UNKNOWN,
   };
