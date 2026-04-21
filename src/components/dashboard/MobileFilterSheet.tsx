@@ -112,7 +112,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
           variant="outline"
           size="sm"
           aria-label="Open filters"
-          className="h-9 px-2.5 gap-1.5 text-xs shrink-0 relative"
+          className="h-9 lg:h-8 px-2.5 gap-1.5 text-xs shrink-0 relative"
         >
           <Filter size={14} className="text-muted-foreground" />
           <span>Filter</span>
