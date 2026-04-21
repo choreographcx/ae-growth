@@ -22,7 +22,7 @@ export interface AlertRule {
 const DEFAULT_ALERT_RULES: AlertRule[] = [
   { id: 'cpa_spike', name: 'CPA Spike', description: 'Alert when CPA rises above threshold', threshold: 25, unit: '%', severity: 'critical', scope: 'global', active: true, isDefault: true },
   { id: 'ctr_drop', name: 'CTR Drop', description: 'Alert when CTR falls below threshold', threshold: 20, unit: '%', severity: 'warning', scope: 'global', active: true, isDefault: true },
-  { id: 'frequency', name: 'Frequency Threshold', description: 'Alert when ad frequency exceeds limit', threshold: 4, unit: 'x', severity: 'warning', scope: 'platform', active: true, isDefault: true },
+  
   { id: 'zero_conv_spend', name: 'Zero-Conversion Spend', description: 'Alert when spend exceeds threshold with zero conversions', threshold: 500, unit: '$', severity: 'critical', scope: 'global', active: true, isDefault: true },
   { id: 'viewability', name: 'Viewability Threshold', description: 'Alert when viewability drops below threshold', threshold: 50, unit: '%', severity: 'warning', scope: 'platform', active: true, isDefault: true },
   { id: 'underpacing', name: 'Underpacing', description: 'Alert when spend pacing falls below expected', threshold: 15, unit: '%', severity: 'warning', scope: 'platform', active: false, isDefault: false },
