@@ -207,9 +207,9 @@ function DesktopInlineFilters({
           onClick={clearAll}
           aria-label="Clear filters"
           title="Clear filters"
-          className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors px-1"
+          className="inline-flex h-8 items-center justify-center px-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
-          <FilterClearIcon size={14} />
+          <FilterClearIcon size={16} />
         </button>
       )}
       <div className="h-3.5 w-px bg-border mx-1" />
