@@ -97,6 +97,17 @@ export default {
         "fade-in": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         "slide-in-left": { from: { transform: "translateX(-100%)" }, to: { transform: "translateX(0)" } },
         shimmer: { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+        // Logo "breathes": subtle scale + opacity pulse synced with the ring.
+        "loading-logo": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.95" },
+          "50%": { transform: "scale(1.06)", opacity: "1" },
+        },
+        // Soft glow ring expands & fades behind the logo.
+        "loading-ring": {
+          "0%": { transform: "scale(0.85)", opacity: "0.7" },
+          "70%": { transform: "scale(1.35)", opacity: "0" },
+          "100%": { transform: "scale(1.35)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -104,6 +115,8 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in-left": "slide-in-left 0.3s ease-out",
         shimmer: "shimmer 2s infinite linear",
+        "loading-logo": "loading-logo 1.8s ease-in-out infinite",
+        "loading-ring": "loading-ring 1.8s ease-out infinite",
       },
     },
   },

@@ -19,7 +19,7 @@ import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { pctChange, aggregateRows, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
 import { generateInsights, sortInsights } from '@/lib/insights';
 import { useUserLayout } from '@/hooks/useUserLayout';
-import { Loader2 } from 'lucide-react';
+import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import {
   DndContext,
   closestCenter,
@@ -314,11 +314,7 @@ export default function OverviewPage() {
           Failed to load data: {error}
         </div>
       )}
-      {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading dashboard data…
-        </div>
-      )}
+      {loading && <LoadingOverlay fixed message="Loading dashboard data…" />}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={visibleOrder} strategy={verticalListSortingStrategy}>

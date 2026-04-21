@@ -8,6 +8,7 @@ import { DashboardProvider } from "@/context/DashboardContext";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { loadCachedBranding } from "@/lib/branding";
+import { LoadingOverlay } from "@/components/layout/LoadingOverlay";
 
 // Lazy-load all pages so the initial JS bundle ships only what's needed for the
 // first paint. Each page becomes its own chunk that downloads on demand.
@@ -38,11 +39,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="text-muted-foreground text-sm">Loading...</div>
-  </div>
-);
+const PageFallback = () => <LoadingOverlay message="Loading…" />;
 
 function ProtectedRoutes() {
   const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
