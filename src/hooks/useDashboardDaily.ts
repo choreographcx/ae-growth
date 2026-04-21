@@ -447,11 +447,12 @@ export function useDashboardDaily(
   }, [allRows, prevRows]);
 
   const matchesDimensionFilters = (r: DashboardDailyRow) => {
-    if (!objectiveSet && !marketSet && !channelSet) return true;
+    if (!objectiveSet && !marketSet && !channelSet && !campaignSet) return true;
     const p = parsedByName.get(r.campaign_name || '') ?? parseCampaignName(r.campaign_name);
+    if (campaignSet  && !campaignSet.has(p.campaign)) return false;
     if (objectiveSet && !objectiveSet.has(p.objective)) return false;
-    if (marketSet && !marketSet.has(p.market)) return false;
-    if (channelSet && !channelSet.has(p.channel)) return false;
+    if (marketSet    && !marketSet.has(p.market)) return false;
+    if (channelSet   && !channelSet.has(p.channel)) return false;
     return true;
   };
 
@@ -461,7 +462,6 @@ export function useDashboardDaily(
     if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return allRows;
     return allRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
-      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
       matchesDimensionFilters(r)
     );
   }, [allRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
@@ -470,7 +470,6 @@ export function useDashboardDaily(
     if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return prevRows;
     return prevRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
-      (!campaignSet    || (r.campaign_name && campaignSet.has(r.campaign_name))) &&
       matchesDimensionFilters(r)
     );
   }, [prevRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
@@ -496,32 +495,18 @@ export function useDashboardDaily(
     return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label));
   }, [allRows]);
 
-  const availableCampaigns = useMemo(() => {
-    const set = new Set<string>();
-    for (const r of allRows) {
-      if (!r.campaign_name) continue;
-      if (platformRawSet && !platformRawSet.has(r.platform)) continue;
-      set.add(r.campaign_name);
-    }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allRows, platformRawSet]);
+  // Campaigns dropdown shows ONLY the 3rd segment (Campaign) from the naming
+  // convention, de-duplicated. Selecting a label filters all raw campaign
+  // rows whose parsed `campaign` matches.
+  const availableCampaigns = useMemo(
+    () => buildDimensionOptions(p => p.campaign),
+    [allRows, platformRawSet, parsedByName]
+  );
 
-  const campaignsByPlatform = useMemo<Partial<Record<PlatformKey, string[]>>>(() => {
-    const buckets = new Map<PlatformKey, Set<string>>();
-    for (const r of allRows) {
-      if (!r.campaign_name) continue;
-      const k = normalizePlatform(r.platform);
-      if (!k) continue;
-      let s = buckets.get(k);
-      if (!s) { s = new Set<string>(); buckets.set(k, s); }
-      s.add(r.campaign_name);
-    }
-    const out: Partial<Record<PlatformKey, string[]>> = {};
-    buckets.forEach((set, k) => {
-      out[k] = Array.from(set).sort((a, b) => a.localeCompare(b));
-    });
-    return out;
-  }, [allRows]);
+  const campaignsByPlatform = useMemo(
+    () => buildDimensionByPlatform(p => p.campaign),
+    [allRows, parsedByName]
+  );
 
   // Helpers to build dimension option lists from parsed campaign names.
   // 'Unknown' is sorted last so the most informative buckets surface first.
