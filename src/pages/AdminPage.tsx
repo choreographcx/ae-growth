@@ -367,6 +367,30 @@ function ModularPlatformCard({
             </div>
           </div>
 
+          {/* Platform-native reporting currency */}
+          <div>
+            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Reporting Currency</Label>
+            <Select value={cfg.reportingCurrency || 'USD'} onValueChange={v => updatePlatform(p.key, { reportingCurrency: v })}>
+              <SelectTrigger className="mt-1.5 h-8 text-xs">
+                <span className="inline-flex items-baseline">
+                  <CurrencySymbol currency={cfg.reportingCurrency || 'USD'} size={11} />&nbsp;{cfg.reportingCurrency || 'USD'}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                {['USD', 'SAR', 'AED'].map(o => (
+                  <SelectItem key={o} value={o}>
+                    <span className="inline-flex items-baseline">
+                      <CurrencySymbol currency={o} size={11} />&nbsp;{o}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Currency this platform reports spend in. Conversion to {currency} is applied automatically when different.
+            </p>
+          </div>
+
           {/* KPI & Conversion Source row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
