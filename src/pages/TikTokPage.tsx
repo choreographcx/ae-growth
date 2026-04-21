@@ -44,11 +44,9 @@ export default function TikTokPage() {
     },
     {
       title: 'Reach', icon: 'Users',
-      tooltip: 'TikTok is awareness-led by default — reach and frequency matter as much as clicks.',
+      tooltip: 'TikTok is awareness-led by default — reach matters as much as clicks.',
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
-      supporting: [
-        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
-      ],
+      supporting: [],
     },
     {
       title: 'Video Engagement', icon: 'Play',
