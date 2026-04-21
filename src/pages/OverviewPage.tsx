@@ -281,6 +281,19 @@ export default function OverviewPage() {
         </div>
       ),
     },
+    conversionBreakdown: {
+      label: 'Conversion Breakdown',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Conversion Breakdown" subtitle="All tracked conversions, aggregated across platforms" />
+          <ConversionBreakdownCard
+            start={data.range.start}
+            end={data.range.end}
+            aggregateAcrossPlatforms
+          />
+        </div>
+      ),
+    },
     platforms: {
       label: 'Platform Performance',
       node: (
