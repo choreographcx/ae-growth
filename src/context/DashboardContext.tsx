@@ -28,6 +28,10 @@ interface DashboardContextType {
   setSelectedCampaigns: (v: string[]) => void;
   selectedObjectives: string[];
   setSelectedObjectives: (v: string[]) => void;
+  selectedMarkets: string[];
+  setSelectedMarkets: (v: string[]) => void;
+  selectedChannels: string[];
+  setSelectedChannels: (v: string[]) => void;
   saveConfig: () => Promise<void>;
   isSaving: boolean;
   configLoaded: boolean;
