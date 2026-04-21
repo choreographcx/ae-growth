@@ -276,6 +276,7 @@ export default function OverviewPage() {
           <ConversionBreakdownCard
             start={data.range.start}
             end={data.range.end}
+            sourceRows={rows}
             aggregateAcrossPlatforms
           />
         </div>

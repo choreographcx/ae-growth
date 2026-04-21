@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
+import { useConversionBreakdown, type ConversionBreakdownRow } from '@/hooks/useConversionBreakdown';
 import { PlatformKey } from '@/types/dashboard';
+import type { DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,8 @@ interface Props {
   end: Date;
   campaigns?: string[];
   className?: string;
+  /** Already-loaded dashboard rows used as a fallback if the breakdown RPC returns empty. */
+  sourceRows?: DashboardDailyRow[];
   /**
    * When true, aggregate identical conversion names across platforms into a
    * single row. Used on Overview where rows from Meta/Google/etc. should roll
@@ -36,32 +39,76 @@ function badgeClass(group: string) {
   return FUNNEL_BADGE.excluded;
 }
 
-export function ConversionBreakdownCard({ platform, start, end, campaigns, className, aggregateAcrossPlatforms = false }: Props) {
+function buildFallbackRows(sourceRows: DashboardDailyRow[]): ConversionBreakdownRow[] {
+  if (!sourceRows.length) return [];
+
+  const totals = sourceRows.reduce((acc, row) => {
+    acc.all += +row.conversions_all || +row.conversions || 0;
+    acc.lower += +row.conversions_lower_funnel || 0;
+    acc.upper += +row.conversions_upper_funnel || 0;
+    return acc;
+  }, { all: 0, lower: 0, upper: 0 });
+
+  const excluded = Math.max(0, totals.all - totals.lower - totals.upper);
+  const platform = sourceRows[0]?.platform || 'All Platforms';
+
+  return [
+    totals.lower > 0 ? {
+      platform,
+      conversion_name: 'Lower Funnel',
+      conversion_funnel_group: 'lower_funnel',
+      conversions_all: totals.lower,
+    } : null,
+    totals.upper > 0 ? {
+      platform,
+      conversion_name: 'Upper Funnel',
+      conversion_funnel_group: 'upper_funnel',
+      conversions_all: totals.upper,
+    } : null,
+    excluded > 0 ? {
+      platform,
+      conversion_name: 'Excluded',
+      conversion_funnel_group: 'excluded',
+      conversions_all: excluded,
+    } : null,
+  ].filter((row): row is ConversionBreakdownRow => row !== null);
+}
+
+export function ConversionBreakdownCard({
+  platform,
+  start,
+  end,
+  campaigns,
+  className,
+  sourceRows,
+  aggregateAcrossPlatforms = false,
+}: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
   const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: false });
 
+  const fallbackRows = useMemo(() => buildFallbackRows(sourceRows ?? []), [sourceRows]);
+  const effectiveRows = rows.length > 0 ? rows : fallbackRows;
+  const effectiveError = effectiveRows.length > 0 ? null : error;
+  const showLoading = loading && effectiveRows.length === 0;
+
   const toggle = (key: FunnelKey) => setEnabled(prev => {
     const next = { ...prev, [key]: !prev[key] };
-    // Prevent all being unchecked — re-enable the toggled one.
     if (!next.lower && !next.upper && !next.excluded) return prev;
     return next;
   });
 
   const filtered = useMemo(() => {
-    return rows.filter(r => {
+    return effectiveRows.filter(r => {
       const g = (r.conversion_funnel_group || '').toLowerCase();
       const isLower = g.includes('lower');
       const isUpper = g.includes('upper');
       if (isLower) return enabled.lower;
       if (isUpper) return enabled.upper;
-      // Anything else (excluded / suppressed / unspecified) falls under Excluded.
       return enabled.excluded;
     });
-  }, [rows, enabled.lower, enabled.upper, enabled.excluded]);
+  }, [effectiveRows, enabled.lower, enabled.upper, enabled.excluded]);
 
-  // When aggregating across platforms (Overview), collapse rows that share the
-  // same conversion_name + funnel_group so totals roll up cleanly.
   const aggregated = useMemo(() => {
     if (!aggregateAcrossPlatforms) return filtered;
     const map = new Map<string, typeof filtered[number]>();
@@ -83,7 +130,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
   );
   const total = useMemo(() => sorted.reduce((s, r) => s + (r.conversions_all || 0), 0), [sorted]);
 
-  const showHeader = !loading && !error;
+  const showHeader = !showLoading && !effectiveError;
 
   return (
     <div className={cn('bg-card rounded-xl border border-border shadow-sm overflow-hidden', className)}>
@@ -122,21 +169,21 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
         </div>
       )}
 
-      {error && (
-        <div className="px-5 py-4 text-xs text-destructive">Failed to load breakdown: {error}</div>
+      {effectiveError && (
+        <div className="px-5 py-4 text-xs text-destructive">Failed to load breakdown: {effectiveError}</div>
       )}
-      {loading && (
+      {showLoading && (
         <div className="px-5 py-6 flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading breakdown…
         </div>
       )}
-      {!loading && !error && sorted.length === 0 && (
+      {!showLoading && !effectiveError && sorted.length === 0 && (
         <div className="px-5 py-6 text-xs text-muted-foreground">
           No conversion events recorded {platform ? 'for this platform' : 'across platforms'} in the selected period.
         </div>
       )}
 
-      {!loading && !error && sorted.length > 0 && (
+      {!showLoading && !effectiveError && sorted.length > 0 && (
         isMobile ? (
           <div className="p-3 space-y-2.5">
             {sorted.map((r, i) => {
