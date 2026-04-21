@@ -108,9 +108,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
     title: 'Reach',
     icon: 'Users',
     primary: { label: 'Reach', value: 8920000, formattedValue: '8.92M', change: 10.1, trend: generateTrend(8500000, 1000000) },
-    supporting: [
-      { label: 'Frequency', formattedValue: '1.40', change: 2.1 },
-    ],
+    supporting: [],
   },
 ];
 
