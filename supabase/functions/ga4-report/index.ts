@@ -80,12 +80,20 @@ async function mintAccessToken(sa: ServiceAccount): Promise<string> {
   return cachedToken.token;
 }
 
-async function loadServiceAccount(authedClient: ReturnType<typeof createClient>): Promise<ServiceAccount> {
+async function loadServiceAccount(serviceClient: ReturnType<typeof createClient>): Promise<ServiceAccount> {
   if (cachedSA) return cachedSA;
-  const { data, error } = await authedClient.rpc('get_google_service_account_json');
+  // Use service-role client to read the vault — bypasses the admin RPC's
+  // role check so any authenticated, approved user can view GA4 metrics.
+  const { data, error } = await serviceClient
+    .schema('vault' as any)
+    .from('decrypted_secrets')
+    .select('decrypted_secret')
+    .eq('name', 'bigquery_sa_json')
+    .maybeSingle();
   if (error) throw new Error(`Vault read failed: ${error.message}`);
-  if (!data || typeof data !== 'string') throw new Error('Vault returned empty service account');
-  const parsed = JSON.parse(data) as ServiceAccount;
+  const raw = (data as any)?.decrypted_secret;
+  if (!raw || typeof raw !== 'string') throw new Error('Service account secret not found in vault');
+  const parsed = JSON.parse(raw) as ServiceAccount;
   if (!parsed.client_email || !parsed.private_key) {
     throw new Error('Service account JSON missing client_email/private_key');
   }
@@ -116,9 +124,11 @@ Deno.serve(async (req) => {
 
     const supaUrl = Deno.env.get('SUPABASE_URL')!;
     const supaAnon = Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supaService = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const userClient = createClient(supaUrl, supaAnon, {
       global: { headers: { Authorization: authHeader } },
     });
+    const serviceClient = createClient(supaUrl, supaService);
 
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData.user) {
@@ -150,7 +160,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const sa = await loadServiceAccount(userClient);
+    const sa = await loadServiceAccount(serviceClient);
     const accessToken = await mintAccessToken(sa);
 
     const ga4Body: Record<string, unknown> = {
