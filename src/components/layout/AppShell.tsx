@@ -1,9 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useRef } from 'react';
 import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { MobileDrawer } from './MobileDrawer';
 import { BackToTop } from './BackToTop';
 import { DocumentTitle } from './DocumentTitle';
+import { LoadingOverlay } from './LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 
