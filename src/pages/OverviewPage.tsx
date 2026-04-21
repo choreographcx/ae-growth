@@ -94,7 +94,6 @@ export default function OverviewPage() {
 
   // Insight flags for KPI cards
   const weakLpvRate  = totals.ctr >= 1.5 && totals.lpvRate > 0 && totals.lpvRate < 30;
-  const reachUpConvFlat = previousTotals && totals.reach > previousTotals.reach * 1.1 && lf.conversions <= (lfPrev?.conversions ?? 0);
 
   const kpiCards: KPIGroupData[] = useMemo(() => {
     const cur = totals;
@@ -159,19 +158,6 @@ export default function OverviewPage() {
         ],
       },
       {
-        title: 'Reach', icon: 'Users',
-        primary: {
-          label: 'Reach', value: cur.reach,
-          formattedValue: formatCompact(cur.reach),
-          change: pctChange(cur.reach, prev?.reach),
-          trend: [],
-        },
-        supporting: cur.reach > 0
-          ? [{ label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—', change: pctChange(cur.frequency, prev?.frequency) }]
-          : [],
-        tooltip: reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
-      },
-      {
         title: 'Landing Page Views', icon: 'FileText',
         primary: {
           label: 'LPV', value: cur.landingPageViews,
@@ -188,7 +174,7 @@ export default function OverviewPage() {
     ];
 
     return applyCurrencyToKPIGroups(groups, currency, 26);
-  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, weakLpvRate, reachUpConvFlat]);
+  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, weakLpvRate]);
 
   // Layout persistence
   const defaultOrder = useMemo(() => [...DEFAULT_SECTION_ORDER], []);
