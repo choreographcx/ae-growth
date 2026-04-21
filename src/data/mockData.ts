@@ -190,7 +190,6 @@ export function generateCampaigns(platform: PlatformKey, count = 8): CampaignRow
       cpa: conversions > 0 ? +(spend / conversions).toFixed(2) : 0,
       conversionRate: +((conversions / clicks) * 100).toFixed(2),
       reach: Math.round(impressions * 0.7),
-      frequency: +(impressions / (impressions * 0.7)).toFixed(1),
       videoViews: platform === 'tiktok' || platform === 'snapchat' ? Math.round(impressions * 0.3) : undefined,
       completionRate: platform === 'tiktok' || platform === 'snapchat' ? +(20 + Math.random() * 40).toFixed(1) : undefined,
     };
