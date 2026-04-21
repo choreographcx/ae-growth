@@ -397,26 +397,15 @@ function ModularPlatformCard({
             </p>
           </div>
 
-          {/* KPI & Conversion Source row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Primary KPI</Label>
-              <Select value={cfg.primaryKpi || 'conversions'} onValueChange={v => updatePlatform(p.key, { primaryKpi: v })}>
-                <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {KPI_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Conversion Source</Label>
-              <Select value={cfg.conversionSource || 'pixel'} onValueChange={v => updatePlatform(p.key, { conversionSource: v })}>
-                <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CONVERSION_SOURCE_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Primary KPI */}
+          <div>
+            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Primary KPI</Label>
+            <Select value={cfg.primaryKpi || 'conversions'} onValueChange={v => updatePlatform(p.key, { primaryKpi: v })}>
+              <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {KPI_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Account IDs */}
