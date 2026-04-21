@@ -319,7 +319,13 @@ export function useDashboardDaily(
   dateRangeLabel: string,
   options: UseDashboardDailyOptions = {}
 ): UseDashboardDailyResult {
-  const { selectedPlatformLabels = [], selectedCampaigns = [], selectedObjectives = [] } = options;
+  const {
+    selectedPlatformLabels = [],
+    selectedCampaigns = [],
+    selectedObjectives = [],
+    selectedMarkets = [],
+    selectedChannels = [],
+  } = options;
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const days = differenceInCalendarDays(range.end, range.start) + 1;
