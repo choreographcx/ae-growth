@@ -56,6 +56,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ClientProfile>(defaultClient);
   const [dateRange, setDateRange] = useState('Last 30 Days');
   const [showPreviousPeriod, setShowPreviousPeriod] = useState(false);
+  /** Once we've applied the saved client.defaultDateRange to the dateRange
+   *  state we lock it in so subsequent settings refetches don't snap the
+   *  user back to it after they've manually picked a different range. */
+  const [defaultRangeApplied, setDefaultRangeApplied] = useState(false);
   const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -81,6 +85,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     ...PLATFORM_ORDER.map(k => client.platforms[k]?.reportingCurrency),
   ]);
 
+  // Per-platform excluded-campaign tokens, parsed from the admin-configured
+  // comma/whitespace-separated string on each PlatformConfig.
+  const excludedCampaignTokensByPlatform = useMemo(() => {
+    const out: Partial<Record<PlatformKey, string[]>> = {};
+    for (const k of PLATFORM_ORDER) {
+      const raw = client.platforms[k]?.excludedCampaignFilter ?? '';
+      const tokens = raw.split(/[,\s]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+      if (tokens.length) out[k] = tokens;
+    }
+    return out;
+  }, [
+    ...PLATFORM_ORDER.map(k => client.platforms[k]?.excludedCampaignFilter),
+  ]);
+
   // Single source of truth for dashboard data — shared with header and pages
   const data = useDashboardDaily(dateRange, {
     selectedPlatformLabels: selectedPlatforms,
@@ -89,6 +107,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedMarkets,
     selectedChannels,
     costMultiplierByPlatform,
+    excludedCampaignTokensByPlatform,
   });
 
   // Client settings cached so navigating between pages never refetches them.
