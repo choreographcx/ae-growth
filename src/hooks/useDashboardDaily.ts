@@ -331,7 +331,15 @@ export function useDashboardDaily(
     selectedObjectives = [],
     selectedMarkets = [],
     selectedChannels = [],
+    costMultiplierByPlatform,
   } = options;
+  // Stable hash of the multiplier map so memo deps don't churn on every render.
+  const multiplierKey = useMemo(
+    () => costMultiplierByPlatform
+      ? Object.entries(costMultiplierByPlatform).map(([k, v]) => `${k}:${v}`).sort().join('|')
+      : '',
+    [costMultiplierByPlatform]
+  );
   const range = useMemo(() => resolveDateRange(dateRangeLabel), [dateRangeLabel]);
 
   const days = differenceInCalendarDays(range.end, range.start) + 1;
@@ -357,7 +365,24 @@ export function useDashboardDaily(
     enabled: !currentQ.isLoading,
   });
 
-  const allRows = currentQ.data ?? [];
+  // Apply per-platform USD→reporting-currency conversion before any aggregation.
+  // Skipped (and short-circuited to identity) when no multiplier is set.
+  const applyMultiplier = (rawRows: DashboardDailyRow[]): DashboardDailyRow[] => {
+    if (!costMultiplierByPlatform) return rawRows;
+    return rawRows.map(r => {
+      const k = normalizePlatform(r.platform);
+      const m = (k && costMultiplierByPlatform[k]) || 1;
+      if (m === 1) return r;
+      return {
+        ...r,
+        cost: (+r.cost || 0) * m,
+        conversion_value: (+r.conversion_value || 0) * m,
+      };
+    });
+  };
+
+  const allRows  = useMemo(() => applyMultiplier(currentQ.data ?? []),  [currentQ.data, multiplierKey]);
+  const prevRows = useMemo(() => applyMultiplier(previousQ.data ?? []), [previousQ.data, multiplierKey]);
   const prevRows = previousQ.data ?? [];
   const loading = currentQ.isLoading;
   const error = currentQ.error ? (currentQ.error as Error).message : null;
