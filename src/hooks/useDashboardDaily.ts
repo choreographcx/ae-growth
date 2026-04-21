@@ -262,6 +262,8 @@ export interface UseDashboardDailyOptions {
   selectedPlatformLabels?: string[];
   selectedCampaigns?: string[];
   selectedObjectives?: string[];
+  selectedMarkets?: string[];
+  selectedChannels?: string[];
 }
 
 interface UseDashboardDailyResult {
@@ -285,6 +287,14 @@ interface UseDashboardDailyResult {
   availableObjectives: string[];
   /** Objectives grouped by normalized platform key (used to scope the objective filter on platform pages). */
   objectivesByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct markets parsed from campaign names. */
+  availableMarkets: string[];
+  /** Markets grouped by normalized platform key. */
+  marketsByPlatform: Partial<Record<PlatformKey, string[]>>;
+  /** Distinct channels parsed from campaign names. */
+  availableChannels: string[];
+  /** Channels grouped by normalized platform key. */
+  channelsByPlatform: Partial<Record<PlatformKey, string[]>>;
 }
 
 export {
