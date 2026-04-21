@@ -181,6 +181,22 @@ export function PlatformPageShell({
         />
       )}
 
+      {/* Funnel — Impressions → Clicks → LPV → LF Conversions (parity with Overview) */}
+      {(totals.impressions > 0 || totals.clicks > 0) && (
+        <EnhancedFunnelCard
+          steps={[
+            { label: 'Impressions', value: totals.impressions, formattedValue: formatCompact(totals.impressions) },
+            { label: 'Clicks',      value: totals.clicks,      formattedValue: formatCompact(totals.clicks),
+              rateFromPrev: totals.ctr, rateLabel: 'CTR' },
+            ...(hasLPV ? [{ label: 'Landing Page Views', value: totals.landingPageViews, formattedValue: formatCompact(totals.landingPageViews),
+              rateFromPrev: totals.lpvRate, rateLabel: 'LPV Rate' }] : []),
+            { label: 'Lower-Funnel Conversions', value: totals.conversionsLowerFunnel,
+              formattedValue: formatCompact(totals.conversionsLowerFunnel),
+              rateFromPrev: totals.cvrLowerFunnel, rateLabel: 'CVR (LF)' },
+          ].filter(s => s.value > 0 || s.label === 'Lower-Funnel Conversions')}
+        />
+      )}
+
       {/* Trends */}
       <div className="space-y-3 md:space-y-4 print-break-before">
         <SectionHeader title="Trends" />
@@ -192,12 +208,27 @@ export function PlatformPageShell({
         </div>
       </div>
 
+      {/* Breakdowns by Market / Channel / Objective (parsed from campaign names) */}
+      {scoped.length > 0 && (
+        <div className="print-break-before">
+          <BreakdownDimensionCard rows={scoped} />
+        </div>
+      )}
+
       {midExtras?.({ totals })}
 
       {!hideConversionBreakdown && hasConversions && (
         <div className="space-y-3 md:space-y-4">
           <SectionHeader title="Conversion Breakdown" />
           <ConversionBreakdownCard platform={platformKey} start={range.start} end={range.end} />
+        </div>
+      )}
+
+      {/* Campaign Performance — same component used on Overview, scoped to this platform */}
+      {scoped.length > 0 && (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend" />
+          <CampaignPerformance platformFilter={platformKey} hidePlatformColumn />
         </div>
       )}
 
