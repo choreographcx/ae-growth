@@ -265,6 +265,21 @@ Deno.serve(async (req) => {
       return respond({ ok: false, error: 'Not authenticated', status: 401 });
     }
 
+    // Enforce approval gate: unapproved users (and users with no profile) cannot
+    // call this endpoint, even though their JWT is valid. The UI hides dashboards
+    // for unapproved users, but the edge function is reachable directly over HTTP.
+    const { data: profile, error: profileErr } = await serviceClient
+      .from('profiles')
+      .select('is_approved')
+      .eq('user_id', userData.user.id)
+      .maybeSingle();
+    if (profileErr) {
+      return respond({ ok: false, error: 'Failed to verify account approval', status: 500 });
+    }
+    if (!profile?.is_approved) {
+      return respond({ ok: false, error: 'Account pending approval', status: 403 });
+    }
+
     const body = (await req.json().catch(() => ({}))) as ReportBody;
     if (!body.startDate || !body.endDate) {
       return respond({ ok: false, error: 'startDate and endDate are required (YYYY-MM-DD)', status: 400 });
