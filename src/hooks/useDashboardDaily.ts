@@ -163,7 +163,6 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     costPerLPV: safeDiv(t.spend, t.landingPageViews),
     lpvRate: safeDiv(t.landingPageViews, t.clicks) * 100,
     cvrLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.landingPageViews) * 100,
-    frequency: safeDiv(t.impressions, t.reach),
     roas: safeDiv(t.conversionValue, t.spend),
     outboundCtr: safeDiv(t.outboundClicks, t.impressions) * 100,
     costPerVideoView: safeDiv(t.spend, t.videoViews),
