@@ -69,9 +69,13 @@ interface CampaignPerformanceProps {
   /** Optional limit for the number of campaigns shown. Defaults to 25. */
   limit?: number;
   className?: string;
+  /** When set, only show campaigns whose normalized platform matches this key. */
+  platformFilter?: PlatformKey;
+  /** When true, hide the Platform column and platform-icon bubble (single-platform context). */
+  hidePlatformColumn?: boolean;
 }
 
-export function CampaignPerformance({ limit = 25, className }: CampaignPerformanceProps) {
+export function CampaignPerformance({ limit = 25, className, platformFilter, hidePlatformColumn }: CampaignPerformanceProps) {
   const { client, data } = useDashboard();
   const currency = client.currency;
   const isMobile = useIsMobile();
@@ -82,6 +86,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
       const name = r.campaign_name?.trim();
       if (!name) continue;
       const platformKey = normalizePlatform(r.platform);
+      if (platformFilter && platformKey !== platformFilter) continue;
       const label = getCampaignLabel(r.campaign_name);
       // Group by display label + platform so campaigns sharing the same
       // label (e.g. multiple "Red Sea" phases on Snapchat) collapse into one row.
@@ -150,7 +155,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
   }
 
   if (isMobile) {
-    return <MobileCampaignCards data={sorted} currency={currency} className={className} />;
+    return <MobileCampaignCards data={sorted} currency={currency} className={className} hidePlatform={hidePlatformColumn} />;
   }
 
   type Col = {
@@ -164,7 +169,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
     {
       key: 'campaignLabel', label: 'Campaign', format: row => (
         <div className="flex items-center gap-2 min-w-0">
-          {row.platform && (
+          {!hidePlatformColumn && row.platform && (
             <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0", platformIconBg[row.platform])}>
               <PlatformIcon platform={row.platform} size={12} />
             </span>
@@ -173,7 +178,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
         </div>
       ),
     },
-    { key: 'platformLabel',           label: 'Platform',  format: row => row.platformLabel },
+    ...(hidePlatformColumn ? [] : [{ key: 'platformLabel' as keyof CampaignRow, label: 'Platform', format: (row: CampaignRow) => row.platformLabel as React.ReactNode }]),
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
     { key: 'impressions',             label: 'Impr.',     align: 'right', format: row => fmtCompact(row.impressions) },
     { key: 'clicks',                  label: 'Clicks',    align: 'right', format: row => fmtCompact(row.clicks) },
@@ -243,21 +248,21 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
 
 /* ─── Mobile cards ─── */
 
-function MobileCampaignCards({ data, currency, className }: { data: CampaignRow[]; currency: string; className?: string }) {
+function MobileCampaignCards({ data, currency, className, hidePlatform }: { data: CampaignRow[]; currency: string; className?: string; hidePlatform?: boolean }) {
   return (
     <div className={cn("space-y-2.5", className)}>
       {data.map(row => (
         <div key={row.key} className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <div className="px-3 pt-3 pb-3">
             <div className="flex items-center gap-2 mb-2">
-              {row.platform && (
+              {!hidePlatform && row.platform && (
                 <div className={cn("flex items-center justify-center w-7 h-7 rounded shrink-0", platformIconBg[row.platform])}>
                   <PlatformIcon platform={row.platform} size={14} />
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.campaignName}>{row.campaignLabel}</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">{row.platformLabel}</p>
+                {!hidePlatform && <p className="text-[11px] text-muted-foreground leading-tight">{row.platformLabel}</p>}
               </div>
             </div>
 
