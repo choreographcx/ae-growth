@@ -39,7 +39,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageFallback = () => <LoadingOverlay message="Loading…" />;
+const PageFallback = () => <LoadingOverlay fixed message="Loading…" />;
 
 function ProtectedRoutes() {
   const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
