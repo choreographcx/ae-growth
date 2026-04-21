@@ -56,6 +56,16 @@ export function getCampaignMarket(name: string | null | undefined): string {
 export function getCampaignObjective(name: string | null | undefined): string {
   return parseCampaignName(name).objective;
 }
+export function resolveCampaignObjective(
+  campaignObjective: string | null | undefined,
+  name: string | null | undefined,
+): string {
+  const normalizedObjective = campaignObjective?.trim();
+  if (normalizedObjective && normalizedObjective.toLowerCase() !== UNKNOWN.toLowerCase()) {
+    return normalizedObjective;
+  }
+  return getCampaignObjective(name);
+}
 export function getCampaignChannel(name: string | null | undefined): string {
   return parseCampaignName(name).channel;
 }

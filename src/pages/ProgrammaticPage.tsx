@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
-import { getCampaignObjective } from '@/lib/campaignNaming';
+import { resolveCampaignObjective } from '@/lib/campaignNaming';
 
 export default function ProgrammaticPage() {
   const { data } = useDashboard();
@@ -89,7 +89,7 @@ export default function ProgrammaticPage() {
             <SectionHeader title="Campaign Objective" />
             <DimensionBreakdownTable
               rows={scoped}
-              pick={r => r.campaign_objective || getCampaignObjective(r.campaign_name)}
+              pick={r => resolveCampaignObjective(r.campaign_objective, r.campaign_name)}
               title="By Objective"
               hideIfAllUnspecified
             />
