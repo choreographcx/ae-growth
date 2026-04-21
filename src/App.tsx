@@ -22,6 +22,7 @@ const ProgrammaticPage = lazy(() => import("./pages/ProgrammaticPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const DebugSnapchat = lazy(() => import("./pages/_DebugSnapchat"));
 
 // Tuned for an analytics dashboard backed by BigQuery RPCs:
 // keep results fresh for 5 min, cache for 30 min, no aggressive refetches.
@@ -95,6 +96,7 @@ function ProtectedRoutes() {
             <Route path="/x" element={<XPage />} />
             <Route path="/programmatic" element={<ProgrammaticPage />} />
             <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
+            <Route path="/_debug-snapchat" element={<DebugSnapchat />} />
             <Route path="/tracking-health" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
