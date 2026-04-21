@@ -500,6 +500,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      debug_snapchat_reach: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          campaign_name: string
+          conversion_name: string
+          date: string
+          impressions: number
+          is_conversion_row: boolean
+          platform: string
+          reach: number
+          row_count: number
+        }[]
+      }
       get_dashboard_conversion_breakdown: {
         Args: {
           p_campaign_names?: string[]
