@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      _debug_rpc_snap: {
+        Row: {
+          campaign_id: string | null
+          campaign_name: string | null
+          clicks: number | null
+          cost: number | null
+          date: string | null
+          id: number
+          impressions: number | null
+          platform: string | null
+          publisher_platform: string | null
+          reach: number | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          campaign_name?: string | null
+          clicks?: number | null
+          cost?: number | null
+          date?: string | null
+          id?: number
+          impressions?: number | null
+          platform?: string | null
+          publisher_platform?: string | null
+          reach?: number | null
+        }
+        Update: {
+          campaign_id?: string | null
+          campaign_name?: string | null
+          clicks?: number | null
+          cost?: number | null
+          date?: string | null
+          id?: number
+          impressions?: number | null
+          platform?: string | null
+          publisher_platform?: string | null
+          reach?: number | null
+        }
+        Relationships: []
+      }
       _debug_snap_rows: {
         Row: {
           audience_type: string | null
@@ -590,6 +629,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _debug_rpc_snap_capture: { Args: never; Returns: undefined }
       _debug_snap_capture: { Args: never; Returns: undefined }
       _debug_snap_rows_capture: { Args: never; Returns: undefined }
       debug_snapchat_reach: {
