@@ -52,8 +52,8 @@ export function DashboardSidebar() {
             <NavLink key={item.to} to={item.to} className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
               isActive
-                ? "bg-sidebar-primary/15 text-sidebar-primary border-l-2 border-sidebar-primary shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.1)]"
-                : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground border-l-2 border-transparent"
+                ? "bg-sidebar-primary/15 text-sidebar-primary border-l-2 border-sidebar-primary shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.1)] hover:bg-[hsl(160_84%_25%)] hover:text-white"
+                : "text-sidebar-muted hover:bg-[hsl(160_84%_25%)] hover:text-white border-l-2 border-transparent"
             )}>
               <NavIcon entry={item.entry} size={17} />
               {!collapsed && <span className="truncate">{item.label}</span>}
