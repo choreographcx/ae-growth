@@ -9,11 +9,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 type FunnelKey = 'lower' | 'upper';
 
 interface Props {
-  platform: PlatformKey;
+  /** Restrict to a single platform. Omit to show all platforms (Overview). */
+  platform?: PlatformKey;
   start: Date;
   end: Date;
   campaigns?: string[];
   className?: string;
+  /**
+   * When true, aggregate identical conversion names across platforms into a
+   * single row. Used on Overview where rows from Meta/Google/etc. should roll
+   * up. When false (default), each platform's rows are shown verbatim.
+   */
+  aggregateAcrossPlatforms?: boolean;
 }
 
 const FUNNEL_BADGE: Record<string, string> = {
