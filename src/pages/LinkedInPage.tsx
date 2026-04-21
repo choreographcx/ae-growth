@@ -36,7 +36,9 @@ export default function LinkedInPage() {
     {
       title: 'Reach', icon: 'Users',
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
-      supporting: [],
+      supporting: cur.reach > 0
+        ? [{ label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—', change: pctChange(cur.frequency, prev?.frequency) }]
+        : [],
     },
     {
       title: 'Landing Page Views', icon: 'FileText',

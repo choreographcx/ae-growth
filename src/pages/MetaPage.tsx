@@ -81,7 +81,7 @@ export default function MetaPage() {
       tooltip: cur.frequency >= 4 ? 'High frequency (≥4) — refresh creative or expand audience to avoid fatigue.' : undefined,
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
       supporting: [
-        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
+        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—', change: pctChange(cur.frequency, prev?.frequency) },
       ],
     },
     {
