@@ -293,7 +293,7 @@ interface UseDashboardDailyResult {
 
 export {
   aggregate as aggregateRows,
-  buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries, buildFrequencySeries,
+  buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries,
 };
 
 /**
