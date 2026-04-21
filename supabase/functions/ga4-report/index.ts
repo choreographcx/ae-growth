@@ -270,18 +270,23 @@ Deno.serve(async (req) => {
       return respond({ ok: false, error: 'startDate and endDate are required (YYYY-MM-DD)', status: 400 });
     }
 
-    let propertyId = body.propertyId;
-    if (!propertyId) {
-      const { data: settings } = await userClient
-        .from('client_reporting_settings')
-        .select('ga4_property_id')
-        .limit(1)
-        .maybeSingle();
-      propertyId = settings?.ga4_property_id ?? undefined;
+    // Always resolve the GA4 property ID server-side from the configured
+    // singleton client. Caller-supplied `propertyId` values are ignored to
+    // prevent users from probing other GA4 properties the SA can access.
+    const { data: configuredPid, error: pidErr } = await serviceClient.rpc('get_active_ga4_property_id');
+    if (pidErr) {
+      return respond({ ok: false, error: `Failed to load GA4 property: ${pidErr.message}`, status: 500 });
     }
+    const propertyId = typeof configuredPid === 'string' ? configuredPid.trim() : '';
 
     if (!propertyId) {
       return respond({ ok: false, error: 'No GA4 property configured', status: 400 });
+    }
+
+    // Defensive: GA4 property IDs are numeric. Reject anything else to prevent
+    // path injection into the API URL even though we control the source.
+    if (!/^\d+$/.test(propertyId)) {
+      return respond({ ok: false, error: 'Configured GA4 property ID is not a numeric value', status: 400 });
     }
 
     const sa = await loadServiceAccount(serviceClient);
