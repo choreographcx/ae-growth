@@ -300,6 +300,9 @@ Deno.serve(async (req) => {
         'engagementRate', 'averageSessionDuration', 'bounceRate',
         'screenPageViews', 'conversions', 'totalRevenue',
       ]).map((name) => ({ name })),
+      // Ask GA4 to compute totals across all rows so the KPI tiles populate.
+      // Without this, `totals` is omitted and the tiles render zeros.
+      metricAggregations: ['TOTAL'],
       limit: body.limit ?? 10000,
     };
 
