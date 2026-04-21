@@ -1,15 +1,15 @@
 /**
  * Money conversion helpers.
  *
- * The dashboard's source-of-truth spend (`row.cost`) is denominated in USD
- * (the BigQuery RPC sums `cost_usd`). When the reporting currency is SAR or
- * AED, we multiply by the matching client-level rate to produce the value
- * shown to the user. The per-platform `reportingCurrency` documents which
- * native currency each platform reports in — we only convert when it differs
- * from the dashboard's reporting currency.
+ * DB invariant: `cost` and `cost_usd` from `bq_fdw.aroya_dashboard_daily` are
+ * always denominated in USD, regardless of which currency each ad platform's
+ * API natively reports in. The per-platform "reporting currency" stored in
+ * Admin → Platform Settings is informational metadata only — it documents
+ * what the source platform bills in but does not drive any conversion.
  *
- * Returns 1 when no conversion is needed (USD reporting, or platform already
- * reports in the same currency as the dashboard).
+ * Conversion is therefore a single step driven solely by the client-level
+ * reporting currency: multiply USD values by the client's USD→SAR or USD→AED
+ * rate. USD reporting (or any unrecognised currency) returns a multiplier of 1.
  */
 import { ClientProfile, PlatformKey } from '@/types/dashboard';
 
@@ -22,15 +22,14 @@ export function rateForReportingCurrency(client: Pick<ClientProfile, 'currency' 
 }
 
 /**
- * Per-platform multiplier applied to USD cost to produce the value in the
- * reporting currency. Skipped when the platform's native currency already
- * matches the reporting currency.
+ * Per-platform multiplier. Currently a uniform passthrough to
+ * `rateForReportingCurrency` because all USD costs convert at the same
+ * client-level rate. Kept as a per-platform function so callers don't need
+ * to be refactored if per-platform overrides are ever reintroduced.
  */
 export function platformConvertRate(
-  client: Pick<ClientProfile, 'currency' | 'usdToSarRate' | 'usdToAedRate' | 'platforms'>,
-  platformKey: PlatformKey,
+  client: Pick<ClientProfile, 'currency' | 'usdToSarRate' | 'usdToAedRate'>,
+  _platformKey: PlatformKey,
 ): number {
-  const platformCurrency = client.platforms[platformKey]?.reportingCurrency || 'USD';
-  if (platformCurrency === client.currency) return 1;
   return rateForReportingCurrency(client);
 }
