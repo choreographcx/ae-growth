@@ -48,10 +48,6 @@ export function inferCurrency(impliedRate: number | null, sarRate: number, aedRa
   return 'UNKNOWN';
 }
 
-export function useePlatformCurrencyIntegrity(enabled: boolean) {
-  return usePlatformCurrencyIntegrity(enabled);
-}
-
 export function usePlatformCurrencyIntegrity(enabled: boolean) {
   const [rows, setRows] = useState<PlatformIntegrityRow[]>([]);
   const [loading, setLoading] = useState(false);
