@@ -155,7 +155,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
   }
 
   if (isMobile) {
-    return <MobileCampaignCards data={sorted} currency={currency} className={className} />;
+    return <MobileCampaignCards data={sorted} currency={currency} className={className} hidePlatform={hidePlatformColumn} />;
   }
 
   type Col = {
@@ -169,7 +169,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     {
       key: 'campaignLabel', label: 'Campaign', format: row => (
         <div className="flex items-center gap-2 min-w-0">
-          {row.platform && (
+          {!hidePlatformColumn && row.platform && (
             <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0", platformIconBg[row.platform])}>
               <PlatformIcon platform={row.platform} size={12} />
             </span>
@@ -178,7 +178,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         </div>
       ),
     },
-    { key: 'platformLabel',           label: 'Platform',  format: row => row.platformLabel },
+    ...(hidePlatformColumn ? [] : [{ key: 'platformLabel' as keyof CampaignRow, label: 'Platform', format: (row: CampaignRow) => row.platformLabel as React.ReactNode }]),
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
     { key: 'impressions',             label: 'Impr.',     align: 'right', format: row => fmtCompact(row.impressions) },
     { key: 'clicks',                  label: 'Clicks',    align: 'right', format: row => fmtCompact(row.clicks) },
