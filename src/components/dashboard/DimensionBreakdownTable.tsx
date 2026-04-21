@@ -79,7 +79,6 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
       {isMobile ? (
         <div className="p-3 space-y-2.5">
           {grouped.map((g) => {
-            const wasted = g.spend > 0 && g.lfConv === 0 && g.share >= 5;
             const winner = g.cpa > 0 && g.cpa === minCpa;
             return (
               <div key={g.name} className="rounded-lg border border-border bg-background p-3">
@@ -89,7 +88,7 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
                 </div>
                 <div className="flex items-baseline gap-1 mb-2">
                   <span className="text-[12px] text-muted-foreground">Spend</span>
-                  <span className={cn('text-[18px] font-bold text-card-foreground tabular-nums inline-flex items-baseline ml-auto', wasted && 'text-destructive')}>
+                  <span className="text-[18px] font-bold text-card-foreground tabular-nums inline-flex items-baseline ml-auto">
                     <CurrencySymbol currency={currency} />{fmtMoney(g.spend, 0)}
                   </span>
                 </div>
