@@ -11,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   isApproved: boolean;
+  profileLoading: boolean;
   profile: { email: string; full_name: string; is_approved: boolean } | null;
   onlineUserIds: Set<string>;
   signOut: () => Promise<void>;
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isSuperAdmin: false,
   isApproved: false,
+  profileLoading: true,
   profile: null,
   onlineUserIds: new Set(),
   signOut: async () => {},
@@ -37,22 +39,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isApproved, setIsApproved] = useState(false);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
+  const [profileLoading, setProfileLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
-    const [profileRes, rolesRes] = await Promise.all([
-      supabase.from('profiles').select('email, full_name, is_approved').eq('user_id', userId).single(),
-      supabase.from('user_roles').select('role').eq('user_id', userId),
-    ]);
+    setProfileLoading(true);
+    try {
+      const [profileRes, rolesRes] = await Promise.all([
+        supabase.from('profiles').select('email, full_name, is_approved').eq('user_id', userId).single(),
+        supabase.from('user_roles').select('role').eq('user_id', userId),
+      ]);
 
-    if (profileRes.data) {
-      setProfile(profileRes.data);
-      setIsApproved(profileRes.data.is_approved);
-    }
+      if (profileRes.data) {
+        setProfile(profileRes.data);
+        setIsApproved(profileRes.data.is_approved);
+      }
 
-    if (rolesRes.data) {
-      const roles = rolesRes.data.map((r: any) => r.role);
-      setIsSuperAdmin(roles.includes('superadmin'));
-      setIsAdmin(roles.includes('admin') || roles.includes('superadmin'));
+      if (rolesRes.data) {
+        const roles = rolesRes.data.map((r: any) => r.role);
+        setIsSuperAdmin(roles.includes('superadmin'));
+        setIsAdmin(roles.includes('admin') || roles.includes('superadmin'));
+      }
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -68,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAdmin(false);
         setIsSuperAdmin(false);
         setIsApproved(false);
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -77,6 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+      } else {
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -130,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isSuperAdmin, isApproved, profile, onlineUserIds, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isSuperAdmin, isApproved, profileLoading, profile, onlineUserIds, signOut }}>
       {children}
     </AuthContext.Provider>
   );
