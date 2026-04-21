@@ -1,1 +1,4 @@
 project_id = "ldydiabaczrjferglbar"
+
+[functions.diag-conv-events]
+verify_jwt = false
