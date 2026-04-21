@@ -74,7 +74,7 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
   // Step 1 — singleton client (anyone can read)
   const { data: clientRow } = await supabase
     .from('clients')
-    .select('id, name, code, currency, timezone, website_domain, updated_at')
+    .select('id, name, code, currency, timezone, website_domain, updated_at, usd_to_sar_rate, usd_to_aed_rate')
     .eq('is_singleton', true)
     .maybeSingle();
 
@@ -113,6 +113,7 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
       conversionSource: row.conversion_source ?? 'pixel',
       includeInOverview: row.include_in_overview,
       includeInDiagnostics: row.include_in_diagnostics,
+      reportingCurrency: row.currency ?? 'USD',
       sourceLabel: row.source_label ?? '',
       namingConvention: row.naming_convention ?? '',
       excludedCampaignFilter: row.excluded_campaign_filter ?? '',
