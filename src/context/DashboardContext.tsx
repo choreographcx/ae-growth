@@ -52,21 +52,50 @@ export interface LayoutEditControls {
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
+const PERSIST_PREFIX = 'dashboard.filters.';
+function persistKey(k: string) { return PERSIST_PREFIX + k; }
+function hasPersisted(k: string): boolean {
+  try { return typeof window !== 'undefined' && window.localStorage.getItem(persistKey(k)) !== null; }
+  catch { return false; }
+}
+function loadPersisted<T>(k: string, fallback: T): T {
+  try {
+    if (typeof window === 'undefined') return fallback;
+    const raw = window.localStorage.getItem(persistKey(k));
+    if (raw === null) return fallback;
+    return JSON.parse(raw) as T;
+  } catch { return fallback; }
+}
+function savePersisted(k: string, v: unknown): void {
+  try { if (typeof window !== 'undefined') window.localStorage.setItem(persistKey(k), JSON.stringify(v)); }
+  catch { /* ignore quota / private mode errors */ }
+}
+
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ClientProfile>(defaultClient);
-  const [dateRange, setDateRange] = useState('Last 30 Days');
-  const [showPreviousPeriod, setShowPreviousPeriod] = useState(false);
+  const [dateRange, setDateRange] = useState<string>(() => loadPersisted('dateRange', 'Last 30 Days'));
+  const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(() => loadPersisted('showPreviousPeriod', false));
   /** Once we've applied the saved client.defaultDateRange to the dateRange
    *  state we lock it in so subsequent settings refetches don't snap the
-   *  user back to it after they've manually picked a different range. */
-  const [defaultRangeApplied, setDefaultRangeApplied] = useState(false);
+   *  user back to it after they've manually picked a different range.
+   *  Also pre-applied when we restored a persisted dateRange from a prior session. */
+  const [defaultRangeApplied, setDefaultRangeApplied] = useState<boolean>(() => hasPersisted('dateRange'));
   const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
-  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
-  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
-  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(() => loadPersisted('selectedPlatforms', [] as string[]));
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>(() => loadPersisted('selectedCampaigns', [] as string[]));
+  const [selectedObjectives, setSelectedObjectives] = useState<string[]>(() => loadPersisted('selectedObjectives', [] as string[]));
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>(() => loadPersisted('selectedMarkets', [] as string[]));
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(() => loadPersisted('selectedChannels', [] as string[]));
+
+  // Persist filter + date selections so they survive reload / re-entry.
+  useEffect(() => { savePersisted('dateRange', dateRange); }, [dateRange]);
+  useEffect(() => { savePersisted('showPreviousPeriod', showPreviousPeriod); }, [showPreviousPeriod]);
+  useEffect(() => { savePersisted('selectedPlatforms', selectedPlatforms); }, [selectedPlatforms]);
+  useEffect(() => { savePersisted('selectedCampaigns', selectedCampaigns); }, [selectedCampaigns]);
+  useEffect(() => { savePersisted('selectedObjectives', selectedObjectives); }, [selectedObjectives]);
+  useEffect(() => { savePersisted('selectedMarkets', selectedMarkets); }, [selectedMarkets]);
+  useEffect(() => { savePersisted('selectedChannels', selectedChannels); }, [selectedChannels]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
