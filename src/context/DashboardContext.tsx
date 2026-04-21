@@ -127,7 +127,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
       }));
     }
-  }, [settingsQ.data]);
+    // Apply the admin-configured Default Date Range — only on the first load
+    // so the user's manual picks aren't reverted on subsequent settings refetches.
+    if (!defaultRangeApplied) {
+      const mapped = mapDefaultDateRange(settingsQ.data.client.defaultDateRange);
+      if (mapped) setDateRange(mapped);
+      setDefaultRangeApplied(true);
+    }
+  }, [settingsQ.data, defaultRangeApplied]);
 
   // Whenever the in-memory client's branding changes (admin live-edit, etc.),
   // mirror it to the document root and the localStorage cache so unauth pages
