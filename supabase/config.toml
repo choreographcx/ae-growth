@@ -1,1 +1,4 @@
 project_id = "ldydiabaczrjferglbar"
+
+[functions.diag-breakdown]
+verify_jwt = false
