@@ -40,7 +40,6 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
 const ALERT_METRIC_TO_FIELD: Record<string, keyof AlertThresholds> = {
   cpa_spike: 'cpaSpike',
   ctr_drop: 'ctrDrop',
-  frequency: 'frequencyThreshold',
   zero_conversion_spend: 'zeroConversionSpend',
   viewability: 'viewabilityThreshold',
 };
@@ -48,7 +47,6 @@ const ALERT_METRIC_TO_FIELD: Record<string, keyof AlertThresholds> = {
 const FIELD_TO_ALERT_METRIC: Record<keyof AlertThresholds, { metric: string; op: string; unit: string; severity: string; name: string }> = {
   cpaSpike:             { metric: 'cpa_spike',             op: '>', unit: '%',        severity: 'warning',  name: 'CPA Spike' },
   ctrDrop:              { metric: 'ctr_drop',              op: '<', unit: '%',        severity: 'warning',  name: 'CTR Drop' },
-  frequencyThreshold:   { metric: 'frequency',             op: '>', unit: 'count',    severity: 'warning',  name: 'Frequency Cap' },
   zeroConversionSpend:  { metric: 'zero_conversion_spend', op: '>', unit: 'currency', severity: 'critical', name: 'Zero Conversion Spend' },
   viewabilityThreshold: { metric: 'viewability',           op: '<', unit: '%',        severity: 'warning',  name: 'Viewability' },
 };
