@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2, Eye, Activity, Wifi, WifiOff } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +41,6 @@ const standardMetrics = [
 ];
 
 const KPI_OPTIONS = ['conversions', 'leads', 'clicks', 'impressions', 'reach', 'video_views', 'app_installs', 'landing_page_views'];
-const CONVERSION_SOURCE_OPTIONS = ['pixel', 'tag', 'insight_tag', 'capi', 'offline', 'ga4', 'manual'];
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string }[] = [
   { value: 'annual', label: 'Annual' },
   { value: 'monthly', label: 'Monthly' },
