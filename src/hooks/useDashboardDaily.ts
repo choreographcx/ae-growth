@@ -264,6 +264,12 @@ export interface UseDashboardDailyOptions {
   selectedObjectives?: string[];
   selectedMarkets?: string[];
   selectedChannels?: string[];
+  /**
+   * Optional per-platform multiplier applied to USD `cost` and `conversion_value`
+   * before any aggregation. Keys are the normalized PlatformKey (e.g. `meta`).
+   * When omitted or 1, no conversion is applied for that platform.
+   */
+  costMultiplierByPlatform?: Partial<Record<PlatformKey, number>>;
 }
 
 interface UseDashboardDailyResult {
