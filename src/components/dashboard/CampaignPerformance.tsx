@@ -69,9 +69,13 @@ interface CampaignPerformanceProps {
   /** Optional limit for the number of campaigns shown. Defaults to 25. */
   limit?: number;
   className?: string;
+  /** When set, only show campaigns whose normalized platform matches this key. */
+  platformFilter?: PlatformKey;
+  /** When true, hide the Platform column and platform-icon bubble (single-platform context). */
+  hidePlatformColumn?: boolean;
 }
 
-export function CampaignPerformance({ limit = 25, className }: CampaignPerformanceProps) {
+export function CampaignPerformance({ limit = 25, className, platformFilter, hidePlatformColumn }: CampaignPerformanceProps) {
   const { client, data } = useDashboard();
   const currency = client.currency;
   const isMobile = useIsMobile();
@@ -82,6 +86,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
       const name = r.campaign_name?.trim();
       if (!name) continue;
       const platformKey = normalizePlatform(r.platform);
+      if (platformFilter && platformKey !== platformFilter) continue;
       const label = getCampaignLabel(r.campaign_name);
       // Group by display label + platform so campaigns sharing the same
       // label (e.g. multiple "Red Sea" phases on Snapchat) collapse into one row.
