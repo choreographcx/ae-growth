@@ -21,20 +21,20 @@ export function Ga4OverviewTile() {
   const { client, data: dashData } = useDashboard();
   const { start, end } = dashData.range;
 
-  // Only show if a GA4 property id is configured.
-  const ga4PropertyId = (client as any)?.ga4PropertyId
-    ?? (client as any)?.reporting?.ga4PropertyId
-    ?? null;
-  // We don't strictly need the id client-side (edge function resolves it),
-  // but we hide the tile if the field is empty.
-  const enabled = true; // always attempt; backend returns 400 if not configured.
+  // Only fire the request when an admin has configured a GA4 property id.
+  const propertyId = (client.ga4PropertyId || '').trim();
+  const enabled = propertyId.length > 0;
 
   const q = useGa4Report({
+    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: [],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions'],
     enabled,
   });
+
+  // Hide entirely if not configured or backend says no property.
+  if (!enabled) return null;
 
   const totals = q.data?.totals ?? [];
   const headers = q.data?.metricHeaders ?? [];
