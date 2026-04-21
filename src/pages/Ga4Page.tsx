@@ -123,9 +123,27 @@ export default function Ga4Page() {
   const anyError = totalsQ.error || channelsQ.error || sourcesQ.error || pagesQ.error;
   const loading = totalsQ.isLoading;
 
+  if (!enabled) {
+    return (
+      <div className="space-y-5 md:space-y-7">
+        <SectionHeader title="Web Analytics (GA4)" subtitle="Live data from the GA4 Data API" />
+        <Card>
+          <CardContent className="p-6 text-sm text-muted-foreground flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            No GA4 property configured. Add a GA4 Property ID in Admin → Measurement Setup to enable this page.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 md:space-y-7">
-      <SectionHeader title="Web Analytics (GA4)" subtitle="Live data from the GA4 Data API" showMobileDatePicker />
+      <SectionHeader
+        title="Web Analytics (GA4)"
+        subtitle={`Live data from the GA4 Data API · Property ${propertyId}`}
+        showMobileDatePicker
+      />
 
       {anyError && (
         <div className="text-sm text-destructive border border-destructive/30 bg-destructive/5 rounded-md px-3 py-2">
