@@ -70,8 +70,11 @@ export function useGa4Report(req: Ga4ReportRequest) {
         },
       });
       if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      return parseResponse(data);
+      const payload = data as any;
+      if (payload?.ok === false) throw new Error(payload.error ?? 'GA4 request failed');
+      const report = payload?.ok === true && payload?.data ? payload.data : data;
+      if ((report as any)?.error) throw new Error((report as any).error);
+      return parseResponse(report);
     },
   });
 }
