@@ -19,6 +19,7 @@ const SnapchatPage = lazy(() => import("./pages/SnapchatPage"));
 const LinkedInPage = lazy(() => import("./pages/LinkedInPage"));
 const XPage = lazy(() => import("./pages/XPage"));
 const ProgrammaticPage = lazy(() => import("./pages/ProgrammaticPage"));
+const Ga4Page = lazy(() => import("./pages/Ga4Page"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -94,6 +95,7 @@ function ProtectedRoutes() {
             <Route path="/linkedin" element={<LinkedInPage />} />
             <Route path="/x" element={<XPage />} />
             <Route path="/programmatic" element={<ProgrammaticPage />} />
+            <Route path="/ga4" element={<Ga4Page />} />
             <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
             <Route path="/tracking-health" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
