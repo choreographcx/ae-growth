@@ -10,6 +10,9 @@ import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard'
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { EmptyPlatformState } from '@/components/dashboard/EmptyPlatformState';
 import { AlertCard } from '@/components/dashboard/AlertCard';
+import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
+import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
+import { CampaignPerformance } from '@/components/dashboard/CampaignPerformance';
 import { generateInsights, sortInsights } from '@/lib/insights';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
