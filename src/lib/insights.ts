@@ -81,17 +81,6 @@ export function generateInsights({
     });
   }
 
-  // 4. Frequency fatigue — high frequency + falling CTR vs prev period
-  if (totals.frequency >= DEFAULTS.highFrequency && previousTotals && previousTotals.ctr > 0) {
-    const ctrDelta = totals.ctr - previousTotals.ctr;
-    if (ctrDelta < 0) {
-      out.push({
-        id: next(), type: 'warning', timestamp: ts(),
-        title: 'Possible audience fatigue',
-        description: `Frequency is ${totals.frequency.toFixed(1)} and CTR fell ${Math.abs(ctrDelta).toFixed(2)} pts. Refresh creative or expand reach.`,
-      });
-    }
-  }
 
 
 
