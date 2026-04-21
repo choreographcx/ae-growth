@@ -36,7 +36,7 @@ const POSITIONS = ['market', 'client', 'campaign', 'phase', 'startDate', 'endDat
 
 export function parseCampaignName(name: string | null | undefined): ParsedCampaignName {
   const empty: ParsedCampaignName = {
-    market: UNKNOWN, client: UNKNOWN, campaign: UNKNOWN,
+    market: UNKNOWN, client: UNKNOWN, campaign: UNKNOWN, phase: UNKNOWN,
     startDate: UNKNOWN, endDate: UNKNOWN, objective: UNKNOWN,
     channel: UNKNOWN, platform: UNKNOWN, bo: UNKNOWN,
   };
