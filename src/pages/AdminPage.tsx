@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2, Eye, Activity, Wifi, WifiOff } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +41,6 @@ const standardMetrics = [
 ];
 
 const KPI_OPTIONS = ['conversions', 'leads', 'clicks', 'impressions', 'reach', 'video_views', 'app_installs', 'landing_page_views'];
-const CONVERSION_SOURCE_OPTIONS = ['pixel', 'tag', 'insight_tag', 'capi', 'offline', 'ga4', 'manual'];
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string }[] = [
   { value: 'annual', label: 'Annual' },
   { value: 'monthly', label: 'Monthly' },
@@ -397,26 +396,15 @@ function ModularPlatformCard({
             </p>
           </div>
 
-          {/* KPI & Conversion Source row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Primary KPI</Label>
-              <Select value={cfg.primaryKpi || 'conversions'} onValueChange={v => updatePlatform(p.key, { primaryKpi: v })}>
-                <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {KPI_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Conversion Source</Label>
-              <Select value={cfg.conversionSource || 'pixel'} onValueChange={v => updatePlatform(p.key, { conversionSource: v })}>
-                <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CONVERSION_SOURCE_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Primary KPI */}
+          <div>
+            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Primary KPI</Label>
+            <Select value={cfg.primaryKpi || 'conversions'} onValueChange={v => updatePlatform(p.key, { primaryKpi: v })}>
+              <SelectTrigger className="mt-1.5 h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {KPI_OPTIONS.map(o => <SelectItem key={o} value={o}>{o.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Account IDs */}
@@ -452,17 +440,7 @@ function ModularPlatformCard({
             </div>
           </div>
 
-          {/* Toggles row */}
-          <div className="flex items-center gap-6 pt-1">
-            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-              <Switch checked={cfg.includeInOverview ?? true} onCheckedChange={v => updatePlatform(p.key, { includeInOverview: v })} className="scale-75 origin-left" />
-              <Eye size={12} /> Overview
-            </label>
-            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-              <Switch checked={cfg.includeInDiagnostics ?? true} onCheckedChange={v => updatePlatform(p.key, { includeInDiagnostics: v })} className="scale-75 origin-left" />
-              <Activity size={12} /> Diagnostics
-            </label>
-          </div>
+          {/* Toggles row removed — Overview/Diagnostics inclusion is implicit when the platform is enabled. */}
 
           {/* Footer status line */}
           <div className="flex items-center justify-between pt-2 border-t border-border/30">
@@ -483,28 +461,17 @@ function ModularPlatformCard({
           {/* Advanced Settings */}
           {advancedOpen && (
             <div className="pt-3 border-t border-border/30 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Source Label Override</Label>
-                  <Input
-                    value={cfg.sourceLabel || ''}
-                    onChange={e => updatePlatform(p.key, { sourceLabel: e.target.value })}
-                    placeholder={p.label}
-                    className="mt-1 h-7 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Naming Convention</Label>
-                  <Select value={cfg.namingConvention || ''} onValueChange={v => updatePlatform(p.key, { namingConvention: v })}>
-                    <SelectTrigger className="mt-1 h-7 text-xs"><SelectValue placeholder="Default" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pipe_delimited">Pipe Delimited</SelectItem>
-                      <SelectItem value="underscore">Underscore</SelectItem>
-                      <SelectItem value="dash">Dash</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Naming Convention</Label>
+                <Select value={cfg.namingConvention || ''} onValueChange={v => updatePlatform(p.key, { namingConvention: v })}>
+                  <SelectTrigger className="mt-1 h-7 text-xs"><SelectValue placeholder="Default" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pipe_delimited">Pipe Delimited</SelectItem>
+                    <SelectItem value="underscore">Underscore</SelectItem>
+                    <SelectItem value="dash">Dash</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Excluded Campaign Filter</Label>

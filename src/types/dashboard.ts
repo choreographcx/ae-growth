@@ -16,16 +16,15 @@ export interface PlatformConfig {
   budget: number;
   budgetType: BudgetType;
   primaryKpi: string;
-  conversionSource: string;
-  includeInOverview: boolean;
-  includeInDiagnostics: boolean;
   /** Currency this platform reports spend in (USD/SAR/AED). When the
    *  reporting currency differs, the matching client conversion rate is
    *  applied to all money metrics. */
   reportingCurrency: string;
   // Advanced settings
-  sourceLabel: string;
   namingConvention: string;
+  /** Comma- or whitespace-separated tokens. Any campaign whose name contains
+   *  one of these tokens (case-insensitive substring) is excluded from all
+   *  aggregations and dashboards for this platform. */
   excludedCampaignFilter: string;
   notes: string;
 }
