@@ -35,9 +35,9 @@ export default function XPage() {
     {
       title: 'Reach', icon: 'Users',
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
-      supporting: cur.reach > 0
-        ? [{ label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—', change: pctChange(cur.frequency, prev?.frequency) }]
-        : [],
+      supporting: [
+        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—', change: pctChange(cur.frequency, prev?.frequency) },
+      ],
     },
     {
       title: 'Landing Page Views', icon: 'FileText',
