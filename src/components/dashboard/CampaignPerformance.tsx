@@ -248,21 +248,21 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
 
 /* ─── Mobile cards ─── */
 
-function MobileCampaignCards({ data, currency, className }: { data: CampaignRow[]; currency: string; className?: string }) {
+function MobileCampaignCards({ data, currency, className, hidePlatform }: { data: CampaignRow[]; currency: string; className?: string; hidePlatform?: boolean }) {
   return (
     <div className={cn("space-y-2.5", className)}>
       {data.map(row => (
         <div key={row.key} className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <div className="px-3 pt-3 pb-3">
             <div className="flex items-center gap-2 mb-2">
-              {row.platform && (
+              {!hidePlatform && row.platform && (
                 <div className={cn("flex items-center justify-center w-7 h-7 rounded shrink-0", platformIconBg[row.platform])}>
                   <PlatformIcon platform={row.platform} size={14} />
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.campaignName}>{row.campaignLabel}</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">{row.platformLabel}</p>
+                {!hidePlatform && <p className="text-[11px] text-muted-foreground leading-tight">{row.platformLabel}</p>}
               </div>
             </div>
 
