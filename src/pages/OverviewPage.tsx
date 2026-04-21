@@ -9,6 +9,7 @@ import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
+import { Ga4OverviewTile } from '@/components/dashboard/Ga4OverviewTile';
 import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
 import { useEffect, useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
@@ -44,6 +45,7 @@ function formatCompact(n: number): string {
 // Default order of top-level Overview sections (ids must be stable across releases).
 const DEFAULT_SECTION_ORDER = [
   'kpis',
+  'ga4',
   'contribution',
   'trends',
   'funnel',
@@ -234,6 +236,10 @@ export default function OverviewPage() {
           <PlatformContributionCard platforms={platformSummaries} />
         </div>
       ),
+    },
+    ga4: {
+      label: 'Web Analytics (GA4)',
+      node: <Ga4OverviewTile />,
     },
     trends: {
       label: 'Trends',

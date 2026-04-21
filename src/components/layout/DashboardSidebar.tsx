@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
@@ -27,6 +27,7 @@ export function DashboardSidebar() {
       label: client.platforms[p].label,
       entry: platformIconEntries[p],
     })),
+    { to: '/ga4', label: 'Web Analytics', entry: { type: 'lucide' as const, icon: Globe } },
     ...(isAdmin
       ? [
           { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },

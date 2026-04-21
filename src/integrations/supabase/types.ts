@@ -567,6 +567,7 @@ export type Database = {
               video_views: number
             }[]
           }
+      get_google_service_account_json: { Args: never; Returns: string }
       get_or_create_active_client: {
         Args: never
         Returns: {
@@ -659,6 +660,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      internal_get_google_sa_json: { Args: never; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user" | "superadmin"
