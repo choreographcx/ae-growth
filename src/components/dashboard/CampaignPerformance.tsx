@@ -82,7 +82,10 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
       const name = r.campaign_name?.trim();
       if (!name) continue;
       const platformKey = normalizePlatform(r.platform);
-      const key = `${platformKey ?? 'other'}::${name}`;
+      const label = getCampaignLabel(r.campaign_name);
+      // Group by display label + platform so campaigns sharing the same
+      // label (e.g. multiple "Red Sea" phases on Snapchat) collapse into one row.
+      const key = `${platformKey ?? 'other'}::${label.toLowerCase()}`;
       let arr = buckets.get(key);
       if (!arr) { arr = []; buckets.set(key, arr); }
       arr.push(r);
@@ -92,9 +95,13 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
     buckets.forEach((rows, key) => {
       const a = aggregateRows(rows, 'all');
       const platformKey = normalizePlatform(rows[0].platform);
+      const uniqueNames = Array.from(new Set(rows.map(r => r.campaign_name).filter(Boolean))) as string[];
+      const displayName = uniqueNames.length > 1
+        ? `${uniqueNames.length} campaigns: ${uniqueNames.join(', ')}`
+        : (rows[0].campaign_name || '—');
       out.push({
         key,
-        campaignName: rows[0].campaign_name || '—',
+        campaignName: displayName,
         campaignLabel: getCampaignLabel(rows[0].campaign_name),
         platform: platformKey,
         platformLabel: platformKey ? PLATFORM_LABELS[platformKey] : (rows[0].platform || '—'),
