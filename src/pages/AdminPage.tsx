@@ -23,6 +23,7 @@ import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSect
 import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
 import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
+import { PlatformIntegrityPanel } from '@/components/admin/PlatformIntegrityPanel';
 
 const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
   { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
@@ -166,6 +167,11 @@ export default function AdminPage() {
             {needsSetup > 0 && (
               <span className="text-amber-600">{needsSetup} need setup</span>
             )}
+          </div>
+
+          {/* BigQuery currency integrity warnings */}
+          <div className="mb-4">
+            <PlatformIntegrityPanel client={client} />
           </div>
 
           {/* Modular Platform Cards Grid */}

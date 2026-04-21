@@ -665,6 +665,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_platform_currency_integrity: {
+        Args: { p_end?: string; p_start?: string }
+        Returns: {
+          implied_rate: number
+          platform: string
+          rows_scanned: number
+          total_cost: number
+          total_cost_usd: number
+        }[]
+      }
       get_profile_is_approved: { Args: { _user_id: string }; Returns: boolean }
       get_singleton_client: {
         Args: never
