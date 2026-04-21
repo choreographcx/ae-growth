@@ -43,7 +43,7 @@ export const defaultClient: ClientProfile = {
     linkedin: { key: 'linkedin', label: 'LinkedIn', enabled: true, color: 'hsl(199, 89%, 48%)', accountIds: ['li_901234'], budget: 20000, budgetType: 'monthly', primaryKpi: 'leads', conversionSource: 'insight_tag', includeInOverview: true, includeInDiagnostics: true, reportingCurrency: 'USD', sourceLabel: '', namingConvention: '', excludedCampaignFilter: '', notes: '' },
     programmatic: { key: 'programmatic', label: 'Programmatic', enabled: true, color: 'hsl(262, 80%, 65%)', accountIds: ['prog_567890'], budget: 15000, budgetType: 'monthly', primaryKpi: 'impressions', conversionSource: 'pixel', includeInOverview: true, includeInDiagnostics: true, reportingCurrency: 'USD', sourceLabel: '', namingConvention: '', excludedCampaignFilter: '', notes: '' },
   },
-  alertThresholds: { cpaSpike: 25, ctrDrop: 20, frequencyThreshold: 4, zeroConversionSpend: 500, viewabilityThreshold: 50 },
+  alertThresholds: { cpaSpike: 25, ctrDrop: 20, zeroConversionSpend: 500, viewabilityThreshold: 50 },
   metricMappings: defaultMetricMappings,
   namingNormalization: defaultNaming,
 };
