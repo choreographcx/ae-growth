@@ -314,7 +314,6 @@ export default function OverviewPage() {
           Failed to load data: {error}
         </div>
       )}
-      {loading && <LoadingOverlay fixed message="Loading dashboard data…" />}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={visibleOrder} strategy={verticalListSortingStrategy}>
