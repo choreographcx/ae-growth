@@ -74,13 +74,6 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "client_branding_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "public_singleton_client"
-            referencedColumns: ["id"]
-          },
         ]
       }
       client_data_sources: {
@@ -132,13 +125,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_data_sources_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -198,13 +184,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_kpi_thresholds_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -282,13 +261,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_platform_settings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -369,13 +341,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: true
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_reporting_settings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "public_singleton_client"
             referencedColumns: ["id"]
           },
         ]
@@ -532,37 +497,7 @@ export type Database = {
       }
     }
     Views: {
-      public_singleton_branding: {
-        Row: {
-          accent_hex: string | null
-          card_radius: string | null
-          chart_palette: string | null
-          dark_logo_url: string | null
-          favicon_url: string | null
-          font_family: string | null
-          logo_url: string | null
-          primary_hex: string | null
-          secondary_hex: string | null
-          sidebar_style: string | null
-          theme_mode: string | null
-        }
-        Relationships: []
-      }
-      public_singleton_client: {
-        Row: {
-          id: string | null
-          name: string | null
-        }
-        Insert: {
-          id?: string | null
-          name?: string | null
-        }
-        Update: {
-          id?: string | null
-          name?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_dashboard_conversion_breakdown: {
@@ -668,6 +603,29 @@ export type Database = {
         }[]
       }
       get_profile_is_approved: { Args: { _user_id: string }; Returns: boolean }
+      get_public_branding: {
+        Args: never
+        Returns: {
+          accent_hex: string
+          card_radius: string
+          chart_palette: string
+          dark_logo_url: string
+          favicon_url: string
+          font_family: string
+          logo_url: string
+          primary_hex: string
+          secondary_hex: string
+          sidebar_style: string
+          theme_mode: string
+        }[]
+      }
+      get_public_client_info: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       get_singleton_client: {
         Args: never
         Returns: {
