@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 
-type FunnelKey = 'lower' | 'upper';
+type FunnelKey = 'lower' | 'upper' | 'excluded';
 
 interface Props {
   /** Restrict to a single platform. Omit to show all platforms (Overview). */
@@ -26,24 +26,25 @@ interface Props {
 const FUNNEL_BADGE: Record<string, string> = {
   lower: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
   upper: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
+  excluded: 'bg-muted text-muted-foreground border-border',
 };
 
 function badgeClass(group: string) {
   const g = group.toLowerCase();
   if (g.includes('lower')) return FUNNEL_BADGE.lower;
   if (g.includes('upper')) return FUNNEL_BADGE.upper;
-  return 'bg-muted text-muted-foreground border-border';
+  return FUNNEL_BADGE.excluded;
 }
 
 export function ConversionBreakdownCard({ platform, start, end, campaigns, className, aggregateAcrossPlatforms = false }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
-  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true });
+  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: false });
 
   const toggle = (key: FunnelKey) => setEnabled(prev => {
     const next = { ...prev, [key]: !prev[key] };
-    // Prevent both being unchecked — re-enable the other one.
-    if (!next.lower && !next.upper) return prev;
+    // Prevent all being unchecked — re-enable the toggled one.
+    if (!next.lower && !next.upper && !next.excluded) return prev;
     return next;
   });
 
@@ -54,10 +55,10 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
       const isUpper = g.includes('upper');
       if (isLower) return enabled.lower;
       if (isUpper) return enabled.upper;
-      // Unknown / unspecified groups always show when at least one filter is on.
-      return enabled.lower || enabled.upper;
+      // Anything else (excluded / suppressed / unspecified) falls under Excluded.
+      return enabled.excluded;
     });
-  }, [rows, enabled.lower, enabled.upper]);
+  }, [rows, enabled.lower, enabled.upper, enabled.excluded]);
 
   // When aggregating across platforms (Overview), collapse rows that share the
   // same conversion_name + funnel_group so totals roll up cleanly.
@@ -108,6 +109,14 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
                 aria-label="Show Upper Funnel"
               />
               Upper Funnel
+            </label>
+            <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
+              <Checkbox
+                checked={enabled.excluded}
+                onCheckedChange={() => toggle('excluded')}
+                aria-label="Show Excluded"
+              />
+              Excluded
             </label>
           </div>
         </div>
