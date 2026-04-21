@@ -495,19 +495,6 @@ export function useDashboardDaily(
     return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label));
   }, [allRows]);
 
-  // Campaigns dropdown shows ONLY the 3rd segment (Campaign) from the naming
-  // convention, de-duplicated. Selecting a label filters all raw campaign
-  // rows whose parsed `campaign` matches.
-  const availableCampaigns = useMemo(
-    () => buildDimensionOptions(p => p.campaign),
-    [allRows, platformRawSet, parsedByName]
-  );
-
-  const campaignsByPlatform = useMemo(
-    () => buildDimensionByPlatform(p => p.campaign),
-    [allRows, parsedByName]
-  );
-
   // Helpers to build dimension option lists from parsed campaign names.
   // 'Unknown' is sorted last so the most informative buckets surface first.
   const sortDim = (arr: string[]) =>
@@ -541,6 +528,12 @@ export function useDashboardDaily(
     buckets.forEach((set, k) => { out[k] = sortDim(Array.from(set)); });
     return out;
   };
+
+  // Campaigns dropdown shows ONLY the 3rd segment (Campaign) from the naming
+  // convention, de-duplicated. Selecting a label filters all raw campaign
+  // rows whose parsed `campaign` matches.
+  const availableCampaigns  = useMemo(() => buildDimensionOptions(p => p.campaign), [allRows, platformRawSet, parsedByName]);
+  const campaignsByPlatform = useMemo(() => buildDimensionByPlatform(p => p.campaign), [allRows, parsedByName]);
 
   const availableObjectives  = useMemo(() => buildDimensionOptions(p => p.objective), [allRows, platformRawSet, parsedByName]);
   const objectivesByPlatform = useMemo(() => buildDimensionByPlatform(p => p.objective), [allRows, parsedByName]);
