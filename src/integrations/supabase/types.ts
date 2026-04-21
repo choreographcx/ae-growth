@@ -500,6 +500,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      diag_frequency_signal: {
+        Args: { p_end?: string; p_start?: string }
+        Returns: {
+          freq_nonnull: number
+          freq_positive: number
+          max_frequency: number
+          max_reach: number
+          platform: string
+          reach_positive: number
+          rows_total: number
+          sample_frequency: number
+          sample_reach: number
+        }[]
+      }
       get_active_ga4_property_id: { Args: never; Returns: string }
       get_dashboard_conversion_breakdown: {
         Args: {
