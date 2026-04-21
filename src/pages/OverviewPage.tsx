@@ -8,6 +8,7 @@ import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
+import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
 import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { Ga4OverviewTile } from '@/components/dashboard/Ga4OverviewTile';
 import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
@@ -262,25 +263,8 @@ export default function OverviewPage() {
     breakdowns: {
       label: 'Market / Channel / Objective Breakdown',
       node: (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Breakdowns" subtitle="Spend, conversions, and CPA split by parsed campaign segments" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 md:gap-3">
-            <DimensionBreakdownTable
-              rows={rows}
-              pick={(r) => getCampaignMarket(r.campaign_name)}
-              title="By Market"
-            />
-            <DimensionBreakdownTable
-              rows={rows}
-              pick={(r) => getCampaignChannel(r.campaign_name)}
-              title="By Channel"
-            />
-            <DimensionBreakdownTable
-              rows={rows}
-              pick={(r) => getCampaignObjective(r.campaign_name)}
-              title="By Objective"
-            />
-          </div>
+        <div className="print-break-before">
+          <BreakdownDimensionCard rows={rows} />
         </div>
       ),
     },
