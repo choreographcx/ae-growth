@@ -55,6 +55,8 @@ export interface DashboardTotals {
   cpaAll: number;
   cpaLowerFunnel: number;
   cpm: number;
+  /** Average impressions per unique user reached (impressions / reach). */
+  frequency: number;
   conversionRate: number;
   conversionRateLowerFunnel: number;
   costPerLPV: number;
@@ -158,6 +160,7 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     cpaAll: safeDiv(t.spend, t.conversionsAll),
     cpaLowerFunnel: safeDiv(t.spend, t.conversionsLowerFunnel),
     cpm: safeDiv(t.spend, t.impressions) * 1000,
+    frequency: safeDiv(t.impressions, t.reach),
     conversionRate: safeDiv(conversions, t.clicks) * 100,
     conversionRateLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.clicks) * 100,
     costPerLPV: safeDiv(t.spend, t.landingPageViews),
