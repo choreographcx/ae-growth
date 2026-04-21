@@ -27,6 +27,8 @@ export interface DashboardDailyRow {
   conversions_upper_funnel: number;
   conversion_value: number;
   reach: number;
+  /** Platform-reported frequency (impressions / unique users), as returned by the source platform. */
+  frequency?: number | null;
   landing_page_views: number;
   outbound_clicks?: number;
   video_views: number;
@@ -55,7 +57,10 @@ export interface DashboardTotals {
   cpaAll: number;
   cpaLowerFunnel: number;
   cpm: number;
-  /** Average impressions per unique user reached (impressions / reach). */
+  /**
+   * Average frequency reported by the source platforms (impression-weighted),
+   * NOT computed locally. Falls back to 0 when no rows report a frequency.
+   */
   frequency: number;
   conversionRate: number;
   conversionRateLowerFunnel: number;
@@ -126,6 +131,10 @@ export function pickConversions(r: DashboardDailyRow, mode: ConversionMode): num
 }
 
 function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): DashboardTotals {
+  // Impression-weighted accumulators for platform-reported frequency.
+  let freqWeightedSum = 0;
+  let freqImpressions = 0;
+
   const t = rows.reduce((a, r) => {
     a.spend += +r.cost || 0;
     a.impressions += +r.impressions || 0;
@@ -139,6 +148,12 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     a.outboundClicks += +r.outbound_clicks || 0;
     a.videoViews += +r.video_views || 0;
     a.videoP100 += +r.video_p100 || 0;
+    const f = r.frequency == null ? null : +r.frequency;
+    const imps = +r.impressions || 0;
+    if (f != null && isFinite(f) && f > 0 && imps > 0) {
+      freqWeightedSum += f * imps;
+      freqImpressions += imps;
+    }
     return a;
   }, {
     spend: 0, impressions: 0, clicks: 0,
@@ -151,6 +166,10 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     ? (t.conversionsLowerFunnel > 0 ? t.conversionsLowerFunnel : t.conversionsAll)
     : t.conversionsAll;
 
+  // Use the platform-reported frequency (impression-weighted average across rows).
+  // No fallback to impressions/reach — if the platform doesn't report it, show 0.
+  const frequency = freqImpressions > 0 ? freqWeightedSum / freqImpressions : 0;
+
   return {
     ...t,
     conversions,
@@ -160,7 +179,7 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     cpaAll: safeDiv(t.spend, t.conversionsAll),
     cpaLowerFunnel: safeDiv(t.spend, t.conversionsLowerFunnel),
     cpm: safeDiv(t.spend, t.impressions) * 1000,
-    frequency: safeDiv(t.impressions, t.reach),
+    frequency,
     conversionRate: safeDiv(conversions, t.clicks) * 100,
     conversionRateLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.clicks) * 100,
     costPerLPV: safeDiv(t.spend, t.landingPageViews),

@@ -558,6 +558,7 @@ export type Database = {
               conversions_upper_funnel: number
               cost: number
               date: string
+              frequency: number
               impressions: number
               landing_page_views: number
               outbound_clicks: number
