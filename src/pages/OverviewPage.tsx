@@ -8,6 +8,8 @@ import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
 import { LayoutEditToggle } from '@/components/dashboard/LayoutEditToggle';
+import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
+import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
 import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
