@@ -90,8 +90,6 @@ export default function OverviewPage() {
   ].filter(s => s.value > 0 || s.label === 'Lower-Funnel Conversions'), [totals, lf]);
 
   // Insight flags for KPI cards
-  const highFreq     = totals.frequency >= 4;
-  const ctrFalling   = previousTotals && totals.ctr < previousTotals.ctr;
   const weakLpvRate  = totals.ctr >= 1.5 && totals.lpvRate > 0 && totals.lpvRate < 30;
   const reachUpConvFlat = previousTotals && totals.reach > previousTotals.reach * 1.1 && lf.conversions <= (lfPrev?.conversions ?? 0);
 
