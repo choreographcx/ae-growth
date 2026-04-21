@@ -284,7 +284,7 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
       is_enabled: cfg.enabled,
       monthly_budget: cfg.budget || null,
       budget_type: cfg.budgetType || 'annual',
-      currency: client.currency,
+      currency: cfg.reportingCurrency || client.currency,
       primary_kpi: cfg.primaryKpi || 'conversions',
       conversion_source: cfg.conversionSource || 'pixel',
       account_ids: cfg.accountIds ?? [],
