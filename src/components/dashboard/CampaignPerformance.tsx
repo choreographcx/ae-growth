@@ -11,6 +11,7 @@ import {
 } from '@/hooks/useDashboardDaily';
 import { PlatformKey } from '@/types/dashboard';
 import { platformIconEntries } from '@/lib/platformIcons';
+import { getCampaignLabel } from '@/lib/campaignNaming';
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
   meta: 'Meta', google: 'Google Ads', tiktok: 'TikTok', snapchat: 'Snapchat',
@@ -20,6 +21,7 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
 interface CampaignRow {
   key: string;
   campaignName: string;
+  campaignLabel: string;
   platform: PlatformKey | null;
   platformLabel: string;
   spend: number;
@@ -93,6 +95,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
       out.push({
         key,
         campaignName: rows[0].campaign_name || '—',
+        campaignLabel: getCampaignLabel(rows[0].campaign_name),
         platform: platformKey,
         platformLabel: platformKey ? PLATFORM_LABELS[platformKey] : (rows[0].platform || '—'),
         spend: a.spend,
@@ -152,14 +155,14 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
 
   const cols: Col[] = [
     {
-      key: 'campaignName', label: 'Campaign', format: row => (
+      key: 'campaignLabel', label: 'Campaign', format: row => (
         <div className="flex items-center gap-2 min-w-0">
           {row.platform && (
             <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0", platformIconBg[row.platform])}>
               <PlatformIcon platform={row.platform} size={12} />
             </span>
           )}
-          <span className="truncate" title={row.campaignName}>{row.campaignName}</span>
+          <span className="truncate" title={row.campaignName}>{row.campaignLabel}</span>
         </div>
       ),
     },
@@ -213,7 +216,7 @@ export function CampaignPerformance({ limit = 25, className }: CampaignPerforman
                     key={c.key as string}
                     className={cn(
                       "px-4 py-3 text-xs tabular-nums",
-                      c.key === 'campaignName'
+                      c.key === 'campaignLabel'
                         ? 'font-semibold text-card-foreground text-left max-w-[320px]'
                         : 'text-card-foreground whitespace-nowrap',
                       c.align === 'right' ? 'text-right' : 'text-left',
@@ -246,7 +249,7 @@ function MobileCampaignCards({ data, currency, className }: { data: CampaignRow[
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.campaignName}>{row.campaignName}</p>
+                <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.campaignName}>{row.campaignLabel}</p>
                 <p className="text-[11px] text-muted-foreground leading-tight">{row.platformLabel}</p>
               </div>
             </div>

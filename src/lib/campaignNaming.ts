@@ -59,3 +59,10 @@ export function getCampaignObjective(name: string | null | undefined): string {
 export function getCampaignChannel(name: string | null | undefined): string {
   return parseCampaignName(name).channel;
 }
+/** Display label = the 3rd underscore segment (campaign), or full name if not parseable. */
+export function getCampaignLabel(name: string | null | undefined): string {
+  if (!name) return UNKNOWN;
+  const parts = name.split('_').map(p => p.trim()).filter(Boolean);
+  if (parts.length >= 3 && parts[2]) return parts[2];
+  return name;
+}
