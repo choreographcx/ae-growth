@@ -500,6 +500,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_active_ga4_property_id: { Args: never; Returns: string }
       get_dashboard_conversion_breakdown: {
         Args: {
           p_campaign_names?: string[]
