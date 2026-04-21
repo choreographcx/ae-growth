@@ -8,6 +8,7 @@ import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
 import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
+import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
 import { useEffect, useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
@@ -47,6 +48,7 @@ const DEFAULT_SECTION_ORDER = [
   'trends',
   'funnel',
   'breakdowns',
+  'conversionBreakdown',
   'platforms',
   'campaigns',
   'insights',
@@ -276,6 +278,19 @@ export default function OverviewPage() {
               title="By Objective"
             />
           </div>
+        </div>
+      ),
+    },
+    conversionBreakdown: {
+      label: 'Conversion Breakdown',
+      node: (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Conversion Breakdown" subtitle="All tracked conversions, aggregated across platforms" />
+          <ConversionBreakdownCard
+            start={data.range.start}
+            end={data.range.end}
+            aggregateAcrossPlatforms
+          />
         </div>
       ),
     },

@@ -9,11 +9,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 type FunnelKey = 'lower' | 'upper';
 
 interface Props {
-  platform: PlatformKey;
+  /** Restrict to a single platform. Omit to show all platforms (Overview). */
+  platform?: PlatformKey;
   start: Date;
   end: Date;
   campaigns?: string[];
   className?: string;
+  /**
+   * When true, aggregate identical conversion names across platforms into a
+   * single row. Used on Overview where rows from Meta/Google/etc. should roll
+   * up. When false (default), each platform's rows are shown verbatim.
+   */
+  aggregateAcrossPlatforms?: boolean;
 }
 
 const FUNNEL_BADGE: Record<string, string> = {
@@ -28,7 +35,7 @@ function badgeClass(group: string) {
   return 'bg-muted text-muted-foreground border-border';
 }
 
-export function ConversionBreakdownCard({ platform, start, end, campaigns, className }: Props) {
+export function ConversionBreakdownCard({ platform, start, end, campaigns, className, aggregateAcrossPlatforms = false }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
   const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true });
@@ -52,9 +59,26 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
     });
   }, [rows, enabled.lower, enabled.upper]);
 
+  // When aggregating across platforms (Overview), collapse rows that share the
+  // same conversion_name + funnel_group so totals roll up cleanly.
+  const aggregated = useMemo(() => {
+    if (!aggregateAcrossPlatforms) return filtered;
+    const map = new Map<string, typeof filtered[number]>();
+    for (const r of filtered) {
+      const key = `${r.conversion_name}::${r.conversion_funnel_group}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.conversions_all += r.conversions_all || 0;
+      } else {
+        map.set(key, { ...r, conversions_all: r.conversions_all || 0 });
+      }
+    }
+    return Array.from(map.values());
+  }, [filtered, aggregateAcrossPlatforms]);
+
   const sorted = useMemo(
-    () => [...filtered].sort((a, b) => b.conversions_all - a.conversions_all),
-    [filtered]
+    () => [...aggregated].sort((a, b) => b.conversions_all - a.conversions_all),
+    [aggregated]
   );
   const total = useMemo(() => sorted.reduce((s, r) => s + (r.conversions_all || 0), 0), [sorted]);
 
@@ -99,7 +123,7 @@ export function ConversionBreakdownCard({ platform, start, end, campaigns, class
       )}
       {!loading && !error && sorted.length === 0 && (
         <div className="px-5 py-6 text-xs text-muted-foreground">
-          No conversion events recorded for this platform in the selected period.
+          No conversion events recorded {platform ? 'for this platform' : 'across platforms'} in the selected period.
         </div>
       )}
 
