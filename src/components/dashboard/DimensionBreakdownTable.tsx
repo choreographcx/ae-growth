@@ -132,7 +132,6 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
             </thead>
             <tbody>
               {grouped.map((g, i) => {
-                const wasted = g.spend > 0 && g.lfConv === 0 && g.share >= 5;
                 const winner = g.cpa > 0 && g.cpa === minCpa;
                 return (
                   <tr key={g.name} className={cn(
@@ -140,7 +139,7 @@ export function DimensionBreakdownTable({ rows, pick, title, subtitle, hideIfAll
                     i % 2 === 1 && 'bg-muted/[0.04]'
                   )}>
                     <td className="px-4 py-3 font-semibold text-card-foreground text-xs">{g.name}</td>
-                    <td className={cn('px-4 py-3 text-right text-xs tabular-nums text-card-foreground', wasted && 'bg-destructive/[0.08]')}>
+                    <td className="px-4 py-3 text-right text-xs tabular-nums text-card-foreground">
                       <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtMoney(g.spend, 0)}</span>
                     </td>
                     <td className="px-4 py-3 text-right text-xs tabular-nums text-card-foreground">{g.share.toFixed(1)}%</td>
