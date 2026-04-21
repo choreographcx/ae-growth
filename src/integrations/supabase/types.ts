@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      _debug_snap_rows: {
+        Row: {
+          audience_type: string | null
+          campaign_id: string | null
+          campaign_name: string | null
+          campaign_objective: string | null
+          clicks: number | null
+          cost: number | null
+          date: string | null
+          id: number
+          impressions: number | null
+          is_conversion_row: boolean | null
+          platform: string | null
+          publisher_platform: string | null
+          reach: number | null
+        }
+        Insert: {
+          audience_type?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          campaign_objective?: string | null
+          clicks?: number | null
+          cost?: number | null
+          date?: string | null
+          id?: number
+          impressions?: number | null
+          is_conversion_row?: boolean | null
+          platform?: string | null
+          publisher_platform?: string | null
+          reach?: number | null
+        }
+        Update: {
+          audience_type?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          campaign_objective?: string | null
+          clicks?: number | null
+          cost?: number | null
+          date?: string | null
+          id?: number
+          impressions?: number | null
+          is_conversion_row?: boolean | null
+          platform?: string | null
+          publisher_platform?: string | null
+          reach?: number | null
+        }
+        Relationships: []
+      }
       _debug_snap_stats: {
         Row: {
           captured_at: string | null
@@ -543,6 +591,7 @@ export type Database = {
     }
     Functions: {
       _debug_snap_capture: { Args: never; Returns: undefined }
+      _debug_snap_rows_capture: { Args: never; Returns: undefined }
       debug_snapchat_reach: {
         Args: { p_end: string; p_start: string }
         Returns: {
