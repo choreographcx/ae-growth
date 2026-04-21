@@ -163,11 +163,8 @@ export default function OverviewPage() {
           change: pctChange(cur.reach, prev?.reach),
           trend: [],
         },
-        supporting: [
-          { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
-        ],
-        tooltip: (highFreq && ctrFalling) ? 'Frequency is high (≥4) while CTR is declining — possible audience fatigue.'
-          : reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
+        supporting: [],
+        tooltip: reachUpConvFlat ? 'Reach is growing but lower-funnel conversions are flat — efficiency may be weakening.' : undefined,
       },
       {
         title: 'Landing Page Views', icon: 'FileText',
