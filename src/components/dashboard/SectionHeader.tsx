@@ -153,7 +153,7 @@ function DesktopInlineFilters({
       )}
       <MultiSelectFilter label="Campaigns" options={campaignNames} selected={selectedCampaigns} onChange={setSelectedCampaigns} />
       {objectiveOptions.length > 0 && (
-        <MultiSelectFilter label="Objective" options={objectiveOptions} selected={selectedObjectives} onChange={setSelectedObjectives} />
+        <MultiSelectFilter label="Objectives" options={objectiveOptions} selected={selectedObjectives} onChange={setSelectedObjectives} />
       )}
       {hasFilters && (
         <button
