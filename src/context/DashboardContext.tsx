@@ -197,7 +197,7 @@ const emptyTotals = {
   ctr: 0, cpc: 0, cpa: 0, cpaAll: 0, cpaLowerFunnel: 0, cpm: 0,
   conversionRate: 0, conversionRateLowerFunnel: 0,
   costPerLPV: 0, lpvRate: 0, cvrLowerFunnel: 0,
-  frequency: 0, roas: 0, outboundCtr: 0,
+  roas: 0, outboundCtr: 0,
   costPerVideoView: 0, videoCompletionRate: 0,
 };
 
