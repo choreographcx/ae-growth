@@ -183,7 +183,7 @@ export default function OverviewPage() {
     ];
 
     return applyCurrencyToKPIGroups(groups, currency, 26);
-  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, highFreq, ctrFalling, weakLpvRate, reachUpConvFlat]);
+  }, [totals, previousTotals, lf, lfPrev, lfConvSeries, currency, totalBudget, spendSeries, weakLpvRate, reachUpConvFlat]);
 
   // Layout persistence
   const defaultOrder = useMemo(() => [...DEFAULT_SECTION_ORDER], []);
