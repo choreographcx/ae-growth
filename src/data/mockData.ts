@@ -43,7 +43,7 @@ export const defaultClient: ClientProfile = {
     linkedin: { key: 'linkedin', label: 'LinkedIn', enabled: true, color: 'hsl(199, 89%, 48%)', accountIds: ['li_901234'], budget: 20000, budgetType: 'monthly', primaryKpi: 'leads', conversionSource: 'insight_tag', includeInOverview: true, includeInDiagnostics: true, reportingCurrency: 'USD', sourceLabel: '', namingConvention: '', excludedCampaignFilter: '', notes: '' },
     programmatic: { key: 'programmatic', label: 'Programmatic', enabled: true, color: 'hsl(262, 80%, 65%)', accountIds: ['prog_567890'], budget: 15000, budgetType: 'monthly', primaryKpi: 'impressions', conversionSource: 'pixel', includeInOverview: true, includeInDiagnostics: true, reportingCurrency: 'USD', sourceLabel: '', namingConvention: '', excludedCampaignFilter: '', notes: '' },
   },
-  alertThresholds: { cpaSpike: 25, ctrDrop: 20, frequencyThreshold: 4, zeroConversionSpend: 500, viewabilityThreshold: 50 },
+  alertThresholds: { cpaSpike: 25, ctrDrop: 20, zeroConversionSpend: 500, viewabilityThreshold: 50 },
   metricMappings: defaultMetricMappings,
   namingNormalization: defaultNaming,
 };
@@ -108,9 +108,7 @@ export const overviewKPIGroups: KPIGroupData[] = [
     title: 'Reach',
     icon: 'Users',
     primary: { label: 'Reach', value: 8920000, formattedValue: '8.92M', change: 10.1, trend: generateTrend(8500000, 1000000) },
-    supporting: [
-      { label: 'Frequency', formattedValue: '1.40', change: 2.1 },
-    ],
+    supporting: [],
   },
 ];
 
@@ -163,7 +161,7 @@ export const alerts: AlertItem[] = [
   { id: '2', type: 'error', title: 'Meta tracking gap detected', description: '12% drop in attributed conversions. Check pixel and CAPI.', platform: 'meta', timestamp: '4h ago' },
   { id: '6', type: 'error', title: 'Snapchat zero conversions', description: '3 campaigns spent $420 with 0 conversions in past 48 hours.', platform: 'snapchat', timestamp: '1d ago' },
   { id: '1', type: 'warning', title: 'Rising CPA on TikTok', description: 'CPA increased 18% over the past 7 days. Review creative performance.', platform: 'tiktok', timestamp: '2h ago' },
-  { id: '4', type: 'warning', title: 'High frequency on Meta retargeting', description: 'Frequency hit 4.2 on retargeting campaigns. Rotate creative.', platform: 'meta', timestamp: '8h ago' },
+  
   { id: '5', type: 'success', title: 'Google Search CPA improved', description: 'Non-brand CPA decreased 12% week over week.', platform: 'google', timestamp: '12h ago' },
   { id: '3', type: 'info', title: 'LinkedIn pacing ahead', description: 'Projected to overspend by 5%. Consider reducing bids.', platform: 'linkedin', timestamp: '6h ago' },
 ];
@@ -192,7 +190,6 @@ export function generateCampaigns(platform: PlatformKey, count = 8): CampaignRow
       cpa: conversions > 0 ? +(spend / conversions).toFixed(2) : 0,
       conversionRate: +((conversions / clicks) * 100).toFixed(2),
       reach: Math.round(impressions * 0.7),
-      frequency: +(impressions / (impressions * 0.7)).toFixed(1),
       videoViews: platform === 'tiktok' || platform === 'snapchat' ? Math.round(impressions * 0.3) : undefined,
       completionRate: platform === 'tiktok' || platform === 'snapchat' ? +(20 + Math.random() * 40).toFixed(1) : undefined,
     };

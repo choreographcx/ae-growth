@@ -59,7 +59,6 @@ export interface ClientProfile {
 export interface AlertThresholds {
   cpaSpike: number;
   ctrDrop: number;
-  frequencyThreshold: number;
   zeroConversionSpend: number;
   viewabilityThreshold: number;
 }
@@ -115,7 +114,6 @@ export interface CampaignRow {
   cpa: number;
   conversionRate: number;
   reach?: number;
-  frequency?: number;
   videoViews?: number;
   completionRate?: number;
   platform?: PlatformKey;

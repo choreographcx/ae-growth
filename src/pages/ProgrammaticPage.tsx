@@ -46,9 +46,7 @@ export default function ProgrammaticPage() {
     {
       title: 'Reach', icon: 'Users',
       primary: { label: 'Reach', value: cur.reach, formattedValue: formatCompact(cur.reach), change: pctChange(cur.reach, prev?.reach), trend: [] },
-      supporting: [
-        { label: 'Frequency', formattedValue: cur.frequency > 0 ? cur.frequency.toFixed(2) : '—' },
-      ],
+      supporting: [],
     },
     {
       title: 'Video Performance', icon: 'Play',

@@ -60,7 +60,6 @@ export interface DashboardTotals {
   costPerLPV: number;
   lpvRate: number;
   cvrLowerFunnel: number;
-  frequency: number;
   roas: number;
   outboundCtr: number;
   costPerVideoView: number;
@@ -164,7 +163,6 @@ function aggregate(rows: DashboardDailyRow[], mode: ConversionMode = 'all'): Das
     costPerLPV: safeDiv(t.spend, t.landingPageViews),
     lpvRate: safeDiv(t.landingPageViews, t.clicks) * 100,
     cvrLowerFunnel: safeDiv(t.conversionsLowerFunnel, t.landingPageViews) * 100,
-    frequency: safeDiv(t.impressions, t.reach),
     roas: safeDiv(t.conversionValue, t.spend),
     outboundCtr: safeDiv(t.outboundClicks, t.impressions) * 100,
     costPerVideoView: safeDiv(t.spend, t.videoViews),
@@ -245,16 +243,6 @@ function buildRoasSeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
     .map(([date, { spend, value }]) => ({ date, value: spend > 0 ? +(value / spend).toFixed(2) : 0 }));
 }
 
-function buildFrequencySeries(rows: DashboardDailyRow[]): TimeSeriesPoint[] {
-  const byDate = new Map<string, { imps: number; reach: number }>();
-  for (const r of rows) {
-    const cur = byDate.get(r.date) || { imps: 0, reach: 0 };
-    cur.imps += +r.impressions || 0; cur.reach += +r.reach || 0;
-    byDate.set(r.date, cur);
-  }
-  return Array.from(byDate.entries()).sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, { imps, reach }]) => ({ date, value: reach > 0 ? +(imps / reach).toFixed(2) : 0 }));
-}
 
 export interface PlatformOption { key: PlatformKey; label: string; raw: string; }
 
@@ -305,7 +293,7 @@ interface UseDashboardDailyResult {
 
 export {
   aggregate as aggregateRows,
-  buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries, buildFrequencySeries,
+  buildTimeSeries, buildCpaSeries, buildCtrSeries, buildRoasSeries,
 };
 
 /**
