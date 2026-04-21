@@ -56,10 +56,12 @@ export function getCampaignMarket(name: string | null | undefined): string | nul
   const trimmed = name.trim();
   // Explicit SA prefix takes precedence over any other parsing.
   if (/^sa[_\s-]/i.test(trimmed)) return 'SA';
+  // Treat the placeholder "0000_" prefix as SA (Saudi Arabia).
+  if (/^0000[_\s-]/i.test(trimmed)) return 'SA';
   const m = parseCampaignName(trimmed).market;
   if (m === UNKNOWN) return m;
   const lower = m.toLowerCase();
-  // Treat the placeholder "0000" segment as SA (Saudi Arabia).
+  // Treat a bare "0000" market segment as SA as well.
   if (lower === '0000') return 'SA';
   return lower.toUpperCase();
 }
