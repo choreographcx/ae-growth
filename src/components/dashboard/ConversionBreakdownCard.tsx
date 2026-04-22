@@ -68,7 +68,7 @@ function normalizeConversionName(raw: string | null | undefined): string {
   const aliases: Record<string, string> = {
     'purchase': 'Purchase',
     'purchases': 'Purchase',
-    'complete_payment': 'Complete Payment',
+    'complete_payment': 'Purchase',
     'onsite_conversion.lead': 'Lead',
     'onsite_conversion.leaad': 'Lead',
     'lead': 'Lead',
