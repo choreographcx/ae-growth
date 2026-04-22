@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
 import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
 import { useGa4Report } from '@/hooks/useGa4Report';
