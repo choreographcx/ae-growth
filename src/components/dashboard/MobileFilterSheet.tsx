@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Filter, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { PlatformKey } from '@/types/dashboard';
 
 interface MobileFilterSheetProps {
@@ -105,45 +107,66 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
 
   const activeFilter = activeKey ? filters.find(f => f.key === activeKey) ?? null : null;
 
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          aria-label="Open filters"
-          className="h-9 lg:h-8 px-2.5 gap-1.5 text-xs shrink-0 relative"
+  const isMobile = useIsMobile();
+
+  const triggerButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      aria-label="Open filters"
+      className="h-9 lg:h-8 px-2.5 gap-1.5 text-xs shrink-0 relative"
+    >
+      <Filter size={14} className="text-muted-foreground" />
+      <span>Filter</span>
+      {totalSelected > 0 && (
+        <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold tabular-nums">
+          {totalSelected}
+        </span>
+      )}
+    </Button>
+  );
+
+  const body = !activeFilter ? (
+    <FilterListView
+      filters={filters}
+      onPick={setActiveKey}
+      onClose={() => setOpen(false)}
+      onClear={clearAll}
+      totalSelected={totalSelected}
+    />
+  ) : (
+    <FilterDetailView
+      filter={activeFilter}
+      onBack={() => setActiveKey(null)}
+      onApply={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>{triggerButton}</SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col"
         >
-          <Filter size={14} className="text-muted-foreground" />
-          <span>Filter</span>
-          {totalSelected > 0 && (
-            <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold tabular-nums">
-              {totalSelected}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col sm:rounded-2xl sm:inset-x-auto sm:w-fit sm:min-w-[360px] sm:max-w-[90vw] sm:left-1/2 sm:-translate-x-1/2 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:max-h-[80vh] sm:border"
+          {body}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={6}
+        className="p-0 w-fit min-w-[320px] max-w-[90vw] max-h-[80vh] flex flex-col overflow-hidden rounded-xl"
       >
-        {!activeFilter ? (
-          <FilterListView
-            filters={filters}
-            onPick={setActiveKey}
-            onClose={() => setOpen(false)}
-            onClear={clearAll}
-            totalSelected={totalSelected}
-          />
-        ) : (
-          <FilterDetailView
-            filter={activeFilter}
-            onBack={() => setActiveKey(null)}
-            onApply={() => setOpen(false)}
-          />
-        )}
-      </SheetContent>
-    </Sheet>
+        {body}
+      </PopoverContent>
+    </Popover>
   );
 }
 
