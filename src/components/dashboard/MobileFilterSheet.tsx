@@ -184,7 +184,7 @@ function FilterListView({
           </Button>
         )}
         <Button className="flex-1 h-10 text-sm font-semibold" onClick={onClose}>
-          Apply
+          Done
         </Button>
       </div>
     </>
