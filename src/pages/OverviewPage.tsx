@@ -44,7 +44,6 @@ function formatCompact(n: number): string {
 // Default order of top-level Overview sections (ids must be stable across releases).
 const DEFAULT_SECTION_ORDER = [
   'kpis',
-  'ga4',
   'contribution',
   'trends',
   'breakdowns',
@@ -209,6 +208,7 @@ export default function OverviewPage() {
       node: (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4">
           {kpiCards.map((g, i) => <KPIGroupCard key={i} data={g} />)}
+          <Ga4OverviewTile />
         </div>
       ),
     },
@@ -220,10 +220,6 @@ export default function OverviewPage() {
           <PlatformContributionCard platforms={platformSummaries} />
         </div>
       ),
-    },
-    ga4: {
-      label: 'Web Analytics (GA4)',
-      node: <Ga4OverviewTile />,
     },
     trends: {
       label: 'Trends',
