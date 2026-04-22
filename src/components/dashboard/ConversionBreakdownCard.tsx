@@ -233,7 +233,7 @@ export function ConversionBreakdownCard({
                       <td className="px-4 py-2.5 text-xs font-medium text-card-foreground">{r.conversion_name}</td>
                       <td className="px-4 py-2.5">
                         <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border', badgeClass(r.conversion_funnel_group))}>
-                          {r.conversion_funnel_group}
+                          {funnelLabel(r.conversion_funnel_group)}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-xs text-right tabular-nums font-semibold">{Math.round(r.conversions_all).toLocaleString()}</td>
