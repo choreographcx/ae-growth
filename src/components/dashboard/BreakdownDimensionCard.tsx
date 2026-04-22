@@ -56,9 +56,6 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
             ) : (
               <SelectItem value="channel">By Channel</SelectItem>
             )}
-            {isProgrammatic && (
-              <SelectItem value="campaignType">By Campaign Type</SelectItem>
-            )}
             <SelectItem value="objective">By Objective</SelectItem>
             <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
