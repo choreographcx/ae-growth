@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Filter, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { PlatformKey } from '@/types/dashboard';
 
 interface MobileFilterSheetProps {
