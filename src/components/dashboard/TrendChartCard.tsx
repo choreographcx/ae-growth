@@ -94,6 +94,8 @@ export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', val
     return ticks;
   }, [data]);
 
+  const gradientId = `grad-${title.replace(/[^a-zA-Z0-9]/g, '')}`;
+
   return (
     <div className={cn("bg-card rounded-xl border border-border p-5 shadow-sm", className)}>
       <h3 className="text-sm font-semibold text-card-foreground mb-4">{title}</h3>
@@ -101,7 +103,7 @@ export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', val
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
             <defs>
-              <linearGradient id={`grad-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={color} stopOpacity={0.2} />
                 <stop offset="100%" stopColor={color} stopOpacity={0} />
               </linearGradient>
@@ -126,7 +128,7 @@ export function TrendChartCard({ title, data, color = 'hsl(var(--chart-1))', val
               tickFormatter={currency ? undefined : (v: number) => `${valuePrefix}${formatCompactValue(v)}${valueSuffix}`}
             />
             <Tooltip content={<TrendTooltip title={title} currency={currency} valuePrefix={valuePrefix} valueSuffix={valueSuffix} />} />
-            <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#grad-${title.replace(/\s/g, '')})`} dot={false} />
+            <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill={`url(#${gradientId})`} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
