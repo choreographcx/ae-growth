@@ -1,16 +1,9 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
-import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 
 
 export default function ProgrammaticPage() {
-  const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'programmatic'), [data.rows]);
-
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
@@ -74,19 +67,6 @@ export default function ProgrammaticPage() {
       platformKey="programmatic"
       title="Programmatic"
       buildKpiCards={buildKpis}
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Campaign Type" subtitle="Display, Video, CTV, Audio breakdown via campaign_type." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.campaign_type}
-              title="By Campaign Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
