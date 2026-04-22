@@ -1,16 +1,9 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
-import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 
 
 export default function GoogleAdsPage() {
-  const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'google'), [data.rows]);
-
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
@@ -66,19 +59,6 @@ export default function GoogleAdsPage() {
       title="Google Ads"
       buildKpiCards={buildKpis}
       warnOnWastedSpend
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Campaign Type" subtitle="Search vs Performance Max vs Display vs Video." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.campaign_type}
-              title="By Campaign Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
