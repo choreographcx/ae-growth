@@ -88,9 +88,12 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
       const platformKey = normalizePlatform(r.platform);
       if (platformFilter && platformKey !== platformFilter) continue;
       const label = getCampaignLabel(r.campaign_name);
-      // Group by display label + platform so campaigns sharing the same
-      // label (e.g. multiple "Red Sea" phases on Snapchat) collapse into one row.
-      const key = `${platformKey ?? 'other'}::${label.toLowerCase()}`;
+      // When the platform column is hidden, group strictly by display label
+      // so identically-named campaigns across platforms collapse into one row.
+      // Otherwise group by platform + label.
+      const key = hidePlatformColumn
+        ? label.toLowerCase()
+        : `${platformKey ?? 'other'}::${label.toLowerCase()}`;
       let arr = buckets.get(key);
       if (!arr) { arr = []; buckets.set(key, arr); }
       arr.push(r);
@@ -100,16 +103,20 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     buckets.forEach((rows, key) => {
       const a = aggregateRows(rows, 'all');
       const platformKey = normalizePlatform(rows[0].platform);
+      const uniquePlatforms = Array.from(new Set(rows.map(r => normalizePlatform(r.platform)).filter(Boolean))) as PlatformKey[];
       const uniqueNames = Array.from(new Set(rows.map(r => r.campaign_name).filter(Boolean))) as string[];
       const displayName = uniqueNames.length > 1
         ? `${uniqueNames.length} campaigns: ${uniqueNames.join(', ')}`
         : (rows[0].campaign_name || '—');
+      const platformLabel = hidePlatformColumn && uniquePlatforms.length > 1
+        ? `${uniquePlatforms.length} platforms`
+        : platformKey ? PLATFORM_LABELS[platformKey] : (rows[0].platform || '—');
       out.push({
         key,
         campaignName: displayName,
         campaignLabel: getCampaignLabel(rows[0].campaign_name),
-        platform: platformKey,
-        platformLabel: platformKey ? PLATFORM_LABELS[platformKey] : (rows[0].platform || '—'),
+        platform: hidePlatformColumn && uniquePlatforms.length > 1 ? null : platformKey,
+        platformLabel,
         spend: a.spend,
         impressions: a.impressions,
         clicks: a.clicks,
@@ -120,7 +127,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
       });
     });
     return out;
-  }, [data.rows]);
+  }, [data.rows, platformFilter, hidePlatformColumn]);
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
