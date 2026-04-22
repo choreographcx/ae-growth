@@ -40,6 +40,7 @@ const queryClient = new QueryClient({
 });
 
 const PageFallback = () => null;
+const PageLoading = () => <LoadingOverlay fixed message="Loading…" />;
 
 function ProtectedRoutes() {
   const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
@@ -82,7 +83,7 @@ function ProtectedRoutes() {
   return (
     <DashboardProvider>
       <AppShell>
-        <Suspense fallback={<PageFallback />}>
+        <Suspense fallback={<PageLoading />}>
           <Routes>
             <Route path="/" element={<OverviewPage />} />
             <Route path="/meta" element={<MetaPage />} />
