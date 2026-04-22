@@ -67,6 +67,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
             {isGoogle && (
               <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
+            {isTikTok && (
+              <SelectItem value="audienceType">By Audience Type</SelectItem>
+            )}
             <SelectItem value="objective">By Objective</SelectItem>
             <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
