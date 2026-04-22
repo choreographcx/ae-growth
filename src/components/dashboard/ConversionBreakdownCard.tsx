@@ -167,15 +167,19 @@ export function ConversionBreakdownCard({
   }, [effectiveRows, enabled.lower, enabled.upper, enabled.excluded]);
 
   const aggregated = useMemo(() => {
-    if (!aggregateAcrossPlatforms) return filtered;
+    // Always normalize names so duplicates like "Purchase"/"purchase" or
+    // "onsite_conversion.lead"/"Lead" collapse into a single row. When
+    // aggregateAcrossPlatforms is false we still merge per-platform duplicates.
     const map = new Map<string, typeof filtered[number]>();
     for (const r of filtered) {
-      const key = `${r.conversion_name}::${r.conversion_funnel_group}`;
+      const canonicalName = normalizeConversionName(r.conversion_name);
+      const platformKey = aggregateAcrossPlatforms ? '*' : (r.platform || '');
+      const key = `${platformKey}::${canonicalName}::${r.conversion_funnel_group}`;
       const existing = map.get(key);
       if (existing) {
         existing.conversions_all += r.conversions_all || 0;
       } else {
-        map.set(key, { ...r, conversions_all: r.conversions_all || 0 });
+        map.set(key, { ...r, conversion_name: canonicalName, conversions_all: r.conversions_all || 0 });
       }
     }
     return Array.from(map.values());
