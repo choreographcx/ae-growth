@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { PlatformKey, KPIGroupData } from '@/types/dashboard';
 import { useDashboard } from '@/context/DashboardContext';
 import { aggregateRows, normalizePlatform, pctChange, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
