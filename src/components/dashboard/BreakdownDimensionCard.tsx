@@ -38,8 +38,7 @@ interface Props {
 
 export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isMeta = platformKey === 'meta';
-  const isProgrammatic = platformKey === 'programmatic';
-  const initial: Dim = isMeta ? 'placement' : isProgrammatic ? 'campaignType' : 'channel';
+  const initial: Dim = isMeta ? 'placement' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
