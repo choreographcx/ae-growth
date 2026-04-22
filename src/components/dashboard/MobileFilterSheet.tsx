@@ -125,7 +125,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col"
+        className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col sm:rounded-2xl sm:max-w-md sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:max-h-[80vh] sm:border"
       >
         {!activeFilter ? (
           <FilterListView
@@ -184,7 +184,7 @@ function FilterListView({
           </Button>
         )}
         <Button className="flex-1 h-10 text-sm font-semibold" onClick={onClose}>
-          Apply
+          Done
         </Button>
       </div>
     </>
