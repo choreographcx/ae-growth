@@ -254,19 +254,6 @@ export default function OverviewPage() {
         </div>
       ),
     },
-    channelBreakdown: {
-      label: 'Channel Breakdown',
-      node: (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Channel Breakdown" subtitle="Performance grouped by channel parsed from campaign names" />
-          <DimensionBreakdownTable
-            rows={rows}
-            pick={(r) => getCampaignChannel(r.campaign_name)}
-            title="By Channel"
-          />
-        </div>
-      ),
-    },
     conversionBreakdown: {
       label: 'Conversion Breakdown',
       node: (
