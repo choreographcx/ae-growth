@@ -122,19 +122,6 @@ export default function MetaPage() {
           </label>
         </div>
       }
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Audience Breakdown" subtitle="Raw audience_type from campaign data." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.audience_type}
-              title="By Audience Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
