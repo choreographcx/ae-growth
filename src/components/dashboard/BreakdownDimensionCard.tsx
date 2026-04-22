@@ -61,9 +61,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
           <SelectContent>
             {isMeta ? (
               <SelectItem value="placement">By Placement</SelectItem>
-            ) : (
+            ) : !isTikTok ? (
               <SelectItem value="channel">By Channel</SelectItem>
-            )}
+            ) : null}
             {isGoogle && (
               <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
