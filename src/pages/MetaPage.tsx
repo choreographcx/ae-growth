@@ -135,15 +135,6 @@ export default function MetaPage() {
               hideIfAllUnspecified
             />
           </div>
-          <div className="space-y-3">
-            <SectionHeader title="Campaign Objective" />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => resolveCampaignObjective(r.campaign_objective, r.campaign_name)}
-              title="By Objective"
-              hideIfAllUnspecified
-            />
-          </div>
         </div>
       )}
     />

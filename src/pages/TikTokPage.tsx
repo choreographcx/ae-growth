@@ -77,15 +77,6 @@ export default function TikTokPage() {
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">
-            <SectionHeader title="Campaign Objective" subtitle="Awareness vs traffic vs conversion-led campaigns." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => resolveCampaignObjective(r.campaign_objective, r.campaign_name)}
-              title="By Objective"
-              hideIfAllUnspecified
-            />
-          </div>
-          <div className="space-y-3">
             <SectionHeader title="Audience" />
             <DimensionBreakdownTable
               rows={scoped}
