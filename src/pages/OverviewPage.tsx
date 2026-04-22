@@ -3,6 +3,7 @@ import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { PerformanceBreakdown } from '@/components/dashboard/PerformanceBreakdown';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
+import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
@@ -46,10 +47,10 @@ const DEFAULT_SECTION_ORDER = [
   'ga4',
   'contribution',
   'trends',
-  'funnel',
   'breakdowns',
-  'conversionBreakdown',
   'performance',
+  'funnel',
+  'conversionBreakdown',
   'insights',
 ] as const;
 
@@ -239,8 +240,19 @@ export default function OverviewPage() {
       ),
     },
     funnel: {
-      label: 'Funnel',
-      node: <EnhancedFunnelCard steps={funnelSteps} />,
+      label: 'Conversion Mix & Funnel',
+      node: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-stretch">
+          {(totals.conversionsLowerFunnel + totals.conversionsUpperFunnel) > 0 && (
+            <ConversionSplitCard
+              lowerFunnel={totals.conversionsLowerFunnel}
+              upperFunnel={totals.conversionsUpperFunnel}
+              className="h-full"
+            />
+          )}
+          <EnhancedFunnelCard steps={funnelSteps} className="h-full" />
+        </div>
+      ),
     },
     breakdowns: {
       label: 'Market / Channel / Objective Breakdown',
