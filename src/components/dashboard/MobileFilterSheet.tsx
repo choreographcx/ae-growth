@@ -125,7 +125,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col sm:rounded-2xl sm:max-w-md sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:max-h-[80vh] sm:border"
+        className="p-0 rounded-t-2xl max-h-[85vh] flex flex-col sm:rounded-2xl sm:inset-x-auto sm:w-fit sm:min-w-[360px] sm:max-w-[90vw] sm:left-1/2 sm:-translate-x-1/2 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 sm:max-h-[80vh] sm:border"
       >
         {!activeFilter ? (
           <FilterListView
