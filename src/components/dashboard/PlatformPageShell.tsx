@@ -250,7 +250,7 @@ export function PlatformPageShell({
       {/* Breakdowns by Market / Channel / Objective (parsed from campaign names) */}
       {scoped.length > 0 && (
         <div className="print-break-before">
-          <BreakdownDimensionCard rows={scoped} />
+          <BreakdownDimensionCard rows={scoped} platformKey={platformKey} />
         </div>
       )}
 
