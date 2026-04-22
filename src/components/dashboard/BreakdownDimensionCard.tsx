@@ -27,19 +27,26 @@ const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => stri
     title: 'By Campaign Type',
     pick: r => r.campaign_type,
   },
+  audienceType: {
+    label: 'By Audience Type',
+    title: 'By Audience Type',
+    pick: r => r.audience_type,
+  },
 };
 
 interface Props {
   rows: DashboardDailyRow[];
   /** When provided, the dropdown options adapt to the platform.
-   *  Meta swaps Channel → Placement. Google Ads adds Campaign Type. */
+   *  Meta swaps Channel → Placement. Google Ads adds Campaign Type.
+   *  TikTok adds Audience Type. */
   platformKey?: PlatformKey;
 }
 
 export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isMeta = platformKey === 'meta';
   const isGoogle = platformKey === 'google';
-  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : 'channel';
+  const isTikTok = platformKey === 'tiktok';
+  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : isTikTok ? 'audienceType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
