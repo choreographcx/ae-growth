@@ -3,21 +3,37 @@ import { DimensionBreakdownTable } from './DimensionBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { getCampaignMarket, getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PlatformKey } from '@/types/dashboard';
 
-type Dim = 'market' | 'channel' | 'objective';
+type Dim = 'market' | 'channel' | 'objective' | 'placement';
 
 const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => string | null | undefined; title: string }> = {
   market:    { label: 'By Market',    pick: r => getCampaignMarket(r.campaign_name),    title: 'By Market' },
   channel:   { label: 'By Channel',   pick: r => getCampaignChannel(r.campaign_name),   title: 'By Channel' },
   objective: { label: 'By Objective', pick: r => resolveCampaignObjective(r.campaign_objective, r.campaign_name), title: 'By Objective' },
+  placement: {
+    label: 'By Placement',
+    title: 'By Placement',
+    pick: r => {
+      const v = (r.publisher_platform || '').toLowerCase();
+      if (!v) return null;
+      if (v.includes('facebook') || v === 'fb') return 'Facebook';
+      if (v.includes('instagram') || v === 'ig') return 'Instagram';
+      return null;
+    },
+  },
 };
 
 interface Props {
   rows: DashboardDailyRow[];
+  /** When provided, the dropdown options adapt to the platform. Meta swaps Channel → Placement. */
+  platformKey?: PlatformKey;
 }
 
-export function BreakdownDimensionCard({ rows }: Props) {
-  const [dim, setDim] = useState<Dim>('channel');
+export function BreakdownDimensionCard({ rows, platformKey }: Props) {
+  const isMeta = platformKey === 'meta';
+  const initial: Dim = isMeta ? 'placement' : 'channel';
+  const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
   return (
@@ -29,7 +45,11 @@ export function BreakdownDimensionCard({ rows }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="channel">By Channel</SelectItem>
+            {isMeta ? (
+              <SelectItem value="placement">By Placement</SelectItem>
+            ) : (
+              <SelectItem value="channel">By Channel</SelectItem>
+            )}
             <SelectItem value="objective">By Objective</SelectItem>
             <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
