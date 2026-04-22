@@ -1,16 +1,9 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
-import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 
 
 export default function SnapchatPage() {
-  const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'snapchat'), [data.rows]);
-
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
@@ -72,19 +65,6 @@ export default function SnapchatPage() {
       platformKey="snapchat"
       title="Snapchat Ads"
       buildKpiCards={buildKpis}
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Audience" />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.audience_type}
-              title="By Audience Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
