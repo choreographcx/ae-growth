@@ -5,7 +5,7 @@ import { getCampaignMarket, getCampaignChannel, resolveCampaignObjective } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey } from '@/types/dashboard';
 
-type Dim = 'market' | 'channel' | 'objective' | 'placement';
+type Dim = 'market' | 'channel' | 'objective' | 'placement' | 'campaignType';
 
 const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => string | null | undefined; title: string }> = {
   market:    { label: 'By Market',    pick: r => getCampaignMarket(r.campaign_name),    title: 'By Market' },
@@ -22,17 +22,24 @@ const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => stri
       return null;
     },
   },
+  campaignType: {
+    label: 'By Campaign Type',
+    title: 'By Campaign Type',
+    pick: r => r.campaign_type,
+  },
 };
 
 interface Props {
   rows: DashboardDailyRow[];
-  /** When provided, the dropdown options adapt to the platform. Meta swaps Channel → Placement. */
+  /** When provided, the dropdown options adapt to the platform.
+   *  Meta swaps Channel → Placement. Programmatic adds Campaign Type. */
   platformKey?: PlatformKey;
 }
 
 export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isMeta = platformKey === 'meta';
-  const initial: Dim = isMeta ? 'placement' : 'channel';
+  const isProgrammatic = platformKey === 'programmatic';
+  const initial: Dim = isMeta ? 'placement' : isProgrammatic ? 'campaignType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
@@ -49,6 +56,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
               <SelectItem value="placement">By Placement</SelectItem>
             ) : (
               <SelectItem value="channel">By Channel</SelectItem>
+            )}
+            {isProgrammatic && (
+              <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
             <SelectItem value="objective">By Objective</SelectItem>
             <SelectItem value="market">By Market</SelectItem>
