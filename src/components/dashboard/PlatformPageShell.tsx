@@ -218,7 +218,7 @@ export function PlatformPageShell({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <TrendChartCard title="Spend"                    data={spendSeries}  currency={currency} color="hsl(var(--chart-1))" />
           <TrendChartCard title="Lower-Funnel Conversions" data={lfConvSeries}                       color="hsl(var(--chart-3))" />
-          <TrendChartCard title="CPA (Lower Funnel)"       data={lfCpaSeries}  currency={currency} color="hsl(var(--chart-4))" />
+          <TrendChartCard title="CPA (Lower Funnel)"       data={lfCpaSeries}                       color="hsl(var(--chart-4))" />
           <TrendChartCard title="Clicks"                   data={ctrSeries}                          color="hsl(var(--chart-2))" />
         </div>
       </div>
