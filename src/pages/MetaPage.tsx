@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
-import { resolveCampaignObjective } from '@/lib/campaignNaming';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Facebook, Instagram } from 'lucide-react';
 
@@ -132,15 +132,6 @@ export default function MetaPage() {
               rows={scoped}
               pick={r => r.audience_type}
               title="By Audience Type"
-              hideIfAllUnspecified
-            />
-          </div>
-          <div className="space-y-3">
-            <SectionHeader title="Campaign Objective" />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => resolveCampaignObjective(r.campaign_objective, r.campaign_name)}
-              title="By Objective"
               hideIfAllUnspecified
             />
           </div>

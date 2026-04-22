@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
-import { resolveCampaignObjective } from '@/lib/campaignNaming';
+
 
 export default function TikTokPage() {
   const { data } = useDashboard();
@@ -76,15 +76,6 @@ export default function TikTokPage() {
       buildKpiCards={buildKpis}
       midExtras={() => (
         <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Campaign Objective" subtitle="Awareness vs traffic vs conversion-led campaigns." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => resolveCampaignObjective(r.campaign_objective, r.campaign_name)}
-              title="By Objective"
-              hideIfAllUnspecified
-            />
-          </div>
           <div className="space-y-3">
             <SectionHeader title="Audience" />
             <DimensionBreakdownTable
