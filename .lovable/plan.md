@@ -1,71 +1,54 @@
 
-The user wants Google SSO so users can sign in with their Google account instead of (or in addition to) email/password.
 
-## How Google SSO works on this project
+## Move active filter chips inside the Filter popover
 
-This project uses an **external Supabase project** (`ldydiabaczrjferglbar`), not Lovable Cloud. Google as an OAuth provider is configured in the **Supabase dashboard**, not in code. Once enabled there, the app calls `supabase.auth.signInWithOAuth({ provider: 'google' })` and Supabase handles the Google consent screen + callback.
+Replace the always-visible chip row with active-filter chips shown at the top of the Filter popover/sheet when it opens. This keeps the dashboard header clean while still giving a clear at-a-glance view of what's active — at the moment users go to inspect or change filters.
 
-## Two parts
+### What changes visually
 
-### 1. Configuration (you do this, one-time, in dashboards)
+```text
+Header row (always):
+  Section title                           [ Filter · 3 ] | [ Date ▾ ]
+  (no second row of chips anymore)
 
-**A. Google Cloud Console** — create OAuth credentials:
-1. Go to console.cloud.google.com → create/select a project
-2. **APIs & Services → OAuth consent screen** → add your domains as Authorized domains: `supabase.co`, `lovable.app`, and `analyticsmena.com` (your custom domain)
-3. **APIs & Services → Credentials → Create Credentials → OAuth Client ID → Web application**
-4. **Authorized JavaScript origins** — add:
-   - `https://media-template.lovable.app`
-   - `https://acx-media.analyticsmena.com`
-   - `https://id-preview--4005571c-f8a2-45e7-aefa-102fb024d337.lovable.app`
-   - `http://localhost:8080` (for local dev, optional)
-5. **Authorized redirect URIs** — add the Supabase callback (shown in step B below):
-   - `https://ldydiabaczrjferglbar.supabase.co/auth/v1/callback`
-6. Save → copy the **Client ID** and **Client Secret**
-
-**B. Supabase Dashboard** — enable Google provider:
-1. Open Authentication → Providers → Google
-2. Toggle Enable → paste Client ID and Client Secret → Save
-3. Copy the callback URL shown there back into Google (step A.5) if you didn't already
-
-**C. Supabase Auth → URL Configuration:**
-- **Site URL**: `https://acx-media.analyticsmena.com` (your primary domain)
-- **Redirect URLs (allowed)**: add all of the following so sign-in works from every environment:
-  - `https://acx-media.analyticsmena.com/**`
-  - `https://media-template.lovable.app/**`
-  - `https://id-preview--4005571c-f8a2-45e7-aefa-102fb024d337.lovable.app/**`
-  - `http://localhost:8080/**`
-
-Without these, Google sign-in returns "requested path is invalid".
-
-### 2. App code changes (I'll do this once approved)
-
-**a. `src/pages/AuthPage.tsx`** — add a "Continue with Google" button above the email form, with a divider ("or continue with email"). The button calls:
-```ts
-await supabase.auth.signInWithOAuth({
-  provider: 'google',
-  options: { redirectTo: `${window.location.origin}/` },
-});
+When user clicks Filter, popover opens:
+  ┌───────────────────────────────────┐
+  │ Filter                            │
+  ├───────────────────────────────────┤
+  │ Active                  Clear all │
+  │  [Markets: UAE ✕]                 │
+  │  [Campaigns: Ramadan +2 ✕]        │
+  ├───────────────────────────────────┤
+  │ Platforms              View All › │
+  │ Markets               1 selected ›│
+  │ Channels                View All ›│
+  │ Campaigns             3 selected ›│
+  │ Objectives              View All ›│
+  ├───────────────────────────────────┤
+  │           [ Done ]                │
+  └───────────────────────────────────┘
 ```
-Styled to match the existing branded card (outlined button with Google "G" mark, primary-tinted hover).
 
-**b. Profile auto-creation** — already handled. The existing `handle_new_user` trigger fires for any new auth user (email or OAuth) and:
-- creates a `profiles` row pulling `full_name` from `raw_user_meta_data` (Google supplies this automatically)
-- assigns the `user` role
-- auto-approves `@wppmedia.com` addresses (your existing domain rule applies to Google sign-ins too)
-- auto-grants admin/superadmin to `rachel.montague@wppmedia.com`
+### Behavior rules
 
-So Google sign-ups will land in the same approval flow as email sign-ups. No DB migration needed.
+- The standalone `<FilterSummary />` row beneath the section header is removed entirely (desktop and mobile).
+- The Filter button keeps its existing count badge so users still see "something is active" without opening anything.
+- When the popover (desktop) or bottom sheet (mobile) opens on the **list view**, an "Active filters" block renders at the top — only if at least one filter is set.
+- Each chip shows `Label: Value` using the same compact summary logic as today (`Meta`, `Meta, UAE`, `Meta +2`).
+- Clicking the small ✕ on a chip clears that one filter group immediately (e.g. removes all selected Markets). The popover stays open so the user can keep adjusting.
+- A `Clear all` text button sits to the right of the "Active" header, only when chips exist. Same behavior as today's clear-all in the footer.
+- The detail view (when a single filter category is open) is unchanged — no chips there.
+- Tooltip on hover still shows the full `Label: Value` for truncated chips.
 
-**c. No new packages, no edge functions, no secrets in the app codebase.** Google Client ID/Secret live only in Supabase.
+### Technical notes
 
-## What I need from you before coding
+- `src/components/dashboard/SectionHeader.tsx`: remove the `<FilterSummary />` render block. The Filter button's existing count badge handles the at-a-glance signal.
+- `src/components/dashboard/MobileFilterSheet.tsx`: in `FilterListView`, add a new "Active" section above the category list. It iterates over `filters`, and for each one with `selected.length > 0` renders a chip using the same summarize helper currently in `FilterSummary.tsx`. Each chip has an inline ✕ button that calls `f.setSelected([])`. The "Clear all" link reuses the existing `clearAll` callback already passed into the view.
+- `src/components/dashboard/FilterSummary.tsx`: no longer used by the header. Either delete it or keep it as an internal helper — plan is to delete and inline a small `summarize()` helper into `MobileFilterSheet.tsx` to avoid an orphan file.
 
-A quick decision on the button placement and whether to also offer email sign-up alongside Google.
+### Files touched
 
-## Files I'll change
-- `src/pages/AuthPage.tsx` — add Google button + divider
+- `src/components/dashboard/SectionHeader.tsx` — remove inline filter summary row.
+- `src/components/dashboard/MobileFilterSheet.tsx` — add "Active filters" block at the top of the list view with per-chip clear and "Clear all".
+- `src/components/dashboard/FilterSummary.tsx` — delete (logic absorbed into MobileFilterSheet).
 
-## Out of scope
-- Other providers (Microsoft, Apple, etc.) — easy to add later with the same pattern
-- Restricting sign-in to specific Google Workspace domains at the Google level (we already have app-side approval gating via `is_approved`)
-- Linking an existing email/password account to a Google identity (Supabase handles this automatically when emails match and "Confirm email" is on)
