@@ -160,7 +160,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
-        align="start"
+        align="end"
         sideOffset={6}
         className="p-0 w-fit min-w-[320px] max-w-[90vw] max-h-[80vh] flex flex-col overflow-hidden rounded-xl"
       >
