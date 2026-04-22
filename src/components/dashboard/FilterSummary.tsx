@@ -23,7 +23,6 @@ export function FilterSummary({
   align = 'end',
 }: FilterSummaryProps) {
   const {
-    dateRange,
     data,
     selectedPlatforms,
     selectedMarkets,
@@ -39,7 +38,6 @@ export function FilterSummary({
   type Chip = { label: string; value: string };
   const chips: Chip[] = [];
 
-  if (dateRange) chips.push({ label: 'Date', value: dateRange });
   if (platformLabel) {
     chips.push({ label: 'Platform', value: platformLabel });
   } else if (showPlatformsFilter && selectedPlatforms.length > 0) {
