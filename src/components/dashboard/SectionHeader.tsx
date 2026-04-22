@@ -83,6 +83,13 @@ export function SectionHeader({
         )}
       </div>
 
+      {showFilters && !hideFiltersButton && (
+        <FilterSummary
+          showPlatformsFilter={showPlatformsFilter}
+          scopeToPlatform={scopeToPlatform}
+        />
+      )}
+
       {belowAction && (
         <div className="flex items-center gap-2 justify-end">
           {belowAction}
