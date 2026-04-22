@@ -56,9 +56,49 @@ export function PlatformPageShell({
   topExtras, midExtras, bottomExtras,
   hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
 }: PlatformPageShellProps) {
-  const { client, data } = useDashboard();
+  const {
+    client, data,
+    selectedPlatforms, setSelectedPlatforms,
+    selectedCampaigns, setSelectedCampaigns,
+    selectedObjectives, setSelectedObjectives,
+    selectedMarkets, setSelectedMarkets,
+    selectedChannels, setSelectedChannels,
+  } = useDashboard();
   const currency = client.currency;
   const { loading, error, rows, previousRows, range, platformSummaries } = data;
+
+  // When landing on a platform page, clear any active filters that would hide
+  // or restrict this platform's data — e.g. a Platforms filter excluding this
+  // platform, or per-dimension selections (Markets/Channels/Campaigns/Objectives)
+  // that were chosen on a different platform's page and don't apply here.
+  const platformLabel = client.platforms?.[platformKey]?.label;
+  useEffect(() => {
+    if (platformLabel && selectedPlatforms.length > 0 && !selectedPlatforms.includes(platformLabel)) {
+      setSelectedPlatforms([]);
+    }
+    if (selectedCampaigns.length > 0) {
+      const allowed = new Set(data.campaignsByPlatform[platformKey] ?? []);
+      const next = selectedCampaigns.filter(v => allowed.has(v));
+      if (next.length !== selectedCampaigns.length) setSelectedCampaigns(next);
+    }
+    if (selectedObjectives.length > 0) {
+      const allowed = new Set(data.objectivesByPlatform[platformKey] ?? []);
+      const next = selectedObjectives.filter(v => allowed.has(v));
+      if (next.length !== selectedObjectives.length) setSelectedObjectives(next);
+    }
+    if (selectedMarkets.length > 0) {
+      const allowed = new Set(data.marketsByPlatform[platformKey] ?? []);
+      const next = selectedMarkets.filter(v => allowed.has(v));
+      if (next.length !== selectedMarkets.length) setSelectedMarkets(next);
+    }
+    if (selectedChannels.length > 0) {
+      const allowed = new Set(data.channelsByPlatform[platformKey] ?? []);
+      const next = selectedChannels.filter(v => allowed.has(v));
+      if (next.length !== selectedChannels.length) setSelectedChannels(next);
+    }
+    // Re-evaluate when route/platform changes or when option lists become available.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [platformKey, platformLabel, data.campaignsByPlatform, data.objectivesByPlatform, data.marketsByPlatform, data.channelsByPlatform]);
 
   const scoped     = useMemo(() => {
     const base = rows.filter(r => normalizePlatform(r.platform) === platformKey);
