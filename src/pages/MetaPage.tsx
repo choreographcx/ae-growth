@@ -38,11 +38,6 @@ export default function MetaPage() {
     return false;
   }, [bothActive, enabled.facebook, enabled.instagram]);
 
-  const scoped = useMemo(
-    () => data.rows.filter(r => normalizePlatform(r.platform) === 'meta').filter(extraRowFilter),
-    [data.rows, extraRowFilter]
-  );
-
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
