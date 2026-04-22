@@ -39,6 +39,13 @@ function badgeClass(group: string) {
   return FUNNEL_BADGE.excluded;
 }
 
+function funnelLabel(group: string) {
+  const g = (group || '').toLowerCase();
+  if (g.includes('lower')) return 'Lower Funnel';
+  if (g.includes('upper')) return 'Upper Funnel';
+  return 'Excluded';
+}
+
 function buildFallbackRows(sourceRows: DashboardDailyRow[]): ConversionBreakdownRow[] {
   if (!sourceRows.length) return [];
 
