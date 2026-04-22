@@ -1,7 +1,6 @@
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
-import { PlatformComparison } from '@/components/dashboard/PlatformComparison';
-import { CampaignPerformance } from '@/components/dashboard/CampaignPerformance';
+import { PerformanceBreakdown } from '@/components/dashboard/PerformanceBreakdown';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
@@ -50,8 +49,7 @@ const DEFAULT_SECTION_ORDER = [
   'funnel',
   'breakdowns',
   'conversionBreakdown',
-  'platforms',
-  'campaigns',
+  'performance',
   'insights',
 ] as const;
 
@@ -266,23 +264,9 @@ export default function OverviewPage() {
         </div>
       ),
     },
-    platforms: {
-      label: 'Platform Performance',
-      node: (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Platform Performance" />
-          <PlatformComparison data={platformSummaries} />
-        </div>
-      ),
-    },
-    campaigns: {
-      label: 'Campaign Performance',
-      node: (
-        <div className="space-y-2.5 md:space-y-3">
-          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend across all platforms" />
-          <CampaignPerformance />
-        </div>
-      ),
+    performance: {
+      label: 'Performance Breakdown',
+      node: <PerformanceBreakdown platforms={platformSummaries} />,
     },
     insights: insights.length > 0 ? {
       label: 'Key Issues & Insights',
