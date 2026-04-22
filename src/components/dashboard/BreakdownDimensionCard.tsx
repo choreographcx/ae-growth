@@ -43,22 +43,12 @@ interface Props {
 }
 
 export function BreakdownDimensionCard({ rows, platformKey }: Props) {
-  const isOverview = !platformKey;
   const isMeta = platformKey === 'meta';
   const isGoogle = platformKey === 'google';
   const isTikTok = platformKey === 'tiktok';
   const isSnapchat = platformKey === 'snapchat';
   const hasAudience = isTikTok || isSnapchat;
-  const showChannel = !isMeta && !hasAudience && !isOverview;
-  const initial: Dim = isMeta
-    ? 'placement'
-    : isGoogle
-    ? 'campaignType'
-    : hasAudience
-    ? 'audienceType'
-    : isOverview
-    ? 'objective'
-    : 'channel';
+  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : hasAudience ? 'audienceType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
@@ -71,8 +61,17 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {isMeta && <SelectItem value="placement">By Placement</SelectItem>}
-            {showChannel && <SelectItem value="channel">By Channel</SelectItem>}
+            {isMeta ? (
+              <SelectItem value="placement">By Placement</SelectItem>
+            ) : !hasAudience ? (
+              <SelectItem value="channel">By Channel</SelectItem>
+            ) : null}
+            {isGoogle && (
+              <SelectItem value="campaignType">By Campaign Type</SelectItem>
+            )}
+            {hasAudience && (
+              <SelectItem value="audienceType">By Audience Type</SelectItem>
+            )}
             {isGoogle && (
               <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
