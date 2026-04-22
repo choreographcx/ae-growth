@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function BreakdownDimensionCard({ rows }: Props) {
-  const [dim, setDim] = useState<Dim>('market');
+  const [dim, setDim] = useState<Dim>('channel');
   const cfg = PICKERS[dim];
 
   return (
@@ -29,9 +29,9 @@ export function BreakdownDimensionCard({ rows }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="market">By Market</SelectItem>
             <SelectItem value="channel">By Channel</SelectItem>
             <SelectItem value="objective">By Objective</SelectItem>
+            <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
         </Select>
       </div>
