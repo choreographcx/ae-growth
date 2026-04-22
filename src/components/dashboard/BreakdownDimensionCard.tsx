@@ -38,7 +38,7 @@ interface Props {
   rows: DashboardDailyRow[];
   /** When provided, the dropdown options adapt to the platform.
    *  Meta swaps Channel → Placement. Google Ads adds Campaign Type.
-   *  TikTok adds Audience Type. */
+   *  TikTok and Snapchat add Audience Type (and drop Channel). */
   platformKey?: PlatformKey;
 }
 
@@ -46,7 +46,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isMeta = platformKey === 'meta';
   const isGoogle = platformKey === 'google';
   const isTikTok = platformKey === 'tiktok';
-  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : isTikTok ? 'audienceType' : 'channel';
+  const isSnapchat = platformKey === 'snapchat';
+  const hasAudience = isTikTok || isSnapchat;
+  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : hasAudience ? 'audienceType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
@@ -61,13 +63,13 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
           <SelectContent>
             {isMeta ? (
               <SelectItem value="placement">By Placement</SelectItem>
-            ) : !isTikTok ? (
+            ) : !hasAudience ? (
               <SelectItem value="channel">By Channel</SelectItem>
             ) : null}
             {isGoogle && (
               <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
-            {isTikTok && (
+            {hasAudience && (
               <SelectItem value="audienceType">By Audience Type</SelectItem>
             )}
             <SelectItem value="objective">By Objective</SelectItem>
