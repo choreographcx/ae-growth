@@ -127,6 +127,21 @@ export default function MetaPage() {
       midExtras={() => (
         <div className="space-y-6">
           <div className="space-y-3">
+            <SectionHeader title="Placement Breakdown" subtitle="Spend & performance split between Facebook and Instagram." />
+            <DimensionBreakdownTable
+              rows={scoped}
+              pick={r => {
+                const v = (r.publisher_platform || '').toLowerCase();
+                if (!v) return null;
+                if (matchSub(v, 'facebook')) return 'Facebook';
+                if (matchSub(v, 'instagram')) return 'Instagram';
+                return null;
+              }}
+              title="By Placement"
+              hideIfAllUnspecified
+            />
+          </div>
+          <div className="space-y-3">
             <SectionHeader title="Audience Breakdown" subtitle="Raw audience_type from campaign data." />
             <DimensionBreakdownTable
               rows={scoped}
