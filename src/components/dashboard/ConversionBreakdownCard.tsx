@@ -200,7 +200,7 @@ export function ConversionBreakdownCard({
                   <div className="flex items-baseline justify-between gap-2 mb-2">
                     <p className="text-[14px] font-semibold text-card-foreground truncate">{r.conversion_name}</p>
                     <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border shrink-0', badgeClass(r.conversion_funnel_group))}>
-                      {r.conversion_funnel_group}
+                      {funnelLabel(r.conversion_funnel_group)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between pt-2 border-t border-border/60">
