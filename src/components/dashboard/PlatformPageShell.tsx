@@ -14,7 +14,8 @@ import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
 import { CampaignPerformance } from '@/components/dashboard/CampaignPerformance';
 import { generateInsights, sortInsights } from '@/lib/insights';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 
 function formatCompact(n: number): string {
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
@@ -150,11 +151,7 @@ export function PlatformPageShell({
           Failed to load data: {error}
         </div>
       )}
-      {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading {title} data…
-        </div>
-      )}
+      {loading && <LoadingOverlay fixed message={`Loading ${title} data…`} />}
 
       {wastedSpend && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/[0.04] p-5 flex gap-3">

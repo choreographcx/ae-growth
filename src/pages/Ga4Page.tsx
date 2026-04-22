@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Loader2, Globe } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
+import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
 import { useGa4Report } from '@/hooks/useGa4Report';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
@@ -152,11 +153,7 @@ export default function Ga4Page() {
           Failed to load GA4 data: {(anyError as Error).message}
         </div>
       )}
-      {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading GA4 data…
-        </div>
-      )}
+      {loading && <LoadingOverlay fixed message="Loading GA4 data…" />}
 
       {/* KPI tiles */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-3">

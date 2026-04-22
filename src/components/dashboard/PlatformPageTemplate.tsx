@@ -14,7 +14,7 @@ import {
   aggregateRows, buildTimeSeries, buildCpaSeries, buildCtrSeries,
   normalizePlatform, pctChange, pickConversions, DashboardDailyRow, ConversionMode,
 } from '@/hooks/useDashboardDaily';
-import { Loader2 } from 'lucide-react';
+import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 
 interface PlatformPageTemplateProps {
   platformKey: PlatformKey;
@@ -208,11 +208,7 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
           Failed to load data: {error}
         </div>
       )}
-      {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading {title} data…
-        </div>
-      )}
+      {loading && <LoadingOverlay fixed message={`Loading ${title} data…`} />}
       {!loading && !error && scopedRows.length === 0 && (
         <div className="text-sm text-muted-foreground border border-border bg-muted/20 rounded-md px-3 py-2">
           No {title} data for the selected period{client.platforms[platformKey]?.enabled === false ? ' — platform is disabled in Admin' : ''}.
