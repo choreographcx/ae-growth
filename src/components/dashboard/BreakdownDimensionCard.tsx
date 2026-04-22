@@ -32,13 +32,14 @@ const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => stri
 interface Props {
   rows: DashboardDailyRow[];
   /** When provided, the dropdown options adapt to the platform.
-   *  Meta swaps Channel → Placement. Programmatic adds Campaign Type. */
+   *  Meta swaps Channel → Placement. Google Ads adds Campaign Type. */
   platformKey?: PlatformKey;
 }
 
 export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isMeta = platformKey === 'meta';
-  const initial: Dim = isMeta ? 'placement' : 'channel';
+  const isGoogle = platformKey === 'google';
+  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
@@ -55,6 +56,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
               <SelectItem value="placement">By Placement</SelectItem>
             ) : (
               <SelectItem value="channel">By Channel</SelectItem>
+            )}
+            {isGoogle && (
+              <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
             <SelectItem value="objective">By Objective</SelectItem>
             <SelectItem value="market">By Market</SelectItem>
