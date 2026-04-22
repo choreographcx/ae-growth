@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
 import { MobileFilterSheet } from '@/components/dashboard/MobileFilterSheet';
+import { FilterSummary } from '@/components/dashboard/FilterSummary';
 import { PlatformKey } from '@/types/dashboard';
 
 interface SectionHeaderProps {
@@ -81,6 +82,13 @@ export function SectionHeader({
           )
         )}
       </div>
+
+      {showFilters && !hideFiltersButton && (
+        <FilterSummary
+          showPlatformsFilter={showPlatformsFilter}
+          scopeToPlatform={scopeToPlatform}
+        />
+      )}
 
       {belowAction && (
         <div className="flex items-center gap-2 justify-end">
