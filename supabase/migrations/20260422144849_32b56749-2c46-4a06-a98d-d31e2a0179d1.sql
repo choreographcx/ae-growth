@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.get_google_service_account_json();
