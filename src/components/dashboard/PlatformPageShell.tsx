@@ -232,28 +232,32 @@ export function PlatformPageShell({
 
       {midExtras?.({ totals })}
 
-      {/* Conversion split — hidden when no conversions tracked */}
-      {hasConversions && (
-        <ConversionSplitCard
-          lowerFunnel={totals.conversionsLowerFunnel}
-          upperFunnel={totals.conversionsUpperFunnel}
-        />
-      )}
-
-      {/* Funnel — Impressions → Clicks → LPV → LF Conversions (parity with Overview) */}
-      {(totals.impressions > 0 || totals.clicks > 0) && (
-        <EnhancedFunnelCard
-          steps={[
-            { label: 'Impressions', value: totals.impressions, formattedValue: formatCompact(totals.impressions) },
-            { label: 'Clicks',      value: totals.clicks,      formattedValue: formatCompact(totals.clicks),
-              rateFromPrev: totals.ctr, rateLabel: 'CTR' },
-            ...(hasLPV ? [{ label: 'Landing Page Views', value: totals.landingPageViews, formattedValue: formatCompact(totals.landingPageViews),
-              rateFromPrev: totals.lpvRate, rateLabel: 'LPV Rate' }] : []),
-            { label: 'Lower-Funnel Conversions', value: totals.conversionsLowerFunnel,
-              formattedValue: formatCompact(totals.conversionsLowerFunnel),
-              rateFromPrev: totals.cvrLowerFunnel, rateLabel: 'CVR (LF)' },
-          ].filter(s => s.value > 0 || s.label === 'Lower-Funnel Conversions')}
-        />
+      {/* Conversion Mix + Funnel — side by side on desktop */}
+      {(hasConversions || totals.impressions > 0 || totals.clicks > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-stretch">
+          {hasConversions && (
+            <ConversionSplitCard
+              lowerFunnel={totals.conversionsLowerFunnel}
+              upperFunnel={totals.conversionsUpperFunnel}
+              className="h-full"
+            />
+          )}
+          {(totals.impressions > 0 || totals.clicks > 0) && (
+            <EnhancedFunnelCard
+              steps={[
+                { label: 'Impressions', value: totals.impressions, formattedValue: formatCompact(totals.impressions) },
+                { label: 'Clicks',      value: totals.clicks,      formattedValue: formatCompact(totals.clicks),
+                  rateFromPrev: totals.ctr, rateLabel: 'CTR' },
+                ...(hasLPV ? [{ label: 'Landing Page Views', value: totals.landingPageViews, formattedValue: formatCompact(totals.landingPageViews),
+                  rateFromPrev: totals.lpvRate, rateLabel: 'LPV Rate' }] : []),
+                { label: 'Lower-Funnel Conversions', value: totals.conversionsLowerFunnel,
+                  formattedValue: formatCompact(totals.conversionsLowerFunnel),
+                  rateFromPrev: totals.cvrLowerFunnel, rateLabel: 'CVR (LF)' },
+              ].filter(s => s.value > 0 || s.label === 'Lower-Funnel Conversions')}
+              className="h-full"
+            />
+          )}
+        </div>
       )}
 
       {!hideConversionBreakdown && hasConversions && (
