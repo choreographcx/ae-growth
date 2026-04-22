@@ -47,7 +47,7 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isGoogle = platformKey === 'google';
   const isTikTok = platformKey === 'tiktok';
   const isSnapchat = platformKey === 'snapchat';
-  const hasAudience = isTikTok || isSnapchat;
+  const hasAudience = isMeta || isTikTok || isSnapchat;
   const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : hasAudience ? 'audienceType' : 'channel';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];

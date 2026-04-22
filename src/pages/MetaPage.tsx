@@ -1,6 +1,4 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { useCallback, useMemo, useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
@@ -39,11 +37,6 @@ export default function MetaPage() {
     if (enabled.instagram && matchSub(sub, 'instagram')) return true;
     return false;
   }, [bothActive, enabled.facebook, enabled.instagram]);
-
-  const scoped = useMemo(
-    () => data.rows.filter(r => normalizePlatform(r.platform) === 'meta').filter(extraRowFilter),
-    [data.rows, extraRowFilter]
-  );
 
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
@@ -124,19 +117,6 @@ export default function MetaPage() {
           </label>
         </div>
       }
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Audience Breakdown" subtitle="Raw audience_type from campaign data." />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.audience_type}
-              title="By Audience Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
