@@ -7,11 +7,9 @@ import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
 import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
 import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { Ga4OverviewTile } from '@/components/dashboard/Ga4OverviewTile';
-import { getCampaignMarket, getCampaignChannel, getCampaignObjective } from '@/lib/campaignNaming';
 import { useEffect, useMemo } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
@@ -51,7 +49,6 @@ const DEFAULT_SECTION_ORDER = [
   'trends',
   'funnel',
   'breakdowns',
-  'channelBreakdown',
   'conversionBreakdown',
   'platforms',
   'campaigns',
@@ -252,19 +249,6 @@ export default function OverviewPage() {
       node: (
         <div className="print-break-before">
           <BreakdownDimensionCard rows={rows} />
-        </div>
-      ),
-    },
-    channelBreakdown: {
-      label: 'Channel Breakdown',
-      node: (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Channel Breakdown" subtitle="Performance grouped by channel parsed from campaign names" />
-          <DimensionBreakdownTable
-            rows={rows}
-            pick={(r) => getCampaignChannel(r.campaign_name)}
-            title="By Channel"
-          />
         </div>
       ),
     },
