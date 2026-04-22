@@ -85,7 +85,7 @@ export function ConversionBreakdownCard({
 }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
-  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: false });
+  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: true });
 
   const fallbackRows = useMemo(() => buildFallbackRows(sourceRows ?? []), [sourceRows]);
   const effectiveRows = rows.length > 0 ? rows : fallbackRows;
