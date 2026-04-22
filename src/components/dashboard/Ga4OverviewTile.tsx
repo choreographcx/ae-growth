@@ -52,7 +52,7 @@ export function Ga4OverviewTile() {
       <div className="hidden lg:flex bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md transition-all duration-300 flex-col">
         <div className="flex items-start justify-between mb-1">
           <div className="flex items-center gap-1 min-w-0">
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Web Analytics</p>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Web Analytics (GA4)</p>
           </div>
           <div className="flex items-center justify-center w-8 h-8 rounded-lg text-sky-600 bg-sky-50">
             <Globe size={16} />
@@ -60,13 +60,13 @@ export function Ga4OverviewTile() {
         </div>
 
         <p className="text-[26px] font-bold text-card-foreground tracking-tight leading-none">
-          {q.isLoading ? <Loader2 className="h-5 w-5 animate-spin inline" /> : formatCompact(sessions)}
+          {q.isLoading ? <Loader2 className="h-5 w-5 animate-spin inline" /> : formatCompact(users)}
         </p>
-        <p className="text-[11px] text-muted-foreground mt-1.5">Sessions (GA4)</p>
+        <p className="text-[11px] text-muted-foreground mt-1.5">Users</p>
 
         <div className="mt-auto pt-3.5 border-t border-border/50 mt-3.5">
           <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-            <Stat label="Users"       value={formatCompact(users)}       loading={q.isLoading} />
+            <Stat label="Sessions"    value={formatCompact(sessions)}    loading={q.isLoading} />
             <Stat label="Engaged"     value={formatCompact(engaged)}     loading={q.isLoading} />
             <Stat label="Conversions" value={formatCompact(conversions)} loading={q.isLoading} />
             <div className="flex items-end justify-end">
@@ -82,15 +82,15 @@ export function Ga4OverviewTile() {
           <div className="flex items-center justify-center w-7 h-7 rounded shrink-0 text-sky-600 bg-sky-50">
             <Globe size={14} />
           </div>
-          <p className="text-[14px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight truncate flex-1 min-w-0">Web Analytics</p>
+          <p className="text-[14px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight truncate flex-1 min-w-0">Web Analytics (GA4)</p>
           <Link to="/ga4" className="text-[11px] text-primary hover:underline shrink-0">Details →</Link>
         </div>
         <p className="text-[30px] font-bold text-card-foreground tracking-tight leading-none mt-2 truncate">
-          {q.isLoading ? <Loader2 className="h-6 w-6 animate-spin inline" /> : formatCompact(sessions)}
+          {q.isLoading ? <Loader2 className="h-6 w-6 animate-spin inline" /> : formatCompact(users)}
         </p>
-        <p className="text-[12px] text-muted-foreground mt-1">Sessions (GA4)</p>
+        <p className="text-[12px] text-muted-foreground mt-1">Users</p>
         <div className="mt-2.5 pt-2 border-t border-border/30 grid gap-x-3 gap-y-1.5 grid-cols-2 min-w-0">
-          <StatMobile label="Users"       value={formatCompact(users)} />
+          <StatMobile label="Sessions"    value={formatCompact(sessions)} />
           <StatMobile label="Engaged"     value={formatCompact(engaged)} />
           <StatMobile label="Conversions" value={formatCompact(conversions)} />
         </div>
