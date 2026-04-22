@@ -5,7 +5,7 @@ import { getCampaignMarket, getCampaignChannel, resolveCampaignObjective } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey } from '@/types/dashboard';
 
-type Dim = 'market' | 'channel' | 'objective' | 'placement' | 'campaignType';
+type Dim = 'market' | 'channel' | 'objective' | 'placement' | 'campaignType' | 'audienceType';
 
 const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => string | null | undefined; title: string }> = {
   market:    { label: 'By Market',    pick: r => getCampaignMarket(r.campaign_name),    title: 'By Market' },
