@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import { normalizePlatform, pctChange, DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
-import { resolveCampaignObjective } from '@/lib/campaignNaming';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Facebook, Instagram } from 'lucide-react';
 
