@@ -39,6 +39,13 @@ function badgeClass(group: string) {
   return FUNNEL_BADGE.excluded;
 }
 
+function funnelLabel(group: string) {
+  const g = (group || '').toLowerCase();
+  if (g.includes('lower')) return 'Lower Funnel';
+  if (g.includes('upper')) return 'Upper Funnel';
+  return 'Excluded';
+}
+
 function buildFallbackRows(sourceRows: DashboardDailyRow[]): ConversionBreakdownRow[] {
   if (!sourceRows.length) return [];
 
@@ -85,7 +92,7 @@ export function ConversionBreakdownCard({
 }: Props) {
   const { loading, error, rows } = useConversionBreakdown({ start, end, platform, campaigns });
   const isMobile = useIsMobile();
-  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: false });
+  const [enabled, setEnabled] = useState<Record<FunnelKey, boolean>>({ lower: true, upper: true, excluded: true });
 
   const fallbackRows = useMemo(() => buildFallbackRows(sourceRows ?? []), [sourceRows]);
   const effectiveRows = rows.length > 0 ? rows : fallbackRows;
@@ -193,7 +200,7 @@ export function ConversionBreakdownCard({
                   <div className="flex items-baseline justify-between gap-2 mb-2">
                     <p className="text-[14px] font-semibold text-card-foreground truncate">{r.conversion_name}</p>
                     <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border shrink-0', badgeClass(r.conversion_funnel_group))}>
-                      {r.conversion_funnel_group}
+                      {funnelLabel(r.conversion_funnel_group)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between pt-2 border-t border-border/60">
@@ -226,7 +233,7 @@ export function ConversionBreakdownCard({
                       <td className="px-4 py-2.5 text-xs font-medium text-card-foreground">{r.conversion_name}</td>
                       <td className="px-4 py-2.5">
                         <span className={cn('inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded border', badgeClass(r.conversion_funnel_group))}>
-                          {r.conversion_funnel_group}
+                          {funnelLabel(r.conversion_funnel_group)}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-xs text-right tabular-nums font-semibold">{Math.round(r.conversions_all).toLocaleString()}</td>
