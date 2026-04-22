@@ -1,16 +1,9 @@
 import { PlatformPageShell, moneyKpi, formatCompact } from '@/components/dashboard/PlatformPageShell';
-import { DimensionBreakdownTable } from '@/components/dashboard/DimensionBreakdownTable';
-import { SectionHeader } from '@/components/dashboard/SectionHeader';
-import { useMemo } from 'react';
-import { useDashboard } from '@/context/DashboardContext';
-import { normalizePlatform, pctChange } from '@/hooks/useDashboardDaily';
+import { pctChange } from '@/hooks/useDashboardDaily';
 import { KPIGroupData } from '@/types/dashboard';
 
 
 export default function TikTokPage() {
-  const { data } = useDashboard();
-  const scoped = useMemo(() => data.rows.filter(r => normalizePlatform(r.platform) === 'tiktok'), [data.rows]);
-
   const buildKpis = (cur: any, prev: any, currency: string): KPIGroupData[] => [
     {
       title: 'Spend', icon: 'DollarSign',
@@ -74,19 +67,6 @@ export default function TikTokPage() {
       platformKey="tiktok"
       title="TikTok Ads"
       buildKpiCards={buildKpis}
-      midExtras={() => (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <SectionHeader title="Audience" />
-            <DimensionBreakdownTable
-              rows={scoped}
-              pick={r => r.audience_type}
-              title="By Audience Type"
-              hideIfAllUnspecified
-            />
-          </div>
-        </div>
-      )}
     />
   );
 }
