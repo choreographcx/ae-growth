@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { DateRangePicker } from '@/components/layout/DashboardHeader';
 import { MobileFilterSheet } from '@/components/dashboard/MobileFilterSheet';
-import { FilterSummary } from '@/components/dashboard/FilterSummary';
 import { PlatformKey } from '@/types/dashboard';
 
 interface SectionHeaderProps {
