@@ -28,15 +28,15 @@ export function ConversionSplitCard({ lowerFunnel, upperFunnel, className }: Pro
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-4">
-        <div className="rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 px-4 py-3">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Lower Funnel</p>
-          <p className="text-2xl font-bold text-card-foreground tabular-nums mt-1">{fmt(lowerFunnel)}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{lfPct.toFixed(1)}% of tracked conversions</p>
-        </div>
         <div className="rounded-lg bg-blue-500/[0.06] border border-blue-500/20 px-4 py-3">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-blue-700 dark:text-blue-400">Upper Funnel</p>
           <p className="text-2xl font-bold text-card-foreground tabular-nums mt-1">{fmt(upperFunnel)}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{ufPct.toFixed(1)}% of tracked conversions</p>
+        </div>
+        <div className="rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 px-4 py-3">
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-400">Lower Funnel</p>
+          <p className="text-2xl font-bold text-card-foreground tabular-nums mt-1">{fmt(lowerFunnel)}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{lfPct.toFixed(1)}% of tracked conversions</p>
         </div>
       </div>
 
