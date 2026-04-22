@@ -33,7 +33,8 @@ interface TrendTooltipProps {
 }
 
 function formatCompactValue(value: number) {
-  return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toLocaleString();
+  const v = Math.round(value);
+  return v >= 1000 ? `${Math.round(v / 1000)}k` : v.toLocaleString();
 }
 
 function CurrencyTick({ x = 0, y = 0, payload, currency, valueSuffix = '' }: CurrencyTickProps) {
