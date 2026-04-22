@@ -46,6 +46,56 @@ function funnelLabel(group: string) {
   return 'Excluded';
 }
 
+/** Title-case a single token, preserving common acronyms. */
+function titleCaseWord(w: string): string {
+  if (!w) return w;
+  const upper = w.toUpperCase();
+  if (['CTA', 'CTR', 'CPA', 'CPM', 'CPC', 'ROI', 'ROAS', 'GA4', 'UTM', 'URL', 'API', 'ID', 'IP', 'SMS'].includes(upper)) return upper;
+  return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+}
+
+/**
+ * Normalize a raw conversion event name into a clean, title-cased display label.
+ * Handles platform-specific aliases so duplicates (e.g. "Purchase" and "purchase",
+ * or "onsite_conversion.lead" and "Lead") collapse into a single canonical row.
+ */
+function normalizeConversionName(raw: string | null | undefined): string {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return 'Unspecified';
+  const lower = trimmed.toLowerCase();
+
+  // Platform-specific aliases → canonical label.
+  const aliases: Record<string, string> = {
+    'purchase': 'Purchase',
+    'purchases': 'Purchase',
+    'complete_payment': 'Complete Payment',
+    'onsite_conversion.lead': 'Lead',
+    'onsite_conversion.leaad': 'Lead',
+    'lead': 'Lead',
+    'leads': 'Lead',
+    'add_to_cart': 'Add To Cart',
+    'initiate_checkout': 'Initiate Checkout',
+    'view_content': 'View Content',
+    'sign_up': 'Sign Up',
+    'complete_registration': 'Complete Registration',
+  };
+  if (aliases[lower]) return aliases[lower];
+
+  // Strip common platform prefixes like "onsite_conversion." or "offsite_conversion.fb_pixel_".
+  const withoutPrefix = lower
+    .replace(/^onsite_conversion\./, '')
+    .replace(/^offsite_conversion\.fb_pixel_/, '')
+    .replace(/^offsite_conversion\./, '');
+  if (aliases[withoutPrefix]) return aliases[withoutPrefix];
+
+  // Generic title-case across underscores / dots / spaces.
+  return withoutPrefix
+    .split(/[_.\s]+/)
+    .filter(Boolean)
+    .map(titleCaseWord)
+    .join(' ');
+}
+
 function buildFallbackRows(sourceRows: DashboardDailyRow[]): ConversionBreakdownRow[] {
   if (!sourceRows.length) return [];
 
@@ -117,15 +167,19 @@ export function ConversionBreakdownCard({
   }, [effectiveRows, enabled.lower, enabled.upper, enabled.excluded]);
 
   const aggregated = useMemo(() => {
-    if (!aggregateAcrossPlatforms) return filtered;
+    // Always normalize names so duplicates like "Purchase"/"purchase" or
+    // "onsite_conversion.lead"/"Lead" collapse into a single row. When
+    // aggregateAcrossPlatforms is false we still merge per-platform duplicates.
     const map = new Map<string, typeof filtered[number]>();
     for (const r of filtered) {
-      const key = `${r.conversion_name}::${r.conversion_funnel_group}`;
+      const canonicalName = normalizeConversionName(r.conversion_name);
+      const platformKey = aggregateAcrossPlatforms ? '*' : (r.platform || '');
+      const key = `${platformKey}::${canonicalName}::${r.conversion_funnel_group}`;
       const existing = map.get(key);
       if (existing) {
         existing.conversions_all += r.conversions_all || 0;
       } else {
-        map.set(key, { ...r, conversions_all: r.conversions_all || 0 });
+        map.set(key, { ...r, conversion_name: canonicalName, conversions_all: r.conversions_all || 0 });
       }
     }
     return Array.from(map.values());
