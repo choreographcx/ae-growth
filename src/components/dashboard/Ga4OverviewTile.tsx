@@ -69,9 +69,6 @@ export function Ga4OverviewTile() {
             <Stat label="Sessions"    value={formatCompact(sessions)}    loading={q.isLoading} />
             <Stat label="Engaged"     value={formatCompact(engaged)}     loading={q.isLoading} />
             <Stat label="Conversions" value={formatCompact(conversions)} loading={q.isLoading} />
-            <div className="flex items-end justify-end">
-              <Link to="/ga4" className="text-[11px] text-primary hover:underline">Details →</Link>
-            </div>
           </div>
         </div>
       </div>
@@ -83,7 +80,6 @@ export function Ga4OverviewTile() {
             <Globe size={14} />
           </div>
           <p className="text-[14px] font-semibold text-muted-foreground uppercase tracking-wider leading-tight truncate flex-1 min-w-0">Web Analytics (GA4)</p>
-          <Link to="/ga4" className="text-[11px] text-primary hover:underline shrink-0">Details →</Link>
         </div>
         <p className="text-[30px] font-bold text-card-foreground tracking-tight leading-none mt-2 truncate">
           {q.isLoading ? <Loader2 className="h-6 w-6 animate-spin inline" /> : formatCompact(users)}
