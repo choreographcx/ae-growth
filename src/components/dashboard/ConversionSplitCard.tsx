@@ -24,7 +24,6 @@ export function ConversionSplitCard({ lowerFunnel, upperFunnel, className }: Pro
     <div className={cn('bg-card rounded-xl border border-border p-5 shadow-sm', className)}>
       <div className="flex items-baseline justify-between mb-4">
         <h3 className="text-sm font-semibold text-card-foreground">Conversion Mix</h3>
-        <p className="text-[11px] text-muted-foreground">Lower-funnel = real outcomes · Upper-funnel = intent signals</p>
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-4">

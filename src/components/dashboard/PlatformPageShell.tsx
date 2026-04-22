@@ -232,6 +232,14 @@ export function PlatformPageShell({
 
       {midExtras?.({ totals })}
 
+      {/* Campaign Performance — moved above Conversion Mix / Funnel */}
+      {scoped.length > 0 && (
+        <div className="space-y-2.5 md:space-y-3 print-break-before">
+          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend" />
+          <CampaignPerformance platformFilter={platformKey} hidePlatformColumn />
+        </div>
+      )}
+
       {/* Conversion Mix + Funnel — side by side on desktop */}
       {(hasConversions || totals.impressions > 0 || totals.clicks > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-stretch">
@@ -269,14 +277,6 @@ export function PlatformPageShell({
             end={range.end}
             sourceRows={scoped}
           />
-        </div>
-      )}
-
-      {/* Campaign Performance — same component used on Overview, scoped to this platform */}
-      {scoped.length > 0 && (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend" />
-          <CampaignPerformance platformFilter={platformKey} hidePlatformColumn />
         </div>
       )}
 
