@@ -65,13 +65,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Track which user id we've already fetched profile data for so token
+    // refreshes (which fire on every browser tab refocus) don't re-trigger
+    // a profile fetch — that toggles `profileLoading` and unmounts the
+    // dashboard tree, which in turn resets in-memory filter state.
+    let lastFetchedUserId: string | null = null;
 
-      if (session?.user) {
-        setTimeout(() => fetchUserData(session.user.id), 0);
+    const handleSession = (session: Session | null, isInitial: boolean) => {
+      setSession(session);
+      const nextUser = session?.user ?? null;
+      setUser(nextUser);
+
+      if (nextUser) {
+        if (lastFetchedUserId !== nextUser.id) {
+          lastFetchedUserId = nextUser.id;
+          if (isInitial) {
+            fetchUserData(nextUser.id);
+          } else {
+            setTimeout(() => fetchUserData(nextUser.id), 0);
+          }
+        }
       } else {
+        lastFetchedUserId = null;
         setProfile(null);
         setIsAdmin(false);
         setIsSuperAdmin(false);
@@ -79,17 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfileLoading(false);
       }
       setLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session, false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      } else {
-        setProfileLoading(false);
-      }
-      setLoading(false);
+      handleSession(session, true);
     });
 
     return () => subscription.unsubscribe();
