@@ -1,8 +1,17 @@
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
+import { PlatformKey } from '@/types/dashboard';
 
 interface Props {
-  lowerFunnel: number;
-  upperFunnel: number;
+  /** Restrict to a single platform. Omit to aggregate across all platforms. */
+  platform?: PlatformKey;
+  start: Date;
+  end: Date;
+  campaigns?: string[];
+  /** Fallback values used while the breakdown RPC is loading or empty. */
+  fallbackLowerFunnel?: number;
+  fallbackUpperFunnel?: number;
   className?: string;
 }
 
@@ -11,11 +20,36 @@ function fmt(n: number): string {
 }
 
 /**
- * Side-by-side split of Lower-Funnel vs Upper-Funnel conversions for a platform page.
- * Helps clarify whether a platform is driving real outcomes (lower) or
- * intent signals (upper).
+ * Side-by-side split of Lower-Funnel vs Upper-Funnel conversions.
+ * Sources data from the same breakdown RPC as ConversionBreakdownCard so
+ * the two cards always agree on totals.
  */
-export function ConversionSplitCard({ lowerFunnel, upperFunnel, className }: Props) {
+export function ConversionSplitCard({
+  platform,
+  start,
+  end,
+  campaigns,
+  fallbackLowerFunnel = 0,
+  fallbackUpperFunnel = 0,
+  className,
+}: Props) {
+  const { rows } = useConversionBreakdown({ start, end, platform, campaigns });
+
+  const { lowerFunnel, upperFunnel } = useMemo(() => {
+    if (!rows.length) {
+      return { lowerFunnel: fallbackLowerFunnel, upperFunnel: fallbackUpperFunnel };
+    }
+    let lower = 0;
+    let upper = 0;
+    for (const r of rows) {
+      const g = (r.conversion_funnel_group || '').toLowerCase();
+      const v = r.conversions_all || 0;
+      if (g.includes('lower')) lower += v;
+      else if (g.includes('upper')) upper += v;
+    }
+    return { lowerFunnel: lower, upperFunnel: upper };
+  }, [rows, fallbackLowerFunnel, fallbackUpperFunnel]);
+
   const total = lowerFunnel + upperFunnel;
   const lfPct = total > 0 ? (lowerFunnel / total) * 100 : 0;
   const ufPct = total > 0 ? (upperFunnel / total) * 100 : 0;

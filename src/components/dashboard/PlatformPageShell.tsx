@@ -284,8 +284,11 @@ export function PlatformPageShell({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-stretch">
           {hasConversions && (
             <ConversionSplitCard
-              lowerFunnel={totals.conversionsLowerFunnel}
-              upperFunnel={totals.conversionsUpperFunnel}
+              platform={platformKey}
+              start={range.start}
+              end={range.end}
+              fallbackLowerFunnel={totals.conversionsLowerFunnel}
+              fallbackUpperFunnel={totals.conversionsUpperFunnel}
               className="h-full"
             />
           )}
