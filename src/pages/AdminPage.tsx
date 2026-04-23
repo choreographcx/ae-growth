@@ -92,11 +92,11 @@ export default function AdminPage() {
 
       {/* Client Setup — kept exactly as-is */}
       <Accordion type="multiple" defaultValue={['client']} className="space-y-3">
-        <AccordionItem value="client" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
-          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
+        <AccordionItem value="client" className="bg-card rounded-xl border border-border shadow-sm data-[state=open]:shadow-md transition-shadow">
+          <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5 px-6 rounded-xl focus-visible:ring-inset">
             <div className="flex items-center gap-2">Client Setup <Badge variant="secondary" className="text-[9px] font-normal ml-1 text-white">{client.name}</Badge></div>
           </AccordionTrigger>
-          <AccordionContent className="pb-6">
+          <AccordionContent className="pb-6 px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               <Field label="Client Name" value={client.name} onChange={v => updateClient({ name: v })} required />
               <CurrencySelectField label="Reporting Currency" value={client.currency} onChange={v => updateClient({ currency: v })} />
