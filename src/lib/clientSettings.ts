@@ -83,11 +83,12 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
   const clientId = clientRow.id;
 
   // Step 2 — parallel fetch of all per-client settings
-  const [brandingRes, platformsRes, reportingRes, alertsRes] = await Promise.all([
+  const [brandingRes, platformsRes, reportingRes, alertsRes, dataSourcesRes] = await Promise.all([
     supabase.from('client_branding').select('*').eq('client_id', clientId).maybeSingle(),
     supabase.from('client_platform_settings').select('*').eq('client_id', clientId),
     supabase.from('client_reporting_settings').select('*').eq('client_id', clientId).maybeSingle(),
     supabase.from('client_kpi_thresholds').select('*').eq('client_id', clientId),
+    supabase.from('client_data_sources').select('*').eq('client_id', clientId).eq('source_type', 'bigquery').maybeSingle(),
   ]);
 
   // Reduce platforms into the keyed map the UI expects.
@@ -165,6 +166,8 @@ export async function loadClientSettings(): Promise<LoadedSettings> {
     ga4PropertyId: reporting?.ga4_property_id ?? '',
     ga4StreamId: reporting?.ga4_stream_id ?? '',
     gtmContainerId: reporting?.gtm_container_id ?? '',
+    bigqueryProject: dataSourcesRes.data?.gcp_project_id ?? '',
+    bigqueryDataset: dataSourcesRes.data?.bq_dataset ?? '',
     primaryConversion: reporting?.primary_conversion_label ?? '',
     secondaryConversion: reporting?.secondary_conversion_label ?? '',
     microConversions: reporting?.micro_conversions ?? [],
@@ -323,7 +326,24 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
     if (error) throw error;
   }
 
-  // 5) Built-in alert thresholds (replace the defaults) ------------------
+  // 5) BigQuery data source --------------------------------------------
+  {
+    const { error } = await supabase
+      .from('client_data_sources')
+      .upsert(
+        {
+          client_id: clientId,
+          source_type: 'bigquery',
+          gcp_project_id: client.bigqueryProject || null,
+          bq_dataset: client.bigqueryDataset || null,
+          is_enabled: true,
+        } as any,
+        { onConflict: 'client_id,source_type' }
+      );
+    if (error) throw error;
+  }
+
+  // 6) Built-in alert thresholds (replace the defaults) ------------------
   await supabase
     .from('client_kpi_thresholds')
     .delete()
