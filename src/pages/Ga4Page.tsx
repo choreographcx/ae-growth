@@ -6,6 +6,7 @@ import { useGa4Report } from '@/hooks/useGa4Report';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencySymbol } from '@/lib/currency';
 import { format, parse } from 'date-fns';
 
 function formatCompact(n: number): string {
@@ -23,7 +24,16 @@ function formatDuration(seconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-function Tile({ label, value, subtitle }: { label: string; value: string; subtitle?: string }) {
+function Money({ amount, currency }: { amount: number; currency: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <CurrencySymbol currency={currency} />
+      {formatCompact(amount)}
+    </span>
+  );
+}
+
+function Tile({ label, value, subtitle }: { label: string; value: React.ReactNode; subtitle?: string }) {
   return (
     <Card>
       <CardContent className="p-4">
