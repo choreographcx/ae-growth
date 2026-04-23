@@ -30,6 +30,8 @@ export const defaultClient: ClientProfile = {
   ga4PropertyId: '123456789',
   ga4StreamId: '987654321',
   gtmContainerId: 'GTM-XXXXX',
+  bigqueryProject: '',
+  bigqueryDataset: '',
   primaryConversion: 'form_submit',
   secondaryConversion: 'phone_call',
   microConversions: ['page_scroll', 'video_play', 'pdf_download'],
