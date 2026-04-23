@@ -15,6 +15,7 @@ import { useDashboard } from '@/context/DashboardContext';
 import { KPIGroupData } from '@/types/dashboard';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { pctChange, aggregateRows, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
+import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { generateInsights, sortInsights } from '@/lib/insights';
 import { useUserLayout } from '@/hooks/useUserLayout';
 
@@ -62,8 +63,59 @@ export default function OverviewPage() {
   } = data;
 
   // Overview always uses LOWER FUNNEL conversions for cross-platform comparability.
-  const lf = useMemo(() => aggregateRows(rows, 'lower_funnel'), [rows]);
-  const lfPrev = useMemo(() => previousRows.length ? aggregateRows(previousRows, 'lower_funnel') : null, [previousRows]);
+  // Source the lower-funnel total from the same RPC that powers the Conversion
+  // Breakdown card so the KPI value stays in lockstep with what's listed there.
+  const breakdownCur = useConversionBreakdown({ start: data.range.start, end: data.range.end });
+  const prevRange = useMemo(() => {
+    if (!previousRows.length) return null;
+    const dates = previousRows.map(r => r.date).sort();
+    return { start: new Date(dates[0]), end: new Date(dates[dates.length - 1]) };
+  }, [previousRows]);
+  const breakdownPrev = useConversionBreakdown({
+    start: prevRange?.start ?? data.range.start,
+    end: prevRange?.end ?? data.range.end,
+  });
+
+  /** Sum lower-funnel rows from the breakdown RPC (matches Conversion Breakdown card). */
+  const sumLowerFunnel = (rows: { conversion_funnel_group: string; conversions_all: number }[]) =>
+    rows.reduce((sum, r) =>
+      (r.conversion_funnel_group || '').toLowerCase().includes('lower')
+        ? sum + (+r.conversions_all || 0)
+        : sum, 0);
+
+  const lfBreakdownTotal = useMemo(() => sumLowerFunnel(breakdownCur.rows), [breakdownCur.rows]);
+  const lfBreakdownTotalPrev = useMemo(
+    () => prevRange ? sumLowerFunnel(breakdownPrev.rows) : 0,
+    [breakdownPrev.rows, prevRange]
+  );
+
+  // Use the breakdown total as the conversion count, but keep spend/clicks/LPV
+  // from the daily aggregate to compute CPA / CVR / etc.
+  const lfBase = useMemo(() => aggregateRows(rows, 'lower_funnel'), [rows]);
+  const lfBasePrev = useMemo(() => previousRows.length ? aggregateRows(previousRows, 'lower_funnel') : null, [previousRows]);
+  const lf = useMemo(() => {
+    const conv = lfBreakdownTotal;
+    return {
+      ...lfBase,
+      conversions: conv,
+      conversionsLowerFunnel: conv,
+      cpaLowerFunnel: lfBase.spend > 0 && conv > 0 ? lfBase.spend / conv : 0,
+      cvrLowerFunnel: lfBase.landingPageViews > 0 ? (conv / lfBase.landingPageViews) * 100 : 0,
+      conversionRateLowerFunnel: lfBase.clicks > 0 ? (conv / lfBase.clicks) * 100 : 0,
+    };
+  }, [lfBase, lfBreakdownTotal]);
+  const lfPrev = useMemo(() => {
+    if (!lfBasePrev) return null;
+    const conv = lfBreakdownTotalPrev;
+    return {
+      ...lfBasePrev,
+      conversions: conv,
+      conversionsLowerFunnel: conv,
+      cpaLowerFunnel: lfBasePrev.spend > 0 && conv > 0 ? lfBasePrev.spend / conv : 0,
+      cvrLowerFunnel: lfBasePrev.landingPageViews > 0 ? (conv / lfBasePrev.landingPageViews) * 100 : 0,
+    };
+  }, [lfBasePrev, lfBreakdownTotalPrev]);
+
   const lfConvSeries = useMemo(() => buildTimeSeries(rows, r => +r.conversions_lower_funnel || 0), [rows]);
   const lfCpaSeries  = useMemo(() => buildCpaSeries(rows, 'lower_funnel'), [rows]);
 
