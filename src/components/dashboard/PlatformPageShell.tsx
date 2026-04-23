@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { PlatformKey, KPIGroupData } from '@/types/dashboard';
 import { useDashboard } from '@/context/DashboardContext';
 import { aggregateRows, normalizePlatform, pctChange, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
+import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
@@ -109,8 +110,46 @@ export function PlatformPageShell({
     return extraRowFilter ? base.filter(extraRowFilter) : base;
   }, [previousRows, platformKey, extraRowFilter]);
 
-  const totals     = useMemo(() => aggregateRows(scoped, 'all'), [scoped]);
-  const prevTotals = useMemo(() => scopedPrev.length ? aggregateRows(scopedPrev, 'all') : null, [scopedPrev]);
+  const baseTotals     = useMemo(() => aggregateRows(scoped, 'all'), [scoped]);
+  const basePrevTotals = useMemo(() => scopedPrev.length ? aggregateRows(scopedPrev, 'all') : null, [scopedPrev]);
+
+  // Source the lower-funnel conversion total from the same RPC that powers the
+  // Conversion Breakdown card so the KPI value stays in lockstep with what's listed there.
+  const breakdownCur = useConversionBreakdown({ start: range.start, end: range.end, platform: platformKey });
+  const prevRange = useMemo(() => {
+    if (!scopedPrev.length) return null;
+    const dates = scopedPrev.map(r => r.date).sort();
+    return { start: new Date(dates[0]), end: new Date(dates[dates.length - 1]) };
+  }, [scopedPrev]);
+  const breakdownPrev = useConversionBreakdown({
+    start: prevRange?.start ?? range.start,
+    end: prevRange?.end ?? range.end,
+    platform: platformKey,
+  });
+
+  const sumLowerFunnel = (rs: { conversion_funnel_group: string; conversions_all: number }[]) =>
+    rs.reduce((sum, r) =>
+      (r.conversion_funnel_group || '').toLowerCase().includes('lower')
+        ? sum + (+r.conversions_all || 0)
+        : sum, 0);
+
+  const lfBreakdownTotal     = useMemo(() => sumLowerFunnel(breakdownCur.rows), [breakdownCur.rows]);
+  const lfBreakdownTotalPrev = useMemo(() => prevRange ? sumLowerFunnel(breakdownPrev.rows) : 0, [breakdownPrev.rows, prevRange]);
+
+  /** Override lower-funnel-derived metrics on a totals object using the breakdown total. */
+  const withBreakdownLF = (t: ReturnType<typeof aggregateRows>, lfConv: number) => ({
+    ...t,
+    conversionsLowerFunnel: lfConv,
+    cpaLowerFunnel: t.spend > 0 && lfConv > 0 ? t.spend / lfConv : 0,
+    cvrLowerFunnel: t.landingPageViews > 0 ? (lfConv / t.landingPageViews) * 100 : 0,
+    conversionRateLowerFunnel: t.clicks > 0 ? (lfConv / t.clicks) * 100 : 0,
+  });
+
+  const totals     = useMemo(() => withBreakdownLF(baseTotals, lfBreakdownTotal), [baseTotals, lfBreakdownTotal]);
+  const prevTotals = useMemo(
+    () => basePrevTotals ? withBreakdownLF(basePrevTotals, lfBreakdownTotalPrev) : null,
+    [basePrevTotals, lfBreakdownTotalPrev]
+  );
 
   const spendSeries  = useMemo(() => buildTimeSeries(scoped, r => +r.cost || 0), [scoped]);
   const lfConvSeries = useMemo(() => buildTimeSeries(scoped, r => +r.conversions_lower_funnel || 0), [scoped]);
