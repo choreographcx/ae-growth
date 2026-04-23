@@ -120,6 +120,16 @@ export default function AdminPage() {
               <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} onChange={v => updateClient({ defaultDateRange: v })} />
               <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
             </div>
+
+            {/* BigQuery Source — bottom of Client Setup */}
+            <div className="mt-6 pt-5 border-t border-border/50">
+              <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-1">BigQuery Source</h4>
+              <p className="text-[11px] text-muted-foreground mb-4">Where the dashboard reads ad-platform performance data from.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Field label="BigQuery Project" value={client.bigqueryProject} onChange={v => updateClient({ bigqueryProject: v })} placeholder="e.g. acme-analytics-prod" />
+                <Field label="BigQuery Dataset" value={client.bigqueryDataset} onChange={v => updateClient({ bigqueryDataset: v })} placeholder="e.g. marketing_unified" />
+              </div>
+            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
