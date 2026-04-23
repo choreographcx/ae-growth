@@ -68,7 +68,7 @@ export default function Ga4Page() {
     propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['sessionSource', 'sessionMedium'],
-    metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions'],
+    metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
     enabled,
@@ -203,6 +203,7 @@ export default function Ga4Page() {
             { header: 'Users',       render: r => formatCompact(r.metrics[1]), align: 'right' },
             { header: 'Engagement',  render: r => `${(r.metrics[2] * 100).toFixed(1)}%`, align: 'right' },
             { header: 'Conv.',       render: r => formatCompact(r.metrics[3]), align: 'right' },
+            { header: 'Revenue',     render: r => formatCompact(r.metrics[4]), align: 'right' },
           ]}
         />
       </div>
