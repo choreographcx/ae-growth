@@ -81,10 +81,41 @@ export function resolveCampaignObjective(
 export function getCampaignChannel(name: string | null | undefined): string {
   return parseCampaignName(name).channel;
 }
+/**
+ * Manual display overrides for specific campaigns. Matched against either the
+ * raw campaign name or its parsed 3rd-segment label (case-insensitive substring).
+ * Keep keys lowercase.
+ */
+const DISPLAY_OVERRIDES: Array<{ test: (raw: string, label: string) => boolean; display: string }> = [
+  {
+    // Google Ads "Campaign 1" / BRANDED search campaign.
+    test: (raw, label) => {
+      const r = raw.toLowerCase();
+      const l = label.toLowerCase();
+      return (l.includes('branded') || r.includes('branded'))
+        && (l.startsWith('campaign 1') || r.includes('campaign 1') || l.includes('brand'));
+    },
+    display: 'Google Search Branded',
+  },
+  {
+    // Google Ads "Campaign 2" / Generic search campaign.
+    test: (raw, label) => {
+      const r = raw.toLowerCase();
+      const l = label.toLowerCase();
+      return (l.includes('generic') || r.includes('generic'))
+        && (l.startsWith('campaign 2') || r.includes('campaign 2') || l.includes('generic'));
+    },
+    display: 'Google Search Generic',
+  },
+];
+
 /** Display label = the 3rd underscore segment (campaign), or full name if not parseable. */
 export function getCampaignLabel(name: string | null | undefined): string {
   if (!name) return UNKNOWN;
   const parts = name.split('_').map(p => p.trim()).filter(Boolean);
-  if (parts.length >= 3 && parts[2]) return parts[2];
-  return name;
+  const baseLabel = parts.length >= 3 && parts[2] ? parts[2] : name;
+  for (const override of DISPLAY_OVERRIDES) {
+    if (override.test(name, baseLabel)) return override.display;
+  }
+  return baseLabel;
 }
