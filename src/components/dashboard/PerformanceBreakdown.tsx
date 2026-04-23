@@ -18,7 +18,7 @@ export function PerformanceBreakdown({ platforms, className }: PerformanceBreakd
 
   const subtitle =
     view === 'platform'
-      ? 'Aggregated performance grouped by platform'
+      ? undefined
       : 'Top campaigns ranked by spend, with metrics aggregated across the date range';
 
   return (

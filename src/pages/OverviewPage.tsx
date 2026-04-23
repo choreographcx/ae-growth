@@ -314,7 +314,7 @@ export default function OverviewPage() {
       label: 'Conversion Breakdown',
       node: (
         <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Conversion Breakdown" subtitle="All tracked conversions, aggregated across platforms" />
+          <SectionHeader title="Conversion Breakdown" />
           <ConversionBreakdownCard
             start={data.range.start}
             end={data.range.end}
