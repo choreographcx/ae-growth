@@ -6,6 +6,7 @@ import { useGa4Report } from '@/hooks/useGa4Report';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CurrencySymbol } from '@/lib/currency';
 import { format, parse } from 'date-fns';
 
 function formatCompact(n: number): string {
@@ -23,7 +24,16 @@ function formatDuration(seconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-function Tile({ label, value, subtitle }: { label: string; value: string; subtitle?: string }) {
+function Money({ amount, currency }: { amount: number; currency: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <CurrencySymbol currency={currency} />
+      {formatCompact(amount)}
+    </span>
+  );
+}
+
+function Tile({ label, value, subtitle }: { label: string; value: React.ReactNode; subtitle?: string }) {
   return (
     <Card>
       <CardContent className="p-4">
@@ -38,7 +48,7 @@ function Tile({ label, value, subtitle }: { label: string; value: string; subtit
 export default function Ga4Page() {
   const { client, data: dashData } = useDashboard();
   const { start, end } = dashData.range;
-
+  const currency = client.currency || 'USD';
   const propertyId = (client.ga4PropertyId || '').trim();
   const enabled = propertyId.length > 0;
 
@@ -163,7 +173,7 @@ export default function Ga4Page() {
         <Tile label="Avg Session"       value={formatDuration(t('averageSessionDuration'))} subtitle={`${(t('bounceRate') * 100).toFixed(1)}% bounce`} />
         <Tile label="Page Views"        value={formatCompact(t('screenPageViews'))} />
         <Tile label="Conversions"       value={formatCompact(t('conversions'))} />
-        <Tile label="Revenue"           value={formatCompact(t('totalRevenue'))} />
+        <Tile label="Revenue"           value={<Money amount={t('totalRevenue')} currency={currency} />} />
       </div>
 
       {/* Trends */}
@@ -186,7 +196,7 @@ export default function Ga4Page() {
             { header: 'Users',     render: r => formatCompact(r.metrics[1]), align: 'right' },
             { header: 'Engaged',   render: r => formatCompact(r.metrics[2]), align: 'right' },
             { header: 'Conv.',     render: r => formatCompact(r.metrics[3]), align: 'right' },
-            { header: 'Revenue',   render: r => formatCompact(r.metrics[4]), align: 'right' },
+            { header: 'Revenue',   render: r => <Money amount={r.metrics[4]} currency={currency} />, align: 'right' },
           ]}
         />
       </div>
@@ -203,7 +213,7 @@ export default function Ga4Page() {
             { header: 'Users',       render: r => formatCompact(r.metrics[1]), align: 'right' },
             { header: 'Engagement',  render: r => `${(r.metrics[2] * 100).toFixed(1)}%`, align: 'right' },
             { header: 'Conv.',       render: r => formatCompact(r.metrics[3]), align: 'right' },
-            { header: 'Revenue',     render: r => formatCompact(r.metrics[4]), align: 'right' },
+            { header: 'Revenue',     render: r => <Money amount={r.metrics[4]} currency={currency} />, align: 'right' },
           ]}
         />
       </div>
