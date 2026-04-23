@@ -126,7 +126,11 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         cpa: a.cpaLowerFunnel,
       });
     });
-    return out;
+    // Hide rows where every key metric is zero — these are noise from empty
+    // BigQuery campaign rollups and clutter the table.
+    return out.filter(r =>
+      r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0
+    );
   }, [data.rows, platformFilter, hidePlatformColumn]);
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
