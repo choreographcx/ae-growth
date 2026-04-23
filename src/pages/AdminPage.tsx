@@ -94,7 +94,7 @@ export default function AdminPage() {
       <Accordion type="multiple" defaultValue={['client']} className="space-y-3">
         <AccordionItem value="client" className="bg-card rounded-xl border border-border shadow-sm px-6 data-[state=open]:shadow-md transition-shadow">
           <AccordionTrigger className="text-sm font-semibold text-card-foreground hover:no-underline py-5">
-            <div className="flex items-center gap-2">Client Setup <Badge variant="secondary" className="text-[9px] font-normal ml-1">{client.name}</Badge></div>
+            <div className="flex items-center gap-2">Client Setup <Badge variant="secondary" className="text-[9px] font-normal ml-1 text-white">{client.name}</Badge></div>
           </AccordionTrigger>
           <AccordionContent className="pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -161,7 +161,7 @@ export default function AdminPage() {
           icon={<LayoutGrid size={16} />}
           title="Platform Setup"
           subtitle="Enable platforms, set budgets, and manage account connections"
-          badge={<Badge variant="secondary" className="text-[9px] font-normal">{enabledCount} / {allPlatforms.length} platforms</Badge>}
+          badge={<Badge variant="secondary" className="text-[9px] font-normal text-white">{enabledCount} / {allPlatforms.length} platforms</Badge>}
         >
           {/* Platform summary strip */}
           <div className="flex flex-wrap items-center gap-4 py-3 mb-4 border-b border-border/50 text-xs text-muted-foreground">
@@ -221,7 +221,7 @@ export default function AdminPage() {
           icon={<FileText size={16} />}
           title="Reporting Rules"
           subtitle="Metric mapping, naming normalization, aliases, and taxonomy"
-          badge={<Badge variant="secondary" className="text-[9px] font-normal">{client.metricMappings.length} mappings</Badge>}
+          badge={<Badge variant="secondary" className="text-[9px] font-normal text-white">{client.metricMappings.length} mappings</Badge>}
         >
           <ReportingRulesSection client={client} updateClient={updateClient} />
         </AdminSection>
@@ -233,7 +233,7 @@ export default function AdminPage() {
           title="Alert Rules"
           subtitle="Configure thresholds, severity levels, and alert policies"
           badge={
-            <Badge variant="secondary" className="text-[9px] font-normal">
+            <Badge variant="secondary" className="text-[9px] font-normal text-white">
               {((client as any).alertRules ?? []).filter((r: any) => r?.active).length || Object.values(client.alertThresholds).filter(v => v > 0).length} active
             </Badge>
           }
@@ -268,7 +268,7 @@ export default function AdminPage() {
           title="Templates & Portability"
           subtitle="Export, import, and reuse dashboard configurations across clients"
           badge={
-            <Badge variant="secondary" className="text-[9px] font-normal">
+            <Badge variant="secondary" className="text-[9px] font-normal text-white">
               {Math.round((Object.entries({
                 client_info: !!client.name,
                 branding: !!(client as any).branding?.primaryColor,
