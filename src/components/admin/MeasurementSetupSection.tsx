@@ -90,6 +90,16 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
         </div>
       </div>
 
+      {/* BigQuery Source */}
+      <div className="pt-4 border-t border-border/50">
+        <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-1">BigQuery Source</h4>
+        <p className="text-[11px] text-muted-foreground mb-4">Where the dashboard reads ad-platform performance data from.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Field label="BigQuery Project" value={client.bigqueryProject} onChange={v => updateClient({ bigqueryProject: v })} placeholder="e.g. acme-analytics-prod" />
+          <Field label="BigQuery Dataset" value={client.bigqueryDataset} onChange={v => updateClient({ bigqueryDataset: v })} placeholder="e.g. marketing_unified" />
+        </div>
+      </div>
+
       {/* Attribution & Counting */}
       <div className="pt-4 border-t border-border/50">
         <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Attribution & Counting</h4>

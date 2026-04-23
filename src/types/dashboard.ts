@@ -45,6 +45,8 @@ export interface ClientProfile {
   ga4PropertyId: string;
   ga4StreamId: string;
   gtmContainerId: string;
+  bigqueryProject: string;
+  bigqueryDataset: string;
   primaryConversion: string;
   secondaryConversion: string;
   microConversions: string[];
