@@ -1,7 +1,7 @@
 /**
  * Money conversion helpers.
  *
- * DB invariant: `cost` and `cost_usd` from `bq_fdw.aroya_dashboard_daily` are
+ * DB invariant: `cost` and `cost_usd` from `bq_fdw.aesa_dashboard_daily` are
  * always denominated in USD, regardless of which currency each ad platform's
  * API natively reports in. The per-platform "reporting currency" stored in
  * Admin → Platform Settings is informational metadata only — it documents
@@ -11,13 +11,18 @@
  * reporting currency: multiply USD values by the client's USD→SAR or USD→AED
  * rate. USD reporting (or any unrecognised currency) returns a multiplier of 1.
  */
-import { ClientProfile, PlatformKey } from '@/types/dashboard';
+import { ClientProfile, PlatformKey } from "@/types/dashboard";
 
-export function rateForReportingCurrency(client: Pick<ClientProfile, 'currency' | 'usdToSarRate' | 'usdToAedRate'>): number {
+export function rateForReportingCurrency(
+  client: Pick<ClientProfile, "currency" | "usdToSarRate" | "usdToAedRate">,
+): number {
   switch (client.currency) {
-    case 'SAR': return Number(client.usdToSarRate) > 0 ? Number(client.usdToSarRate) : 1;
-    case 'AED': return Number(client.usdToAedRate) > 0 ? Number(client.usdToAedRate) : 1;
-    default:    return 1; // USD or anything unrecognised — no conversion.
+    case "SAR":
+      return Number(client.usdToSarRate) > 0 ? Number(client.usdToSarRate) : 1;
+    case "AED":
+      return Number(client.usdToAedRate) > 0 ? Number(client.usdToAedRate) : 1;
+    default:
+      return 1; // USD or anything unrecognised — no conversion.
   }
 }
 
@@ -28,7 +33,7 @@ export function rateForReportingCurrency(client: Pick<ClientProfile, 'currency' 
  * to be refactored if per-platform overrides are ever reintroduced.
  */
 export function platformConvertRate(
-  client: Pick<ClientProfile, 'currency' | 'usdToSarRate' | 'usdToAedRate'>,
+  client: Pick<ClientProfile, "currency" | "usdToSarRate" | "usdToAedRate">,
   _platformKey: PlatformKey,
 ): number {
   return rateForReportingCurrency(client);
