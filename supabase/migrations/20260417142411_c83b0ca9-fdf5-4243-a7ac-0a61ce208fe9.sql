@@ -1,5 +1,5 @@
 -- Add new conversion columns to the BigQuery foreign table mapping
-ALTER FOREIGN TABLE bq_fdw.aroya_dashboard_daily
+ALTER FOREIGN TABLE bq_fdw.aesa_dashboard_daily
   ADD COLUMN IF NOT EXISTS conversions_all double precision,
   ADD COLUMN IF NOT EXISTS conversions_lower_funnel double precision,
   ADD COLUMN IF NOT EXISTS conversions_upper_funnel double precision,
