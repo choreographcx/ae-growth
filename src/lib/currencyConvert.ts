@@ -1,7 +1,7 @@
 /**
  * Money conversion helpers.
  *
- * DB invariant: `cost` and `cost_usd` from `bq_fdw.aroya_dashboard_daily` are
+ * DB invariant: `cost` and `cost_usd` from `public.dashboard_daily` are
  * always denominated in USD, regardless of which currency each ad platform's
  * API natively reports in. The per-platform "reporting currency" stored in
  * Admin → Platform Settings is informational metadata only — it documents
