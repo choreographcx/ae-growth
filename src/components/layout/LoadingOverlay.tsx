@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import HeaderLogo from '@/assets/header-logo.svg';
+import { loadCachedBranding, subscribeBrandingUpdates } from '@/lib/branding';
 
 interface LoadingOverlayProps {
   /** Optional message shown beneath the logo */
