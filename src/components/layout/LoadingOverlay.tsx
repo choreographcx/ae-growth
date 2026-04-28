@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import HeaderLogo from '@/assets/header-logo.svg';
+import { loadCachedBranding, subscribeBrandingUpdates } from '@/lib/branding';
 
 interface LoadingOverlayProps {
   /** Optional message shown beneath the logo */
@@ -18,6 +20,19 @@ interface LoadingOverlayProps {
  * loads (`fixed=true`).
  */
 export function LoadingOverlay({ message = 'Loading…', fixed = false }: LoadingOverlayProps) {
+  const [logoUrl, setLogoUrl] = useState<string>(() => {
+    const cached = loadCachedBranding();
+    return cached?.logoUrl || HeaderLogo;
+  });
+
+  useEffect(() => {
+    const refresh = () => {
+      const cached = loadCachedBranding();
+      setLogoUrl(cached?.logoUrl || HeaderLogo);
+    };
+    return subscribeBrandingUpdates(refresh);
+  }, []);
+
   const wrapperClass = fixed
     ? 'fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in'
     : 'min-h-screen flex items-center justify-center bg-background';
@@ -32,7 +47,7 @@ export function LoadingOverlay({ message = 'Loading…', fixed = false }: Loadin
             className="absolute h-24 w-24 rounded-full bg-primary/15 animate-loading-ring"
           />
           <img
-            src={HeaderLogo}
+            src={logoUrl}
             alt=""
             aria-hidden
             className="relative h-12 w-auto animate-loading-logo will-change-transform"
