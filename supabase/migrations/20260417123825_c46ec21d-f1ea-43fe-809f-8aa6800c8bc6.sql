@@ -49,7 +49,7 @@ begin
     coalesce(sum(d.reach), 0)::numeric              as reach,
     coalesce(sum(d.landing_page_views), 0)::numeric as landing_page_views,
     coalesce(sum(d.video_views), 0)::numeric        as video_views
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_fdw.aesa_dashboard_daily d
   where d.date between p_start and p_end
   group by d.date, d.platform
   order by d.date, d.platform;
