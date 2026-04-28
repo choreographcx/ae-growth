@@ -20,6 +20,19 @@ interface LoadingOverlayProps {
  * loads (`fixed=true`).
  */
 export function LoadingOverlay({ message = 'Loading…', fixed = false }: LoadingOverlayProps) {
+  const [logoUrl, setLogoUrl] = useState<string>(() => {
+    const cached = loadCachedBranding();
+    return cached?.logoUrl || HeaderLogo;
+  });
+
+  useEffect(() => {
+    const refresh = () => {
+      const cached = loadCachedBranding();
+      setLogoUrl(cached?.logoUrl || HeaderLogo);
+    };
+    return subscribeBrandingUpdates(refresh);
+  }, []);
+
   const wrapperClass = fixed
     ? 'fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in'
     : 'min-h-screen flex items-center justify-center bg-background';
