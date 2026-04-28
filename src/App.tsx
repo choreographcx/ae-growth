@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { loadCachedBranding } from "@/lib/branding";
 import { LoadingOverlay } from "@/components/layout/LoadingOverlay";
+import AuthPage from "./pages/AuthPage";
 
 // Lazy-load all pages so the initial JS bundle ships only what's needed for the
 // first paint. Each page becomes its own chunk that downloads on demand.
@@ -22,7 +23,6 @@ const XPage = lazy(() => import("./pages/XPage"));
 const ProgrammaticPage = lazy(() => import("./pages/ProgrammaticPage"));
 const Ga4Page = lazy(() => import("./pages/Ga4Page"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
-const AuthPage = lazy(() => import("./pages/AuthPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Tuned for an analytics dashboard backed by BigQuery RPCs:
