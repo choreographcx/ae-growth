@@ -66,7 +66,7 @@ begin
     coalesce(sum(d.outbound_clicks), 0)::numeric                                         as outbound_clicks,
     coalesce(sum(d.video_views), 0)::numeric                                             as video_views,
     coalesce(sum(d.video_p100), 0)::numeric                                              as video_p100
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and (
       _platform_keys is null
@@ -139,7 +139,7 @@ begin
     coalesce(d.conversion_name, '(unspecified)')         as conversion_name,
     coalesce(d.conversion_funnel_group, '(unspecified)') as conversion_funnel_group,
     coalesce(sum(d.conversions_all), 0)::numeric         as conversions_all
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and coalesce(d.is_conversion_row, false) = true
     and (

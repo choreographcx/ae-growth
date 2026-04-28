@@ -40,7 +40,7 @@ BEGIN
     max(d.reach)::numeric                                          AS max_reach,
     max(d.frequency) FILTER (WHERE d.frequency > 0)::numeric       AS sample_frequency,
     max(d.reach) FILTER (WHERE d.reach > 0)::numeric               AS sample_reach
-  FROM bq_fdw.aroya_dashboard_daily d
+  FROM bq_aesa.aesa_dashboard_daily d
   WHERE d.date BETWEEN p_start AND p_end
     AND coalesce(d.is_conversion_row, false) = false
   GROUP BY d.platform

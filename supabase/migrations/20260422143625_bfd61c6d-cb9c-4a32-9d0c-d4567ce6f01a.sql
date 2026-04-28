@@ -1,1 +1,1 @@
-DROP VIEW IF EXISTS public.aroya_dashboard_conversions;
+DROP VIEW IF EXISTS public.aesa_dashboard_conversions;

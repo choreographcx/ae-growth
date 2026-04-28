@@ -21,7 +21,7 @@ AS $$
     COALESCE(SUM(d.conversions_all), 0)::numeric,
     COALESCE(SUM(d.conversions_lower_funnel), 0)::numeric,
     COALESCE(SUM(d.conversions_upper_funnel), 0)::numeric
-  FROM bq_fdw.aroya_dashboard_daily d
+  FROM bq_aesa.aesa_dashboard_daily d
   WHERE d.date BETWEEN p_start AND p_end
   GROUP BY d.platform, d.conversion_name, d.conversion_funnel_group
   ORDER BY 5 DESC NULLS LAST

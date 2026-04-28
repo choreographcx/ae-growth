@@ -28,7 +28,7 @@ begin
     d.date, d.platform, d.publisher_platform, d.campaign_id, d.campaign_name,
     d.campaign_objective, d.audience_type, coalesce(d.is_conversion_row, false),
     d.reach, d.impressions, d.clicks, d.cost
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between '2026-03-22'::date and '2026-04-21'::date
     and lower(coalesce(d.platform,'')) like '%snap%'
     and coalesce(d.reach, 0) > 0

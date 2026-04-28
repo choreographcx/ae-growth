@@ -42,7 +42,7 @@ begin
       else null
     end                                                        as implied_rate,
     count(*)::bigint                                           as rows_scanned
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and coalesce(d.is_conversion_row, false) = false
   group by d.platform

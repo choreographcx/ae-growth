@@ -29,7 +29,7 @@ begin
     coalesce(d.campaign_name, '') as campaign_name,
     coalesce(d.conversion_name, '') as conversion_name,
     count(*)::bigint as row_count
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and lower(coalesce(d.platform,'')) like '%snap%'
     and coalesce(d.reach, 0) > 0

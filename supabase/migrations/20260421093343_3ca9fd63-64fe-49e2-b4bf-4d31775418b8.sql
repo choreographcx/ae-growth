@@ -74,7 +74,7 @@ begin
     coalesce(sum(d.outbound_clicks), 0)::numeric                                         as outbound_clicks,
     coalesce(sum(d.video_views), 0)::numeric                                             as video_views,
     coalesce(sum(d.video_p100), 0)::numeric                                              as video_p100
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and (
       _platform_keys is null
