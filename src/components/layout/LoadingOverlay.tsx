@@ -47,7 +47,7 @@ export function LoadingOverlay({ message = 'Loading…', fixed = false }: Loadin
             className="absolute h-24 w-24 rounded-full bg-primary/15 animate-loading-ring"
           />
           <img
-            src={HeaderLogo}
+            src={logoUrl}
             alt=""
             aria-hidden
             className="relative h-12 w-auto animate-loading-logo will-change-transform"
