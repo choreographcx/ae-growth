@@ -1,6 +1,6 @@
 DROP FOREIGN TABLE IF EXISTS bq_fdw.aroya_dashboard_daily CASCADE;
 
-CREATE FOREIGN TABLE bq_fdw.aroya_dashboard_daily (
+CREATE FOREIGN TABLE bq_fdw.aesa_dashboard_daily (
   platform                       text,
   date                           date,
   account_id                     text,
