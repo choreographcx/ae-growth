@@ -50,7 +50,7 @@ export function LoadingOverlay({ message = 'Loading…', fixed = false }: Loadin
             src={logoUrl}
             alt=""
             aria-hidden
-            className="relative h-12 w-auto animate-loading-logo will-change-transform"
+            className="relative h-6 w-auto animate-loading-logo will-change-transform"
             draggable={false}
           />
         </div>
