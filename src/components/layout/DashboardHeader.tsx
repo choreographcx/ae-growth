@@ -325,7 +325,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             <img
               src={(client as any).branding.logoUrl}
               alt={client.name}
-              className="h-7 w-auto object-contain"
+              className="h-3.5 w-auto object-contain"
             />
           </Link>
         )}
@@ -343,7 +343,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <img
                 src={(client as any).branding.logoUrl}
                 alt={client.name}
-                className="h-8 w-auto object-contain"
+                className="h-4 w-auto object-contain"
               />
             </Link>
           )}
