@@ -330,36 +330,13 @@ export {
  * Fetch the full unfiltered range from BigQuery via the supabase RPC.
  * Cached & deduped by react-query keyed on the date range.
  */
-/**
- * Fetch the unfiltered range directly from the AESA wrapper view
- * `public.dashboard_daily`. The underlying BigQuery FDW requires a date
- * partition filter on EVERY query, so `.gte('date', start)` and
- * `.lte('date', end)` are mandatory and intentionally non-optional.
- */
 async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
   const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-  const startDate = fmt(start);
-  const endDate = fmt(end);
-  // Page through the view to bypass the default 1000-row PostgREST limit
-  // without hardcoding a ceiling we can outgrow.
-  const PAGE = 1000;
-  const out: DashboardDailyRow[] = [];
-  let from = 0;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { data, error } = await (supabase as any)
-      .from('dashboard_daily')
-      .select('*')
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .range(from, from + PAGE - 1);
-    if (error) throw new Error(error.message);
-    const batch = (data as DashboardDailyRow[]) || [];
-    out.push(...batch);
-    if (batch.length < PAGE) break;
-    from += PAGE;
-  }
-  return out;
+  const { data, error } = await (supabase.rpc as any)('get_dashboard_daily', {
+    p_start: fmt(start), p_end: fmt(end),
+  });
+  if (error) throw new Error(error.message);
+  return (data as DashboardDailyRow[]) || [];
 }
 
 export function useDashboardDaily(
