@@ -61,7 +61,7 @@ begin
       else coalesce(d.conversion_funnel_group, '(unspecified)')
     end                                                                     as conversion_funnel_group,
     coalesce(sum(d.conversions_all), 0)::numeric                            as conversions_all
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and d.conversion_name is not null
     and length(trim(d.conversion_name)) > 0

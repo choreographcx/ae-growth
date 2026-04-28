@@ -32,7 +32,7 @@ begin
       coalesce(sum(d.impressions), 0)::numeric  as impressions,
       coalesce(sum(d.clicks), 0)::numeric  as clicks,
       coalesce(sum(d.cost_usd), 0)::numeric  as cost
-    from bq_fdw.aroya_dashboard_daily d
+    from bq_aesa.aesa_dashboard_daily d
     where d.date between '2026-04-20'::date and '2026-04-21'::date
       and lower(coalesce(d.platform,'')) like '%snap%'
     group by d.date, d.platform, d.publisher_platform, d.campaign_id, d.campaign_name,

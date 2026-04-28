@@ -32,7 +32,7 @@ begin
     count(*) filter (where not coalesce(d.is_conversion_row, false))::bigint,
     count(*) filter (where coalesce(d.is_conversion_row, false) and coalesce(d.reach,0) > 0)::bigint,
     count(*) filter (where not coalesce(d.is_conversion_row, false) and coalesce(d.reach,0) > 0)::bigint
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between '2026-03-22'::date and '2026-04-21'::date
     and lower(coalesce(d.platform,'')) like '%snap%'
   group by d.platform;

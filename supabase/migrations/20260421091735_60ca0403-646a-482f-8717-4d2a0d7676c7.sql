@@ -10,7 +10,7 @@ BEGIN
   SELECT decrypted_secret
     INTO _secret
   FROM vault.decrypted_secrets
-  WHERE name = 'bq_aroya_sa_key_id'
+  WHERE name = 'bq_aesa_sa_key_id'
   LIMIT 1;
 
   IF _secret IS NULL THEN
@@ -22,7 +22,7 @@ BEGIN
   END IF;
 
   IF _secret IS NULL THEN
-    RAISE EXCEPTION 'Service account secret not found in vault (looked for bq_aroya_sa_key_id, bigquery_sa_json)';
+    RAISE EXCEPTION 'Service account secret not found in vault (looked for bq_aesa_sa_key_id, bigquery_sa_json)';
   END IF;
 
   RETURN _secret;
@@ -52,7 +52,7 @@ BEGIN
   SELECT decrypted_secret
     INTO _secret
   FROM vault.decrypted_secrets
-  WHERE name = 'bq_aroya_sa_key_id'
+  WHERE name = 'bq_aesa_sa_key_id'
   LIMIT 1;
 
   IF _secret IS NULL THEN

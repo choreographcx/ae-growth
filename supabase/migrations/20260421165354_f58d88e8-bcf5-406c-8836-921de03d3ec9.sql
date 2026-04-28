@@ -16,7 +16,7 @@ AS $$
     COALESCE(d.conversion_funnel_group, '(null)') AS conversion_funnel_group,
     COUNT(*)::bigint,
     COALESCE(SUM(d.conversions_all), 0)::numeric
-  FROM bq_fdw.aroya_dashboard_daily d
+  FROM bq_aesa.aesa_dashboard_daily d
   WHERE d.date BETWEEN p_start AND p_end
   GROUP BY d.platform, d.conversion_name, d.conversion_funnel_group
   ORDER BY d.platform, 5 DESC NULLS LAST

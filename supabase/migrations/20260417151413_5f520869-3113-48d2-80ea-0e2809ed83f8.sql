@@ -1,4 +1,4 @@
-DROP FOREIGN TABLE IF EXISTS bq_fdw.aroya_dashboard_daily CASCADE;
+DROP FOREIGN TABLE IF EXISTS bq_aesa.aesa_dashboard_daily CASCADE;
 
 CREATE FOREIGN TABLE bq_fdw.aesa_dashboard_daily (
   platform                       text,
@@ -63,9 +63,9 @@ CREATE FOREIGN TABLE bq_fdw.aesa_dashboard_daily (
 
   is_wasted_spend                boolean
 )
-SERVER bq_aroya_server
+SERVER bq_aesa_server
 OPTIONS (
-  table 'Aroya_Dashboard_Daily',
+  table 'AESA_Dashboard_Daily',
   location 'US'
 );
 
@@ -172,7 +172,7 @@ begin
     coalesce(d.conversion_name, '(unspecified)')         as conversion_name,
     coalesce(d.conversion_funnel_group, '(unspecified)') as conversion_funnel_group,
     coalesce(sum(d.conversions_all), 0)::numeric         as conversions_all
-  from bq_fdw.aroya_dashboard_daily d
+  from bq_aesa.aesa_dashboard_daily d
   where d.date between p_start and p_end
     and coalesce(d.is_conversion_row, false) = true
     and (p_platforms is null      or array_length(p_platforms, 1)      is null or d.platform      = any(p_platforms))
