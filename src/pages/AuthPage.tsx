@@ -105,6 +105,10 @@ export default function AuthPage() {
               <img
                 src={branding.logoUrl}
                 alt="Logo"
+                width={160}
+                height={40}
+                fetchPriority="high"
+                decoding="async"
                 className="h-10 w-auto object-contain mx-auto mb-4"
               />
             ) : (
