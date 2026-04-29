@@ -2,11 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { classifyCardType } from './cardType';
 
 describe('classifyCardType', () => {
-  it('detects Al Fursan Infinity (with various separators)', () => {
-    expect(classifyCardType('Amex_Al Fursan Infinity_SC Direct_KSA_EN_Leads')).toBe('fursan_infinity');
-    expect(classifyCardType('Amex_Fursan Infinity_Meta_UAE_AR_Conversions')).toBe('fursan_infinity');
-    expect(classifyCardType('Al-Fursan-Infinity Platinum Acquisition')).toBe('fursan_infinity');
-    expect(classifyCardType('Amex_Al_Fursan_Infinity_KSA')).toBe('fursan_infinity');
+  it('detects AlFursan (canonical one-word and spaced variants)', () => {
+    expect(classifyCardType('Amex_AlFursan_SC Direct_KSA_EN_Leads')).toBe('alfursan');
+    expect(classifyCardType('Amex_Al Fursan_Meta_UAE_AR_Conversions')).toBe('alfursan');
+    expect(classifyCardType('Al-Fursan Acquisition Q4')).toBe('alfursan');
+    expect(classifyCardType('Amex_Al_Fursan_KSA')).toBe('alfursan');
+    // Legacy naming still rolls up to AlFursan
+    expect(classifyCardType('Amex_Al Fursan Infinity_KSA')).toBe('alfursan');
   });
 
   it('detects Platinum', () => {
@@ -15,12 +17,13 @@ describe('classifyCardType', () => {
     expect(classifyCardType('amex_platinum_meta_uae')).toBe('platinum');
   });
 
-  it('detects Other for known tokens (not Platinum / Fursan Infinity)', () => {
+  it('detects Other for known AMEX product tokens', () => {
     expect(classifyCardType('Amex_Gold_SC Direct_KSA_EN_Leads')).toBe('other');
     expect(classifyCardType('Amex_Green_Meta_UAE')).toBe('other');
+    expect(classifyCardType('Amex_Blue_Meta_KSA')).toBe('other');
+    expect(classifyCardType('Amex_Business_Search_KSA')).toBe('other');
+    expect(classifyCardType('Amex_Marriott Bonvoy_Meta_KSA')).toBe('other');
     expect(classifyCardType('Amex_Centurion_X_KSA')).toBe('other');
-    expect(classifyCardType('Amex_Al Fursan_Meta_UAE')).toBe('other'); // plain Fursan, no Infinity
-    expect(classifyCardType('Cashback Q3 Push')).toBe('other');
   });
 
   it('falls back to Unknown when no token matches', () => {
@@ -30,9 +33,13 @@ describe('classifyCardType', () => {
     expect(classifyCardType(undefined)).toBe('unknown');
   });
 
-  it('does not false-match substrings (e.g. "Goldman" should not be Gold)', () => {
-    // Word-boundary regex: a token inside a longer word shouldn't match.
+  it('does not false-match substrings (word-boundary)', () => {
     expect(classifyCardType('Goldman_Sachs_Brand')).toBe('unknown');
     expect(classifyCardType('Plate_Recognition_Test')).toBe('unknown');
+    expect(classifyCardType('Bluetooth_Promo')).toBe('unknown');
+  });
+
+  it('AlFursan takes priority over Platinum when both appear', () => {
+    expect(classifyCardType('AlFursan Platinum Acquisition')).toBe('alfursan');
   });
 });
