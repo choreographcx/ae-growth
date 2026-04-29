@@ -48,6 +48,7 @@ export function useGa4Report(req: Ga4ReportRequest) {
   const key = useMemo(() => [
     'ga4-report',
     req.propertyId ?? 'default',
+    (req.propertyIds ?? []).slice().sort().join(','),
     fmt(req.startDate), fmt(req.endDate),
     (req.dimensions ?? ['date']).join(','),
     (req.metrics ?? []).join(','),
@@ -63,6 +64,7 @@ export function useGa4Report(req: Ga4ReportRequest) {
       const { data, error } = await supabase.functions.invoke('ga4-report', {
         body: {
           propertyId: req.propertyId,
+          propertyIds: req.propertyIds,
           startDate: fmt(req.startDate),
           endDate: fmt(req.endDate),
           dimensions: req.dimensions,
