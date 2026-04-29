@@ -1,13 +1,12 @@
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
-import { PerformanceBreakdown } from '@/components/dashboard/PerformanceBreakdown';
+import { PerformanceBreakdownCard } from '@/components/dashboard/PerformanceBreakdownCard';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
-import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
 import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { Ga4OverviewTile } from '@/components/dashboard/Ga4OverviewTile';
 import { useEffect, useMemo } from 'react';
@@ -43,11 +42,13 @@ function formatCompact(n: number): string {
 }
 
 // Default order of top-level Overview sections (ids must be stable across releases).
+// `breakdowns` is intentionally removed — Performance Breakdown now contains all
+// dimension levels via its dropdown. Legacy saved layouts that still reference
+// `breakdowns` are filtered out at render time.
 const DEFAULT_SECTION_ORDER = [
   'kpis',
   'contribution',
   'trends',
-  'breakdowns',
   'performance',
   'funnel',
   'conversionBreakdown',
@@ -294,14 +295,9 @@ export default function OverviewPage() {
         </div>
       ),
     },
-    breakdowns: {
-      label: 'Market / Channel / Objective Breakdown',
-      node: (
-        <div className="print-break-before">
-          <BreakdownDimensionCard rows={rows} />
-        </div>
-      ),
-    },
+    // Legacy `breakdowns` section is now folded into Performance Breakdown.
+    // We leave the key absent so old saved layouts that still reference it
+    // are filtered out by the `sectionMap[id] != null` guard below.
     conversionBreakdown: {
       label: 'Conversion Breakdown',
       node: (
@@ -318,7 +314,7 @@ export default function OverviewPage() {
     },
     performance: {
       label: 'Performance Breakdown',
-      node: <PerformanceBreakdown platforms={platformSummaries} />,
+      node: <PerformanceBreakdownCard rows={rows} platforms={platformSummaries} />,
     },
     insights: insights.length > 0 ? {
       label: 'Key Issues & Insights',
