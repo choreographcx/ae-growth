@@ -245,8 +245,6 @@ export function TemplatesPortabilitySection({ client }: Props) {
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Include in Template</Label>
               <ToggleRow label="Branding & theme settings" checked={includeBranding} onChange={setIncludeBranding} />
               <ToggleRow label="Alert rules & thresholds" checked={includeAlerts} onChange={setIncludeAlerts} />
-              <ToggleRow label="Branding & theme settings" checked={includeBranding} onChange={setIncludeBranding} />
-              <ToggleRow label="Alert rules & thresholds" checked={includeAlerts} onChange={setIncludeAlerts} />
             </div>
           </div>
           <DialogFooter className="mt-4">
