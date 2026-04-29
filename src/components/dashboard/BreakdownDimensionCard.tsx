@@ -72,7 +72,6 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
               <SelectItem value="audienceType">By Audience Type</SelectItem>
             )}
             <SelectItem value="objective">By Objective</SelectItem>
-            <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
         </Select>
       </div>
