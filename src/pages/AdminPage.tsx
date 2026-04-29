@@ -158,22 +158,18 @@ export default function AdminPage() {
           id="platforms"
           icon={<LayoutGrid size={16} />}
           title="Platform Setup"
-          subtitle="Enable platforms, set budgets, and manage account connections"
+          subtitle="Enable platforms and set budgets"
           badge={<Badge variant="secondary" className="text-[9px] font-normal text-white">{enabledCount} / {allPlatforms.length} platforms</Badge>}
         >
           {/* Platform summary strip */}
           <div className="flex flex-wrap items-center gap-4 py-3 mb-4 border-b border-border/50 text-xs text-muted-foreground">
             <span><strong className="text-card-foreground">{enabledCount}</strong> enabled</span>
-            <span><strong className="text-card-foreground">{totalAccounts}</strong> connected accounts</span>
             <span>
               <strong className="text-card-foreground">
                 <CurrencySymbol currency={currency} />
                 {Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}
               </strong> total budget
             </span>
-            {needsSetup > 0 && (
-              <span className="text-amber-600">{needsSetup} need setup</span>
-            )}
           </div>
 
           {/* BigQuery currency integrity warnings */}
