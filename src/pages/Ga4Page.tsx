@@ -171,7 +171,7 @@ export default function Ga4Page() {
   if (!enabled) {
     return (
       <div className="space-y-5 md:space-y-7">
-        <SectionHeader title="Web Analytics (GA4)" subtitle="Live data from the GA4 Data API" />
+        <SectionHeader title="Web Analytics (GA4)" />
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground flex items-center gap-2">
             <Globe className="h-4 w-4" />
@@ -182,9 +182,9 @@ export default function Ga4Page() {
     );
   }
 
-  // Only show the toggle if there are 2+ properties — with 1 it's pointless.
-  const showPropertyToggle = activeSources.length > 1;
-  const propertyToggle = showPropertyToggle ? (
+  // Always render the property filter (even with one property) so users can see
+  // a clear chip indicating which property the dashboard is currently scoped to.
+  const propertyToggle = (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
       {activeSources.map((s) => {
         const checked = selectedIds.includes(s.property_id);
@@ -210,13 +210,12 @@ export default function Ga4Page() {
         );
       })}
     </div>
-  ) : null;
+  );
 
   return (
     <div className="space-y-5 md:space-y-7">
       <SectionHeader
         title="Web Analytics (GA4)"
-        subtitle={`Live data from the GA4 Data API · ${activeSources.length} ${activeSources.length === 1 ? 'property' : 'properties'}`}
         showMobileDatePicker
         showFilters
         hideFiltersButton
