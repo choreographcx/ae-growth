@@ -71,7 +71,11 @@ export function useGa4Sources() {
     patch: { property_id?: string; label?: string; is_enabled?: boolean },
   ) => {
     setSaving(true);
-    const updates: Record<string, unknown> = {};
+    const updates: {
+      ga4_property_id?: string;
+      is_enabled?: boolean;
+      additional_config?: { label: string };
+    } = {};
     if (patch.property_id !== undefined) {
       const trimmed = patch.property_id.trim();
       if (!/^\d+$/.test(trimmed)) {
@@ -83,9 +87,7 @@ export function useGa4Sources() {
     }
     if (patch.is_enabled !== undefined) updates.is_enabled = patch.is_enabled;
     if (patch.label !== undefined) {
-      // Read existing additional_config to merge label
-      const existing = sources.find((s) => s.id === id);
-      updates.additional_config = { ...(existing ? { label: existing.label } : {}), label: patch.label };
+      updates.additional_config = { label: patch.label };
     }
     const { error } = await supabase.from('client_data_sources').update(updates).eq('id', id);
     setSaving(false);
