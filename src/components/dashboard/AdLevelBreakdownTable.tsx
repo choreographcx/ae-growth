@@ -202,9 +202,14 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
   type Col = { key: keyof AggRow; label: string; align?: 'right'; format: (row: AggRow) => React.ReactNode };
   const cols: Col[] = [
     { key: 'name', label: level === 'ad_group' ? 'Ad Group' : 'Ad', format: row => (
-        <div className="min-w-0">
-          <div className="truncate font-semibold text-card-foreground" title={row.name}>{row.name}</div>
-          <div className="truncate text-[10px] text-muted-foreground" title={row.campaignName}>{row.campaignName}</div>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0", platformIconBg[row.platform])}>
+            <PlatformIcon platform={row.platform} size={12} />
+          </span>
+          <div className="min-w-0">
+            <div className="truncate font-semibold text-card-foreground" title={row.name}>{row.name}</div>
+            <div className="truncate text-[10px] text-muted-foreground" title={row.campaignName}>{row.campaignName}</div>
+          </div>
         </div>
       ) },
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
