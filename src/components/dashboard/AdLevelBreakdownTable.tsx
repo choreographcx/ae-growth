@@ -113,55 +113,63 @@ function CurrencyValue({ amount, decimals = 0, currency }: { amount: number; dec
   return <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{formatted}</span>;
 }
 
-export function AdLevelBreakdownTable({ rows, level, platformKey, className, limit = 50 }: Props) {
-  const { client } = useDashboard();
+export function AdLevelBreakdownTable({ rows: _rows, level, platformKey, className, limit = 50 }: Props) {
+  const { client, data } = useDashboard();
   const currency = client.currency;
   const isMobile = useIsMobile();
 
-  const aggregated = useMemo<AggRow[]>(() => {
-    const buckets = new Map<string, DashboardDailyRow[]>();
-    for (const r of rows) {
-      const p = normalizePlatform(r.platform);
-      if (platformKey && p !== platformKey) continue;
-      const name = level === 'ad_group'
-        ? (r.ad_group_name || '').trim()
-        : (r.ad_name || '').trim();
-      if (!name) continue;
-      const id = level === 'ad_group' ? (r.ad_group_id || '') : (r.ad_id || '');
-      const key = `${p}::${id}::${name.toLowerCase()}`;
-      let arr = buckets.get(key);
-      if (!arr) { arr = []; buckets.set(key, arr); }
-      arr.push(r);
-    }
-    const out: AggRow[] = [];
-    buckets.forEach((rs, key) => {
-      const a = aggregateRows(rs, 'all');
-      const rawName = level === 'ad_group'
-        ? (rs[0].ad_group_name || '').trim()
-        : (rs[0].ad_name || '').trim();
-      const campaignNames = Array.from(new Set(rs.map(r => r.campaign_name).filter(Boolean))) as string[];
-      out.push({
-        key,
-        name: cleanAdName(rawName),
-        campaignName: campaignNames.length > 1 ? `${campaignNames.length} campaigns` : cleanAdName(campaignNames[0] || '—'),
-        platform: normalizePlatform(rs[0].platform),
-        spend: a.spend,
-        shareOfSpend: 0,
-        impressions: a.impressions,
-        clicks: a.clicks,
-        ctr: a.ctr,
-        cpc: a.cpc,
-        conversionsLowerFunnel: a.conversionsLowerFunnel,
-        cpa: a.cpaLowerFunnel,
+  const start = data.range.start;
+  const end = data.range.end;
+  const startKey = format(start, 'yyyy-MM-dd');
+  const endKey = format(end, 'yyyy-MM-dd');
+
+  const rpcLevel = level === 'ad_group' ? 'ad_group' : 'ad';
+
+  const { data: rpcRows, isLoading, error } = useQuery({
+    queryKey: ['dashboard-ad-breakdown', startKey, endKey, rpcLevel, platformKey ?? 'all'],
+    queryFn: async (): Promise<AdBreakdownRpcRow[]> => {
+      const { data: resp, error: err } = await supabase.rpc('get_dashboard_ad_breakdown', {
+        p_start: startKey,
+        p_end: endKey,
+        p_level: rpcLevel,
+        p_platform: platformKey ?? null,
+        p_limit: 200,
       });
+      if (err) throw new Error(err.message);
+      return (resp as AdBreakdownRpcRow[]) ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  const aggregated = useMemo<AggRow[]>(() => {
+    if (!rpcRows) return [];
+    const out: AggRow[] = rpcRows.map((r) => {
+      const p = normalizePlatform(r.platform);
+      const rawName = level === 'ad_group' ? (r.ad_group_name || '') : (r.ad_name || '');
+      const id = level === 'ad_group' ? (r.ad_group_id || '') : (r.ad_id || '');
+      const ctr = r.impressions > 0 ? (r.clicks / r.impressions) * 100 : 0;
+      const cpc = r.clicks > 0 ? r.cost / r.clicks : 0;
+      const cpa = r.conversions_lower_funnel > 0 ? r.cost / r.conversions_lower_funnel : 0;
+      return {
+        key: `${p}::${id}::${rawName.toLowerCase()}`,
+        name: cleanAdName(rawName),
+        campaignName: cleanAdName(r.campaign_name || '—'),
+        platform: p,
+        spend: +r.cost || 0,
+        shareOfSpend: 0,
+        impressions: +r.impressions || 0,
+        clicks: +r.clicks || 0,
+        ctr,
+        cpc,
+        conversionsLowerFunnel: +r.conversions_lower_funnel || 0,
+        cpa,
+      };
     });
-    const filtered = out.filter(r =>
-      r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0
-    );
-    const totalSpend = filtered.reduce((s, r) => s + r.spend, 0);
-    if (totalSpend > 0) for (const r of filtered) r.shareOfSpend = (r.spend / totalSpend) * 100;
-    return filtered;
-  }, [rows, platformKey, level]);
+    const totalSpend = out.reduce((s, r) => s + r.spend, 0);
+    if (totalSpend > 0) for (const r of out) r.shareOfSpend = (r.spend / totalSpend) * 100;
+    return out;
+  }, [rpcRows, level]);
 
   const [sortKey, setSortKey] = useState<keyof AggRow>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
