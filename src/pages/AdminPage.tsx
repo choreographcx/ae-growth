@@ -483,13 +483,16 @@ function Field({ label, value, onChange, placeholder, required }: { label: strin
   );
 }
 
-function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+function SelectField({ label, value, options, optionLabels, onChange }: { label: string; value: string; options: string[]; optionLabels?: Record<string, string>; onChange: (v: string) => void }) {
+  const renderLabel = (o: string) => optionLabels?.[o] ?? o;
   return (
     <div>
       {label && <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">{label}</Label>}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={cn(label ? "mt-1.5" : "", "h-9 text-sm")}><SelectValue /></SelectTrigger>
-        <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+        <SelectTrigger className={cn(label ? "mt-1.5" : "", "h-9 text-sm")}>
+          <SelectValue>{renderLabel(value)}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{renderLabel(o)}</SelectItem>)}</SelectContent>
       </Select>
     </div>
   );
