@@ -46,7 +46,6 @@ export function TemplatesPortabilitySection({ client }: Props) {
 
   const checklist = useMemo<ChecklistItem[]>(() => {
     const enabledPlatforms = Object.values(client.platforms).filter(p => p.enabled);
-    const connectedAccounts = enabledPlatforms.filter(p => p.accountIds.filter(Boolean).length > 0);
     const hasBudgets = enabledPlatforms.some(p => (p.budget || 0) > 0);
     const hasBranding = !!(client as any).branding?.primaryColor;
     const hasMeasurement = !!(client.ga4PropertyId && client.primaryConversion);
@@ -69,11 +68,9 @@ export function TemplatesPortabilitySection({ client }: Props) {
       {
         key: 'platforms',
         label: 'Platform Setup',
-        status: enabledPlatforms.length > 0
-          ? connectedAccounts.length === enabledPlatforms.length ? 'complete' : 'warning'
-          : 'incomplete',
+        status: enabledPlatforms.length > 0 ? 'complete' : 'incomplete',
         detail: enabledPlatforms.length > 0
-          ? `${enabledPlatforms.length} enabled, ${connectedAccounts.length} connected${!hasBudgets ? ' · No budgets' : ''}`
+          ? `${enabledPlatforms.length} enabled${!hasBudgets ? ' · No budgets' : ''}`
           : 'No platforms enabled',
       },
       {
