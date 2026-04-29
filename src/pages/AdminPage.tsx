@@ -115,7 +115,7 @@ export default function AdminPage() {
                 />
               )}
               <SelectField label="Time Zone" value={client.timezone} options={['Asia/Dubai', 'Asia/Riyadh']} onChange={v => updateClient({ timezone: v })} />
-              <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} onChange={v => updateClient({ defaultDateRange: v })} />
+              <SelectField label="Default Date Range" value={client.defaultDateRange} options={['last_7_days', 'last_14_days', 'last_30_days', 'this_month', 'last_month']} optionLabels={{ last_7_days: 'Last 7 Days', last_14_days: 'Last 14 Days', last_30_days: 'Last 30 Days', this_month: 'This Month', last_month: 'Last Month' }} onChange={v => updateClient({ defaultDateRange: v })} />
               <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
             </div>
 
