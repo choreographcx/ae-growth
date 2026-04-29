@@ -4,6 +4,7 @@ import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subY
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
 import { parseCampaignName, UNKNOWN } from '@/lib/campaignNaming';
+import { CardType, classifyCardType } from '@/lib/cardType';
 
 export type ConversionMode = 'all' | 'lower_funnel';
 
@@ -280,6 +281,8 @@ export interface UseDashboardDailyOptions {
   selectedObjectives?: string[];
   selectedMarkets?: string[];
   selectedChannels?: string[];
+  /** Selected card-type buckets (Platinum / Al Fursan Infinity / Other / Unknown). Empty = no filter. */
+  selectedCardTypes?: CardType[];
   /**
    * Optional per-platform multiplier applied to USD `cost` and `conversion_value`
    * before any aggregation. Keys are the normalized PlatformKey (e.g. `meta`).
@@ -362,6 +365,7 @@ export function useDashboardDaily(
     selectedObjectives = [],
     selectedMarkets = [],
     selectedChannels = [],
+    selectedCardTypes = [],
     costMultiplierByPlatform,
     excludedCampaignTokensByPlatform,
   } = options;
