@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Ga4ReportRequest {
   /** Optional override; otherwise resolved server-side from client_reporting_settings. */
   propertyId?: string;
+  /** Optional subset of configured property IDs to aggregate. If omitted, all enabled properties are used. */
+  propertyIds?: string[];
   startDate: Date;
   endDate: Date;
   dimensions?: string[];
