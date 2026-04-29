@@ -45,8 +45,6 @@ export function SetupStatusSummary() {
   const { client } = useDashboard();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
-  const connectedCount = Object.values(client.platforms).filter(p => p.enabled && p.accountIds.filter(Boolean).length > 0).length;
-  const needsAttention = enabledCount - connectedCount;
 
   const hasBranding = !!(client as any).branding?.primaryColor;
   const hasMeasurement = !!(client.ga4PropertyId && client.primaryConversion);
