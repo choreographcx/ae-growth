@@ -6,6 +6,7 @@ import { SectionHeader } from './SectionHeader';
 import { AdLevelBreakdownTable } from './AdLevelBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { resolveCampaignObjective } from '@/lib/campaignNaming';
+import { CARD_TYPE_LABELS, classifyCardType } from '@/lib/cardType';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey, PlatformSummary } from '@/types/dashboard';
 
@@ -24,6 +25,7 @@ type Level =
   | 'objective'
   | 'campaignType'
   | 'placement'
+  | 'cardType'
   | 'platform'
   | 'campaign'
   | 'adGroup'
@@ -40,7 +42,7 @@ interface PerformanceBreakdownCardProps {
 }
 
 const DIMENSION_PICKERS: Record<
-  'audienceType' | 'objective' | 'campaignType' | 'placement',
+  'audienceType' | 'objective' | 'campaignType' | 'placement' | 'cardType',
   { title: string; pick: (r: DashboardDailyRow) => string | null | undefined }
 > = {
   audienceType: { title: 'By Audience Type', pick: r => r.audience_type },
@@ -55,6 +57,10 @@ const DIMENSION_PICKERS: Record<
       if (v.includes('instagram') || v === 'ig') return 'Instagram';
       return null;
     },
+  },
+  cardType: {
+    title: 'By Card Type',
+    pick: r => CARD_TYPE_LABELS[classifyCardType(r.campaign_name)],
   },
 };
 
@@ -74,6 +80,7 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
     list.push({ value: 'objective', label: 'By Objective' });
     if (isGoogle) list.push({ value: 'campaignType', label: 'By Campaign Type' });
     if (isMeta) list.push({ value: 'placement', label: 'By Placement' });
+    list.push({ value: 'cardType', label: 'By Card Type' });
     list.push({ value: 'campaign', label: 'By Campaign' });
     list.push({ value: 'adGroup',  label: 'By Ad Group' });
     list.push({ value: 'adLevel',  label: 'By Ad Level' });
@@ -134,7 +141,8 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
       {(activeLevel === 'audienceType' ||
         activeLevel === 'objective' ||
         activeLevel === 'campaignType' ||
-        activeLevel === 'placement') && (
+        activeLevel === 'placement' ||
+        activeLevel === 'cardType') && (
         <DimensionBreakdownTable
           rows={rows}
           pick={DIMENSION_PICKERS[activeLevel].pick}

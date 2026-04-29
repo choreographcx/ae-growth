@@ -4,6 +4,7 @@ import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subY
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
 import { parseCampaignName, UNKNOWN } from '@/lib/campaignNaming';
+import { CardType, classifyCardType } from '@/lib/cardType';
 
 export type ConversionMode = 'all' | 'lower_funnel';
 
@@ -280,6 +281,8 @@ export interface UseDashboardDailyOptions {
   selectedObjectives?: string[];
   selectedMarkets?: string[];
   selectedChannels?: string[];
+  /** Selected card-type buckets (Platinum / Al Fursan Infinity / Other / Unknown). Empty = no filter. */
+  selectedCardTypes?: CardType[];
   /**
    * Optional per-platform multiplier applied to USD `cost` and `conversion_value`
    * before any aggregation. Keys are the normalized PlatformKey (e.g. `meta`).
@@ -362,6 +365,7 @@ export function useDashboardDaily(
     selectedObjectives = [],
     selectedMarkets = [],
     selectedChannels = [],
+    selectedCardTypes = [],
     costMultiplierByPlatform,
     excludedCampaignTokensByPlatform,
   } = options;
@@ -498,6 +502,11 @@ export function useDashboardDaily(
     [selectedChannels]
   );
 
+  const cardTypeSet = useMemo(
+    () => (selectedCardTypes.length ? new Set(selectedCardTypes) : null),
+    [selectedCardTypes]
+  );
+
   // Parsed segments cached per row to avoid re-splitting on every filter pass.
   const parsedByName = useMemo(() => {
     const m = new Map<string, ReturnType<typeof parseCampaignName>>();
@@ -514,33 +523,51 @@ export function useDashboardDaily(
     return m;
   }, [allRows, prevRows]);
 
+  // Card-type bucket cached per campaign name.
+  const cardTypeByName = useMemo(() => {
+    const m = new Map<string, CardType>();
+    for (const r of allRows) {
+      const name = r.campaign_name || '';
+      if (!m.has(name)) m.set(name, classifyCardType(name));
+    }
+    for (const r of prevRows) {
+      const name = r.campaign_name || '';
+      if (!m.has(name)) m.set(name, classifyCardType(name));
+    }
+    return m;
+  }, [allRows, prevRows]);
+
   const matchesDimensionFilters = (r: DashboardDailyRow) => {
-    if (!objectiveSet && !marketSet && !channelSet && !campaignSet) return true;
+    if (!objectiveSet && !marketSet && !channelSet && !campaignSet && !cardTypeSet) return true;
     const p = parsedByName.get(r.campaign_name || '') ?? parseCampaignName(r.campaign_name);
     if (campaignSet  && !campaignSet.has(p.campaign)) return false;
     if (objectiveSet && !objectiveSet.has(p.objective)) return false;
     if (marketSet    && !marketSet.has(p.market)) return false;
     if (channelSet   && !channelSet.has(p.channel)) return false;
+    if (cardTypeSet) {
+      const ct = cardTypeByName.get(r.campaign_name || '') ?? classifyCardType(r.campaign_name);
+      if (!cardTypeSet.has(ct)) return false;
+    }
     return true;
   };
 
   // Client-side filtering — avoids an extra BigQuery round-trip whenever the
   // unfiltered superset is already in memory.
   const rows = useMemo(() => {
-    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return allRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet && !cardTypeSet) return allRows;
     return allRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
       matchesDimensionFilters(r)
     );
-  }, [allRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
+  }, [allRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, cardTypeSet, parsedByName, cardTypeByName]);
 
   const filteredPrevRows = useMemo(() => {
-    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet) return prevRows;
+    if (!platformRawSet && !campaignSet && !objectiveSet && !marketSet && !channelSet && !cardTypeSet) return prevRows;
     return prevRows.filter(r =>
       (!platformRawSet || platformRawSet.has(r.platform)) &&
       matchesDimensionFilters(r)
     );
-  }, [prevRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, parsedByName]);
+  }, [prevRows, platformRawSet, campaignSet, objectiveSet, marketSet, channelSet, cardTypeSet, parsedByName, cardTypeByName]);
 
   const totals = useMemo(() => aggregate(rows, 'all'), [rows]);
   const previousTotals = useMemo(

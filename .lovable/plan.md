@@ -1,71 +1,62 @@
+# Card-type split (Platinum / Al Fursan Infinity / Other / Unknown)
 
-## Where the data lives today
+Tag every row in the dashboard by **card type** based on substring matches against `campaign_name`, then expose a global filter and per-page breakdown widgets that respect it everywhere (Overview, Meta, Google Ads, TikTok, Snapchat, X, LinkedIn, Programmatic, PDF export).
 
-The BigQuery foreign table `bq_fdw.aesa_dashboard_daily` already includes:
-`campaign_id, campaign_name, ad_group_id, ad_group_name, ad_id, ad_name` plus all metrics (spend, impressions, clicks, conversions, video, etc.).
+## Buckets & matching rules
 
-But the Postgres RPC `get_dashboard_daily` only returns campaign-level columns — `ad_group_id` / `ad_group_name` are dropped during aggregation. So:
-- Campaign data is already usable in the app (the `CampaignPerformance` table on Overview + `PerformanceBreakdownCard` on each platform page render it).
-- Ad group data is currently invisible to the frontend even though it's in BQ.
+Pure client-side classification — no DB schema changes.
 
-## What "campaign data" already shows
+```text
+1. Platinum            campaign_name ~ /\bplatinum\b/i
+2. Al Fursan Infinity  campaign_name ~ /\b(al[\s_-]?fursan[\s_-]+infinity|fursan[\s_-]+infinity)\b/i
+3. Other               campaign_name matched a known card token (Gold, Green, Centurion, Reserve, Cashback, Fursan w/o Infinity, etc.) but not Platinum / Fursan Infinity
+4. Unknown / Unmapped  no card-type token detected at all
+```
 
-On Overview: `CampaignPerformance` shows top campaigns across all platforms (Spend, Share, Impr, Clicks, CTR, CPC, Conversions, CPA).
-On each platform page: same component scoped via `platformFilter` inside `PerformanceBreakdownCard`.
+Matching is case-insensitive, runs on the raw `campaign_name`, and is centralised so the keyword lists can be tuned in one place. Rules priority: Al Fursan Infinity → Platinum → Other (token list) → Unknown. We can expand the Other-token list as we discover more campaigns.
 
-So for campaigns, the question is mostly: do you want **more depth** (e.g. drill-in, more columns, sortable, exportable), or are you happy with what's there?
+## New files
 
-## Options for ad group data
+- **`src/lib/cardType.ts`** — single source of truth.
+  - `CardType = 'platinum' | 'fursan_infinity' | 'other' | 'unknown'`
+  - `classifyCardType(campaignName): CardType`
+  - `CARD_TYPE_LABELS`, `CARD_TYPE_ORDER`, `CARD_TYPE_COLORS` (using the existing chart palette)
+  - Unit-tested with sample names so the rule list is easy to evolve.
 
-Three approaches, can be combined.
+- **`src/components/dashboard/CardTypeBreakdownCard.tsx`** — reusable widget that takes the current rows + KPI builder and renders a 4-column comparison (Spend / Impressions / Clicks / Conversions) split by card type. Used on Overview and each platform page.
 
-### Option A — Drill-down inside the existing campaign table (recommended)
+## Filter wiring (global)
 
-Each campaign row becomes expandable. Clicking a campaign opens a nested ad-group sub-table underneath it, showing the same metric columns aggregated by `ad_group_name`.
+- **`src/context/DashboardContext.tsx`** — add `cardTypes: CardType[]` (default = all four selected) and `setCardTypes`. Persist to `localStorage` like the existing platform filter.
+- **`src/hooks/useDashboardDaily.ts`** — when assembling `filteredRows`, drop rows whose `classifyCardType(campaign_name)` is not in the selected set. This single change makes every KPI, chart, table, funnel, and the PDF respect the filter automatically (they all derive from `filteredRows`).
+- **`src/components/dashboard/MobileFilterSheet.tsx`** + **`src/components/layout/DashboardHeader.tsx`** — add a "Card Type" multi-select chip group next to the existing Platforms filter (mobile sheet + desktop filter popover). Same component pattern as `MultiSelectFilter`.
+- The selector shows live counts per bucket for the active date range so users can spot where "Unknown" volume is coming from.
 
-- Overview: drill is available on the existing top-campaigns table.
-- Platform pages: same component, scoped to that platform.
-- Keeps the page tidy — ad groups only appear on demand.
+## Breakdown widgets (per page)
 
-Backend: extend `get_dashboard_daily` RPC to also return `ad_group_id` / `ad_group_name`, and switch the GROUP BY to include them. Row count grows ~3–10× (depends on account), still well within RPC limits for typical date ranges.
+Add `<CardTypeBreakdownCard />` as a new sortable section on:
+- `OverviewPage` — under the platform contribution card.
+- Each platform page (`MetaPage`, `GoogleAdsPage`, `TikTokPage`, `SnapchatPage`, `XPage`, `LinkedInPage`, `ProgrammaticPage`) — under the trend chart.
 
-### Option B — Dedicated "Ad Groups" tab on each platform page
+The widget always shows all four buckets regardless of the global filter selection so users can compare without changing filters; the global filter only shrinks the page-level KPIs.
 
-Add a tab next to the existing campaign breakdown:
-`Campaigns | Ad Groups` (and optionally `Ads`).
+## PDF export
 
-Same column set, just one level deeper. Easier to scan when an analyst specifically wants ad-group performance without expanding row by row. No drill UI to build.
+`src/components/pdf/PDFReport.tsx` — append a "Card-type performance" section (one table per platform) using the same classifier. Reuses existing print styles.
 
-On Overview we'd skip this (Overview should stay high level — too many ad groups across all platforms is noise).
+## Admin: tuning the keyword list
 
-### Option C — Ad group filter (multi-select)
+Add a small read-only panel in `AdminPage` ("Card-type rules") that lists the current keyword sets and shows top 20 unmatched campaign names from the active date range, so the admin can spot gaps and request rule additions. No DB persistence in v1 — rules stay in `cardType.ts` so they're reviewable in code. We can promote to a Supabase table later if the list grows.
 
-Add an "Ad Group" filter to the existing platform/campaign filter row. Selecting one or many ad groups re-scopes every KPI, chart and table on the page.
+## Why this approach
 
-Useful when an analyst already knows the ad groups they care about. Cheapest to build but doesn't surface ad-group-level rows by itself — best paired with A or B.
+- **No migration, no BQ schema change.** Pure derived field.
+- **One classifier, one filter source.** Every existing chart/table/PDF inherits the split for free because they all consume `filteredRows`.
+- **Easy to evolve.** When a new card product launches, edit one keyword list. The Admin panel surfaces unmatched campaigns so we know when to update it.
+- **Safe default.** Filter starts with all buckets selected → existing dashboards look unchanged on first load.
 
-## Recommendation
+## Out of scope (v1)
 
-- **Overview**: Option A only — keep the high-level campaign table, allow expanding a row to see ad groups underneath. No ad-group filter, no separate tab.
-- **Platform pages**: Option A + Option B — drill-down on the campaign table AND a dedicated "Ad Groups" tab. Optionally add Option C (ad-group filter) later if users ask for it.
-
-## Technical changes (for the option set above)
-
-1. **Migration**: update `public.get_dashboard_daily` RPC
-   - Add `ad_group_id`, `ad_group_name` to the SELECT and GROUP BY.
-   - Optionally add an `p_ad_group_names text[]` filter argument (for Option C).
-2. **Hook**: extend `DashboardDailyRow` in `src/hooks/useDashboardDaily.ts` with the two new fields. Existing aggregations stay unchanged (they still sum across all rows).
-3. **Campaign table** (`CampaignPerformance.tsx`):
-   - Add a chevron column; clicking expands a nested table grouped by `ad_group_name` for that campaign.
-   - Reuse the same metric formatters and column widths.
-4. **Platform pages** (`PlatformPageTemplate.tsx` / `PerformanceBreakdownCard.tsx`):
-   - Add an "Ad Groups" tab rendering a flat ad-group table (group rows by `ad_group_id::ad_group_name`, scoped to the platform).
-5. **Filters** (only if Option C is approved): extend `MultiSelectFilter` row + `useDashboardDaily` options with `selectedAdGroups`.
-
-No new tables, no new edge functions — purely an RPC + frontend extension.
-
-## Questions for you
-
-1. Confirm the recommendation (Overview = drill-down only; Platform pages = drill-down + Ad Groups tab)?
-2. Do you also want an **Ads** level (one deeper than ad groups), or stop at ad group?
-3. Add the ad-group **filter** (Option C) now, or defer until requested?
+- Server-side filtering inside `get_dashboard_daily` — not needed since classification is cheap on the client and we already pull all rows for the date range.
+- Persisting per-user card-type selections to Supabase (uses `localStorage` like other filters).
+- Editing the keyword list from the UI — code-managed for now.
