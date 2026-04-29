@@ -93,7 +93,7 @@ export default function Ga4Page() {
     metrics: [
       'sessions', 'totalUsers', 'newUsers', 'engagedSessions',
       'engagementRate', 'averageSessionDuration', 'bounceRate',
-      'screenPageViews', 'conversions', 'totalRevenue',
+      'screenPageViews', 'conversions',
     ],
     enabled: queryEnabled,
   });
@@ -102,7 +102,7 @@ export default function Ga4Page() {
     startDate: start, endDate: end,
     propertyIds: propertyIdsForQuery,
     dimensions: ['sessionDefaultChannelGroup'],
-    metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions', 'totalRevenue'],
+    metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
     enabled: queryEnabled,
@@ -112,7 +112,7 @@ export default function Ga4Page() {
     startDate: start, endDate: end,
     propertyIds: propertyIdsForQuery,
     dimensions: ['sessionSource', 'sessionMedium'],
-    metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions', 'totalRevenue'],
+    metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
     enabled: queryEnabled,
@@ -231,13 +231,12 @@ export default function Ga4Page() {
 
       {/* KPI tiles */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-3">
-        <Tile label="Sessions"          value={formatCompact(t('sessions'))} />
         <Tile label="Users"             value={formatCompact(t('totalUsers'))} subtitle={`New: ${formatCompact(t('newUsers'))}`} />
+        <Tile label="Sessions"          value={formatCompact(t('sessions'))} />
         <Tile label="Engaged Sessions"  value={formatCompact(t('engagedSessions'))} subtitle={`${(t('engagementRate') * 100).toFixed(1)}% rate`} />
         <Tile label="Avg Session"       value={formatDuration(t('averageSessionDuration'))} subtitle={`${(t('bounceRate') * 100).toFixed(1)}% bounce`} />
         <Tile label="Page Views"        value={formatCompact(t('screenPageViews'))} />
         <Tile label="Conversions"       value={formatCompact(t('conversions'))} />
-        <Tile label="Revenue"           value={<Money amount={t('totalRevenue')} currency={currency} />} />
       </div>
 
       {/* Trends */}
@@ -260,7 +259,6 @@ export default function Ga4Page() {
             { header: 'Users',     render: r => formatCompact(r.metrics[1]), align: 'right' },
             { header: 'Engaged',   render: r => formatCompact(r.metrics[2]), align: 'right' },
             { header: 'Conv.',     render: r => formatCompact(r.metrics[3]), align: 'right' },
-            { header: 'Revenue',   render: r => <Money amount={r.metrics[4]} currency={currency} />, align: 'right' },
           ]}
         />
       </div>
@@ -277,7 +275,6 @@ export default function Ga4Page() {
             { header: 'Users',       render: r => formatCompact(r.metrics[1]), align: 'right' },
             { header: 'Engagement',  render: r => `${(r.metrics[2] * 100).toFixed(1)}%`, align: 'right' },
             { header: 'Conv.',       render: r => formatCompact(r.metrics[3]), align: 'right' },
-            { header: 'Revenue',     render: r => <Money amount={r.metrics[4]} currency={currency} />, align: 'right' },
           ]}
         />
       </div>
