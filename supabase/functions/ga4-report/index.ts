@@ -26,6 +26,8 @@ interface ApiResponse<T> {
 
 interface ReportBody {
   propertyId?: string;
+  /** Optional subset of configured property IDs to include. If omitted, all configured properties are aggregated. */
+  propertyIds?: string[];
   startDate: string;
   endDate: string;
   dimensions?: string[];
@@ -358,12 +360,25 @@ Deno.serve(async (req) => {
       console.error('ga4-report get_active_ga4_property_ids error:', pidErr.message);
       return respond({ ok: false, error: 'Internal server error', status: 500 });
     }
-    const propertyIds: string[] = Array.isArray(configuredPids)
+    const allPropertyIds: string[] = Array.isArray(configuredPids)
       ? configuredPids.map((p) => String(p ?? '').trim()).filter(Boolean)
       : [];
 
-    if (propertyIds.length === 0) {
+    if (allPropertyIds.length === 0) {
       return respond({ ok: false, error: 'No GA4 property configured', status: 400 });
+    }
+
+    // If the caller specified a subset, intersect with the configured set so users
+    // can never query properties that weren't pre-approved server-side.
+    const requestedSet = Array.isArray(body.propertyIds) && body.propertyIds.length > 0
+      ? new Set(body.propertyIds.map((p) => String(p ?? '').trim()).filter(Boolean))
+      : null;
+    const propertyIds = requestedSet
+      ? allPropertyIds.filter((p) => requestedSet.has(p))
+      : allPropertyIds;
+
+    if (propertyIds.length === 0) {
+      return respond({ ok: false, error: 'None of the requested GA4 properties are configured', status: 400 });
     }
 
     // Defensive: GA4 property IDs are numeric. Reject anything else to prevent

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Globe, Loader2 } from 'lucide-react';
 import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
@@ -7,6 +7,7 @@ import { useGa4Sources } from '@/hooks/useGa4Sources';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CurrencySymbol } from '@/lib/currency';
 import { format, parse } from 'date-fns';
 
@@ -51,47 +52,80 @@ export default function Ga4Page() {
   const { start, end } = dashData.range;
   const currency = client.currency || 'USD';
 
-  // Aggregate across ALL configured GA4 properties.
+  // Aggregate across configured GA4 properties (or a user-selected subset).
   const { sources, loading: sourcesLoading } = useGa4Sources();
-  const activeSources = sources.filter((s) => s.is_enabled);
+  const activeSources = useMemo(() => sources.filter((s) => s.is_enabled), [sources]);
   const enabled = !sourcesLoading && activeSources.length > 0;
+
+  // Selection state: which property IDs are currently shown. Default to all.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  useEffect(() => {
+    // Initialise / reconcile when the configured set changes.
+    setSelectedIds((prev) => {
+      const validIds = activeSources.map((s) => s.property_id);
+      const validSet = new Set(validIds);
+      const kept = prev.filter((id) => validSet.has(id));
+      // First load (or all properties were removed/re-added): default to all selected.
+      if (kept.length === 0) return validIds;
+      return kept;
+    });
+  }, [activeSources]);
+
+  const toggleProperty = (id: string) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) {
+        // Don't allow deselecting the last one — must keep at least one active.
+        if (prev.length === 1) return prev;
+        return prev.filter((x) => x !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  // Only send propertyIds when it's a strict subset; otherwise let edge function aggregate all.
+  const propertyIdsForQuery = selectedIds.length === activeSources.length ? undefined : selectedIds;
+  const queryEnabled = enabled && (propertyIdsForQuery === undefined || propertyIdsForQuery.length > 0);
 
   const totalsQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['date'],
     metrics: [
       'sessions', 'totalUsers', 'newUsers', 'engagedSessions',
       'engagementRate', 'averageSessionDuration', 'bounceRate',
       'screenPageViews', 'conversions', 'totalRevenue',
     ],
-    enabled,
+    enabled: queryEnabled,
   });
 
   const channelsQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['sessionDefaultChannelGroup'],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const sourcesQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['sessionSource', 'sessionMedium'],
     metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const pagesQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['pagePath'],
     metrics: ['screenPageViews', 'totalUsers', 'averageSessionDuration', 'bounceRate'],
     orderBys: [{ metric: 'screenPageViews', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const totals = totalsQ.data?.totals ?? [];
@@ -148,6 +182,36 @@ export default function Ga4Page() {
     );
   }
 
+  // Only show the toggle if there are 2+ properties — with 1 it's pointless.
+  const showPropertyToggle = activeSources.length > 1;
+  const propertyToggle = showPropertyToggle ? (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
+      {activeSources.map((s) => {
+        const checked = selectedIds.includes(s.property_id);
+        const isLastChecked = checked && selectedIds.length === 1;
+        const display = (s.label?.trim() || `Property ${s.property_id}`);
+        return (
+          <label
+            key={s.id}
+            className={`flex items-center gap-1.5 text-sm font-medium text-card-foreground select-none ${
+              isLastChecked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+            }`}
+            title={isLastChecked ? 'At least one property must be selected' : `Toggle ${display}`}
+          >
+            <Checkbox
+              checked={checked}
+              disabled={isLastChecked}
+              onCheckedChange={() => toggleProperty(s.property_id)}
+              aria-label={`Show ${display}`}
+            />
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            {display}
+          </label>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
     <div className="space-y-5 md:space-y-7">
       <SectionHeader
@@ -156,6 +220,8 @@ export default function Ga4Page() {
         showMobileDatePicker
         showFilters
         hideFiltersButton
+        action={propertyToggle}
+        actionBelow
       />
 
       {anyError && (
