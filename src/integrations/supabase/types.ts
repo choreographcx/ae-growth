@@ -822,6 +822,28 @@ export type Database = {
       }
       get_active_ga4_property_id: { Args: never; Returns: string }
       get_active_ga4_property_ids: { Args: never; Returns: string[] }
+      get_dashboard_ad_breakdown: {
+        Args: {
+          p_end: string
+          p_level?: string
+          p_limit?: number
+          p_platform?: string
+          p_start: string
+        }
+        Returns: {
+          ad_group_id: string
+          ad_group_name: string
+          ad_id: string
+          ad_name: string
+          campaign_name: string
+          clicks: number
+          conversions_all: number
+          conversions_lower_funnel: number
+          cost: number
+          impressions: number
+          platform: string
+        }[]
+      }
       get_dashboard_conversion_breakdown: {
         Args: {
           p_campaign_names?: string[]
@@ -846,10 +868,6 @@ export type Database = {
           p_suppressed_conversions?: Json
         }
         Returns: {
-          ad_group_id: string
-          ad_group_name: string
-          ad_id: string
-          ad_name: string
           audience_type: string
           campaign_id: string
           campaign_name: string
