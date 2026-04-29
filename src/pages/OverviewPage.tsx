@@ -66,15 +66,6 @@ export default function OverviewPage() {
   // Source the lower-funnel total from the same RPC that powers the Conversion
   // Breakdown card so the KPI value stays in lockstep with what's listed there.
   const breakdownCur = useConversionBreakdown({ start: data.range.start, end: data.range.end });
-  const prevRange = useMemo(() => {
-    if (!previousRows.length) return null;
-    const dates = previousRows.map(r => r.date).sort();
-    return { start: new Date(dates[0]), end: new Date(dates[dates.length - 1]) };
-  }, [previousRows]);
-  const breakdownPrev = useConversionBreakdown({
-    start: prevRange?.start ?? data.range.start,
-    end: prevRange?.end ?? data.range.end,
-  });
 
   /** Sum lower-funnel rows from the breakdown RPC (matches Conversion Breakdown card). */
   const sumLowerFunnel = (rows: { conversion_funnel_group: string; conversions_all: number }[]) =>
@@ -84,10 +75,6 @@ export default function OverviewPage() {
         : sum, 0);
 
   const lfBreakdownTotal = useMemo(() => sumLowerFunnel(breakdownCur.rows), [breakdownCur.rows]);
-  const lfBreakdownTotalPrev = useMemo(
-    () => prevRange ? sumLowerFunnel(breakdownPrev.rows) : 0,
-    [breakdownPrev.rows, prevRange]
-  );
 
   // Use the breakdown total as the conversion count, but keep spend/clicks/LPV
   // from the daily aggregate to compute CPA / CVR / etc.
@@ -104,9 +91,12 @@ export default function OverviewPage() {
       conversionRateLowerFunnel: lfBase.clicks > 0 ? (conv / lfBase.clicks) * 100 : 0,
     };
   }, [lfBase, lfBreakdownTotal]);
+  // Previous-period LF derived from the cheap daily aggregate (no extra RPC).
+  // Slight definitional drift vs. the breakdown RPC for the current period is
+  // acceptable here since this only powers the % delta arrow on the KPI tile.
   const lfPrev = useMemo(() => {
     if (!lfBasePrev) return null;
-    const conv = lfBreakdownTotalPrev;
+    const conv = lfBasePrev.conversionsLowerFunnel;
     return {
       ...lfBasePrev,
       conversions: conv,
@@ -114,7 +104,7 @@ export default function OverviewPage() {
       cpaLowerFunnel: lfBasePrev.spend > 0 && conv > 0 ? lfBasePrev.spend / conv : 0,
       cvrLowerFunnel: lfBasePrev.landingPageViews > 0 ? (conv / lfBasePrev.landingPageViews) * 100 : 0,
     };
-  }, [lfBasePrev, lfBreakdownTotalPrev]);
+  }, [lfBasePrev]);
 
   const lfConvSeries = useMemo(() => buildTimeSeries(rows, r => +r.conversions_lower_funnel || 0), [rows]);
   const lfCpaSeries  = useMemo(() => buildCpaSeries(rows, 'lower_funnel'), [rows]);
