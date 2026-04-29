@@ -49,11 +49,13 @@ export default function Ga4Page() {
   const { client, data: dashData } = useDashboard();
   const { start, end } = dashData.range;
   const currency = client.currency || 'USD';
-  const propertyId = (client.ga4PropertyId || '').trim();
-  const enabled = propertyId.length > 0;
+
+  // Aggregate across ALL configured GA4 properties.
+  const { sources, loading: sourcesLoading } = useGa4Sources();
+  const activeSources = sources.filter((s) => s.is_enabled);
+  const enabled = !sourcesLoading && activeSources.length > 0;
 
   const totalsQ = useGa4Report({
-    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['date'],
     metrics: [
@@ -65,7 +67,6 @@ export default function Ga4Page() {
   });
 
   const channelsQ = useGa4Report({
-    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['sessionDefaultChannelGroup'],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions', 'totalRevenue'],
@@ -75,7 +76,6 @@ export default function Ga4Page() {
   });
 
   const sourcesQ = useGa4Report({
-    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['sessionSource', 'sessionMedium'],
     metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions', 'totalRevenue'],
@@ -85,7 +85,6 @@ export default function Ga4Page() {
   });
 
   const pagesQ = useGa4Report({
-    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: ['pagePath'],
     metrics: ['screenPageViews', 'totalUsers', 'averageSessionDuration', 'bounceRate'],
