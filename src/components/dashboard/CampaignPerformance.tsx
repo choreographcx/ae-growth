@@ -25,6 +25,7 @@ interface CampaignRow {
   platform: PlatformKey | null;
   platformLabel: string;
   spend: number;
+  shareOfSpend: number;
   impressions: number;
   clicks: number;
   ctr: number;
