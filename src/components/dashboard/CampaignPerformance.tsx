@@ -199,6 +199,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     },
     ...(hidePlatformColumn ? [] : [{ key: 'platformLabel' as keyof CampaignRow, label: 'Platform', format: (row: CampaignRow) => row.platformLabel as React.ReactNode }]),
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
+    { key: 'shareOfSpend',            label: '% Spend',   align: 'right', format: row => `${row.shareOfSpend.toFixed(1)}%` },
     { key: 'impressions',             label: 'Impr.',     align: 'right', format: row => fmtCompact(row.impressions) },
     { key: 'clicks',                  label: 'Clicks',    align: 'right', format: row => fmtCompact(row.clicks) },
     { key: 'ctr',                     label: 'CTR',       align: 'right', format: row => `${row.ctr.toFixed(2)}%` },
