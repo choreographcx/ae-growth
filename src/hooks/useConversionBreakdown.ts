@@ -50,6 +50,9 @@ export function useConversionBreakdown({ start, end, platform, campaigns }: Opti
   const q = useQuery({
     queryKey: ['conversion-breakdown', startKey, endKey, campaignKey],
     queryFn: () => fetchBreakdown(start, end, campaigns),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const rows = useMemo(() => {
