@@ -295,14 +295,9 @@ export default function OverviewPage() {
         </div>
       ),
     },
-    breakdowns: {
-      label: 'Market / Channel / Objective Breakdown',
-      node: (
-        <div className="print-break-before">
-          <BreakdownDimensionCard rows={rows} />
-        </div>
-      ),
-    },
+    // Legacy `breakdowns` section is now folded into Performance Breakdown.
+    // We leave the key absent so old saved layouts that still reference it
+    // are filtered out by the `sectionMap[id] != null` guard below.
     conversionBreakdown: {
       label: 'Conversion Breakdown',
       node: (
@@ -319,7 +314,7 @@ export default function OverviewPage() {
     },
     performance: {
       label: 'Performance Breakdown',
-      node: <PerformanceBreakdown platforms={platformSummaries} />,
+      node: <PerformanceBreakdownCard rows={rows} platforms={platformSummaries} />,
     },
     insights: insights.length > 0 ? {
       label: 'Key Issues & Insights',
