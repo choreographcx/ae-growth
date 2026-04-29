@@ -281,7 +281,7 @@ export interface UseDashboardDailyOptions {
   selectedObjectives?: string[];
   selectedMarkets?: string[];
   selectedChannels?: string[];
-  /** Selected card-type buckets (Platinum / Al Fursan Infinity / Other / Unknown). Empty = no filter. */
+  /** Selected card-type buckets (Platinum / AlFursan / Other / Unknown). Empty = no filter. */
   selectedCardTypes?: CardType[];
   /**
    * Optional per-platform multiplier applied to USD `cost` and `conversion_value`

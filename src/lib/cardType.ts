@@ -6,33 +6,35 @@
  * as a global filter (Dashboard → Filter → Card Type) and as a breakdown
  * dimension in `PerformanceBreakdownCard`.
  *
- * Priority of rules (first match wins):
- *   1. Al Fursan Infinity   — must match BEFORE plain "Fursan" / "Platinum"
- *                             so a campaign called "Al Fursan Infinity Platinum"
- *                             is classified as Fursan Infinity.
- *   2. Platinum             — any standalone "Platinum" mention.
- *   3. Other                — known card tokens that aren't Platinum or
- *                             Al Fursan Infinity (Gold, Green, Centurion,
- *                             plain Fursan, Reserve, Cashback, Rewards, …).
- *   4. Unknown              — no card token detected.
+ * Real AMEX KSA product line (per americanexpress.com.sa):
+ *   Platinum, Gold, AlFursan (co-brand), Marriott Bonvoy (co-brand),
+ *   Green, Blue, Business, Centurion.
+ *
+ * Buckets (kept intentionally to four for dashboard simplicity):
+ *   1. AlFursan  — co-brand 'AlFursan' / 'Al Fursan' / 'Al-Fursan'.
+ *                  Matched FIRST so it isn't shadowed by other rules.
+ *   2. Platinum  — any standalone 'Platinum' mention.
+ *   3. Other     — any other recognised AMEX product token
+ *                  (Gold, Green, Blue, Business, Marriott (Bonvoy), Centurion).
+ *   4. Unknown   — no card token detected.
  *
  * Rules live here in code (not in the DB) so changes are reviewable. When new
  * card products launch, add the keyword to `OTHER_TOKENS` (or a dedicated rule
  * if it deserves its own bucket).
  */
 
-export type CardType = 'fursan_infinity' | 'platinum' | 'other' | 'unknown';
+export type CardType = 'alfursan' | 'platinum' | 'other' | 'unknown';
 
 export const CARD_TYPE_ORDER: CardType[] = [
   'platinum',
-  'fursan_infinity',
+  'alfursan',
   'other',
   'unknown',
 ];
 
 export const CARD_TYPE_LABELS: Record<CardType, string> = {
   platinum: 'Platinum',
-  fursan_infinity: 'Al Fursan Infinity',
+  alfursan: 'AlFursan',
   other: 'Other',
   unknown: 'Unknown',
 };
@@ -40,7 +42,7 @@ export const CARD_TYPE_LABELS: Record<CardType, string> = {
 /** Tailwind-friendly chart palette tokens (already defined in index.css). */
 export const CARD_TYPE_COLORS: Record<CardType, string> = {
   platinum: 'hsl(var(--chart-1))',
-  fursan_infinity: 'hsl(var(--chart-2))',
+  alfursan: 'hsl(var(--chart-2))',
   other: 'hsl(var(--chart-3))',
   unknown: 'hsl(var(--muted-foreground))',
 };
@@ -49,26 +51,35 @@ export const CARD_TYPE_COLORS: Record<CardType, string> = {
 const WB = '(?:^|[\\s_\\-/])';
 const WE = '(?:[\\s_\\-/]|$)';
 
-const FURSAN_INFINITY_RE = new RegExp(
-  `${WB}(?:al[\\s_\\-]?)?fursan[\\s_\\-]+infinity${WE}`,
+/**
+ * AlFursan co-brand. Tolerate spelling variants:
+ *   'AlFursan' (canonical, one word) | 'Al Fursan' | 'Al-Fursan' | 'Al_Fursan'
+ * Also still matches legacy 'Fursan Infinity' so older campaigns roll up here.
+ */
+const ALFURSAN_RE = new RegExp(
+  `${WB}(?:al[\\s_\\-]?)?fursan${WE}`,
   'i',
 );
 
 const PLATINUM_RE = new RegExp(`${WB}platinum${WE}`, 'i');
 
 /**
- * Other recognised card tokens. Order doesn't matter — any match places the
- * row in the "Other" bucket. Add lower-cased tokens here as you discover them.
+ * Other recognised AMEX product tokens. Order doesn't matter — any match places
+ * the row in the "Other" bucket. Add lower-cased tokens here as new products
+ * launch (or promote one to its own bucket above).
  */
 const OTHER_TOKENS: string[] = [
   'gold',
   'green',
+  'blue',
+  'business',
   'centurion',
+  'marriott',
+  'bonvoy',
   'reserve',
   'cashback',
   'cash back',
   'rewards',
-  'fursan', // plain Al Fursan (not Infinity) — caught after the Infinity rule.
 ];
 
 const OTHER_RE = new RegExp(
@@ -78,7 +89,7 @@ const OTHER_RE = new RegExp(
 
 export function classifyCardType(campaignName: string | null | undefined): CardType {
   if (!campaignName) return 'unknown';
-  if (FURSAN_INFINITY_RE.test(campaignName)) return 'fursan_infinity';
+  if (ALFURSAN_RE.test(campaignName)) return 'alfursan';
   if (PLATINUM_RE.test(campaignName)) return 'platinum';
   if (OTHER_RE.test(campaignName)) return 'other';
   return 'unknown';
