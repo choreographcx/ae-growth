@@ -236,9 +236,10 @@ function base64UrlEncode(input: string | Uint8Array): string {
 
 async function loadServiceAccount(serviceClient: ReturnType<typeof createClient>): Promise<ServiceAccount> {
   if (cachedSA) return cachedSA;
-  const { data, error } = await serviceClient.rpc('internal_get_google_sa_json');
-  if (error) throw new Error(`Vault read failed: ${error.message}`);
-  if (!data || typeof data !== 'string') throw new Error('Service account secret not found in vault');
+  // GA4 uses its own dedicated vault secret (ga4_sa_json), separate from the ad-platforms BigQuery SA.
+  const { data, error } = await serviceClient.rpc('internal_get_ga4_sa_json');
+  if (error) throw new Error(`GA4 vault read failed: ${error.message}`);
+  if (!data || typeof data !== 'string') throw new Error('GA4 service account secret not found in vault (ga4_sa_json)');
   cachedSA = parseServiceAccount(data);
   return cachedSA;
 }
