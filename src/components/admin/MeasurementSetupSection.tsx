@@ -60,7 +60,6 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
         <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Tracking Summary</h4>
         <div className="flex flex-wrap gap-2">
           <TrackingStatusPill label="GA4 Connected" connected={ga4Connected} />
-          <TrackingStatusPill label="GTM Connected" connected={gtmConnected} />
           <TrackingStatusPill label="Primary Conversion" connected={primaryMapped} />
           <div className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium',
