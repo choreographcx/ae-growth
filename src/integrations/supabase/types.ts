@@ -846,6 +846,10 @@ export type Database = {
           p_suppressed_conversions?: Json
         }
         Returns: {
+          ad_group_id: string
+          ad_group_name: string
+          ad_id: string
+          ad_name: string
           audience_type: string
           campaign_id: string
           campaign_name: string
