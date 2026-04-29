@@ -195,6 +195,22 @@ export function AdLevelBreakdownTable({ rows: _rows, level, platformKey, classNa
     else { setSortKey(key); setSortDir(typeof aggregated[0]?.[key] === 'string' ? 'asc' : 'desc'); }
   };
 
+  if (isLoading) {
+    return (
+      <div className={cn("bg-card rounded-xl border border-border shadow-sm p-6 text-sm text-muted-foreground flex items-center gap-2", className)}>
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading {level === 'ad_group' ? 'ad group' : 'ad'} performance…
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={cn("bg-card rounded-xl border border-border shadow-sm p-6 text-sm text-destructive", className)}>
+        Failed to load {level === 'ad_group' ? 'ad group' : 'ad'} data: {(error as Error).message}
+      </div>
+    );
+  }
+
   if (aggregated.length === 0) {
     return (
       <div className={cn("bg-card rounded-xl border border-border shadow-sm p-6 text-sm text-muted-foreground", className)}>
@@ -202,6 +218,7 @@ export function AdLevelBreakdownTable({ rows: _rows, level, platformKey, classNa
       </div>
     );
   }
+
 
   if (isMobile) {
     return (
