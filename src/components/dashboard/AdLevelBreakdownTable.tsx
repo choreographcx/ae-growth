@@ -38,7 +38,19 @@ function PlatformIcon({ platform, size = 12 }: { platform: PlatformKey; size?: n
  * are removed from the display string. Matching is case-insensitive and only
  * exact segment matches (split by underscore) are dropped.
  */
-const REDUNDANT_SEGMENTS = new Set(['amex', 'ksa']);
+/**
+ * Segments that are redundant given the dashboard's fixed scope (AMEX KSA) or
+ * already conveyed by the platform-icon badge to the left of the row name.
+ * Matched case-insensitively against exact underscore-separated segments.
+ */
+const REDUNDANT_SEGMENTS = new Set([
+  'amex', 'ksa',
+  // platform aliases — already shown via the platform icon
+  'tiktok', 'tt', 'sc', 'sc direct', 'snapchat', 'snap',
+  'meta', 'fb', 'facebook', 'instagram', 'ig',
+  'google', 'google ads', 'gads', 'youtube', 'yt',
+  'linkedin', 'li', 'x', 'twitter', 'programmatic', 'dv360',
+]);
 function cleanAdName(name: string): string {
   if (!name) return name;
   const parts = name.split('_').map(p => p.trim());
