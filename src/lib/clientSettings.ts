@@ -328,19 +328,33 @@ export async function saveClientSettings(client: ClientProfile, ownerUserId: str
 
   // 5) BigQuery data source --------------------------------------------
   {
-    const { error } = await supabase
+    const { data: existingBq } = await supabase
       .from('client_data_sources')
-      .upsert(
-        {
-          client_id: clientId,
-          source_type: 'bigquery',
-          gcp_project_id: client.bigqueryProject || null,
-          bq_dataset: client.bigqueryDataset || null,
-          is_enabled: true,
-        } as any,
-        { onConflict: 'client_id,source_type' }
-      );
-    if (error) throw error;
+      .select('id')
+      .eq('client_id', clientId)
+      .eq('source_type', 'bigquery')
+      .maybeSingle();
+
+    const payload = {
+      client_id: clientId,
+      source_type: 'bigquery',
+      gcp_project_id: client.bigqueryProject || null,
+      bq_dataset: client.bigqueryDataset || null,
+      is_enabled: true,
+    } as any;
+
+    if (existingBq) {
+      const { error } = await supabase
+        .from('client_data_sources')
+        .update(payload)
+        .eq('id', existingBq.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('client_data_sources')
+        .insert(payload);
+      if (error) throw error;
+    }
   }
 
   // 6) Built-in alert thresholds (replace the defaults) ------------------
