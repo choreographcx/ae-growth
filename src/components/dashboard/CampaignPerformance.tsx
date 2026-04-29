@@ -158,6 +158,45 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (key: string) => {
+    setExpandedKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const buildAdGroups = (rows: DashboardDailyRow[]): AdGroupRow[] => {
+    const buckets = new Map<string, DashboardDailyRow[]>();
+    for (const r of rows) {
+      const name = (r.ad_group_name || '').trim() || '(unspecified)';
+      const id = r.ad_group_id || '';
+      const key = `${id}::${name.toLowerCase()}`;
+      let arr = buckets.get(key);
+      if (!arr) { arr = []; buckets.set(key, arr); }
+      arr.push(r);
+    }
+    const out: AdGroupRow[] = [];
+    buckets.forEach((rs, key) => {
+      const a = aggregateRows(rs, 'all');
+      out.push({
+        key,
+        name: (rs[0].ad_group_name || '').trim() || '(unspecified)',
+        spend: a.spend,
+        impressions: a.impressions,
+        clicks: a.clicks,
+        ctr: a.ctr,
+        cpc: a.cpc,
+        conversionsLowerFunnel: a.conversionsLowerFunnel,
+        cpa: a.cpaLowerFunnel,
+      });
+    });
+    return out
+      .filter(r => r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0)
+      .sort((a, b) => b.spend - a.spend);
+  };
 
   const sorted = useMemo(() => {
     const list = [...campaigns];
