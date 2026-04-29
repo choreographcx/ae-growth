@@ -42,11 +42,13 @@ function formatCompact(n: number): string {
 }
 
 // Default order of top-level Overview sections (ids must be stable across releases).
+// `breakdowns` is intentionally removed — Performance Breakdown now contains all
+// dimension levels via its dropdown. Legacy saved layouts that still reference
+// `breakdowns` are filtered out at render time.
 const DEFAULT_SECTION_ORDER = [
   'kpis',
   'contribution',
   'trends',
-  'breakdowns',
   'performance',
   'funnel',
   'conversionBreakdown',
