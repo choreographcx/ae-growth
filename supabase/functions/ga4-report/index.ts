@@ -290,7 +290,8 @@ Deno.serve(async (req) => {
     // prevent users from probing other GA4 properties the SA can access.
     const { data: configuredPid, error: pidErr } = await serviceClient.rpc('get_active_ga4_property_id');
     if (pidErr) {
-      return respond({ ok: false, error: `Failed to load GA4 property: ${pidErr.message}`, status: 500 });
+      console.error('ga4-report get_active_ga4_property_id error:', pidErr.message);
+      return respond({ ok: false, error: 'Internal server error', status: 500 });
     }
     const propertyId = typeof configuredPid === 'string' ? configuredPid.trim() : '';
 
@@ -350,6 +351,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('ga4-report error:', msg);
-    return respond({ ok: false, error: msg, status: 500 });
+    return respond({ ok: false, error: 'Internal server error', status: 500 });
   }
 });
