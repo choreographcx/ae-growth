@@ -3,7 +3,8 @@ import { DimensionBreakdownTable } from './DimensionBreakdownTable';
 import { CampaignPerformance } from './CampaignPerformance';
 import { PlatformComparison } from './PlatformComparison';
 import { SectionHeader } from './SectionHeader';
-import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
+import { AdLevelBreakdownTable } from './AdLevelBreakdownTable';
+import { DashboardDailyRow, normalizePlatform } from '@/hooks/useDashboardDaily';
 import { resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey, PlatformSummary } from '@/types/dashboard';
@@ -123,10 +124,11 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
       )}
 
       {(activeLevel === 'adGroup' || activeLevel === 'adLevel') && (
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6 text-sm text-muted-foreground">
-          {activeLevel === 'adGroup' ? 'Ad Group' : 'Ad Level'} data isn’t wired up yet for this client. Once the
-          data feed includes ad group / ad level rows, this view will populate automatically.
-        </div>
+        <AdLevelBreakdownTable
+          rows={rows}
+          level={activeLevel === 'adGroup' ? 'ad_group' : 'ad'}
+          platformKey={platformKey}
+        />
       )}
 
       {(activeLevel === 'audienceType' ||
