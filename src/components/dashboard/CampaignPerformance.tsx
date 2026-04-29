@@ -140,6 +140,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         cpc: a.cpc,
         conversionsLowerFunnel: a.conversionsLowerFunnel,
         cpa: a.cpaLowerFunnel,
+        rawRows: rows,
       });
     });
     // Hide rows where every key metric is zero — these are noise from empty
