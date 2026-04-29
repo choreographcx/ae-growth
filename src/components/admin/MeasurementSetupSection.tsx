@@ -145,7 +145,7 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
           <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Micro Conversions</Label>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {client.microConversions.map((mc, i) => (
-              <Badge key={i} variant="secondary" className="gap-1.5 text-xs pl-2.5 pr-1.5 py-1">
+              <Badge key={i} variant="secondary" className="gap-1.5 text-xs pl-2.5 pr-1.5 py-1 text-primary-foreground">
                 {mc}
                 <button onClick={() => updateClient({ microConversions: client.microConversions.filter((_, idx) => idx !== i) })} className="hover:text-destructive transition-colors">
                   <X size={10} />
