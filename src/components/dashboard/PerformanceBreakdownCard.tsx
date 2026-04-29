@@ -96,8 +96,6 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
   const subtitle =
     activeLevel === 'campaign'
       ? 'Top campaigns ranked by spend, with metrics aggregated across the date range'
-      : activeLevel === 'platform'
-      ? 'Spend, conversions and efficiency by ad platform'
       : undefined;
 
   return (
