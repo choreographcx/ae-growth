@@ -834,6 +834,17 @@ export type Database = {
           total_impressions: number
         }[]
       }
+      diag_meta_publisher_split: {
+        Args: { p_end?: string; p_start?: string }
+        Returns: {
+          month: string
+          publisher_platform: string
+          rows_count: number
+          total_clicks: number
+          total_cost_usd: number
+          total_impressions: number
+        }[]
+      }
       diag_platform_monthly: {
         Args: { p_end?: string; p_platform_key: string; p_start?: string }
         Returns: {
