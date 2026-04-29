@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DimensionBreakdownTable } from './DimensionBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
-import { getCampaignMarket, getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
+import { getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey } from '@/types/dashboard';
 
