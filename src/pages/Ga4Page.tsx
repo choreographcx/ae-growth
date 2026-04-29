@@ -82,9 +82,9 @@ export default function Ga4Page() {
     });
   };
 
-  // Only send propertyIds when it's a strict subset; otherwise let edge function aggregate all.
-  const propertyIdsForQuery = selectedIds.length === activeSources.length ? undefined : selectedIds;
-  const queryEnabled = enabled && (propertyIdsForQuery === undefined || propertyIdsForQuery.length > 0);
+  // Always send the exact selected GA4 property IDs so toggles scope every report.
+  const propertyIdsForQuery = selectedIds;
+  const queryEnabled = enabled && propertyIdsForQuery.length > 0;
 
   const totalsQ = useGa4Report({
     startDate: start, endDate: end,
@@ -198,7 +198,6 @@ export default function Ga4Page() {
             }`}
             title={isLastChecked ? 'At least one property must be selected' : `Toggle ${display}`}
           >
-            <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             <Checkbox
               checked={checked}
               disabled={isLastChecked}
