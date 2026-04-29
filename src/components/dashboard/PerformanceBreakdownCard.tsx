@@ -80,6 +80,7 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
     list.push({ value: 'objective', label: 'By Objective' });
     if (isGoogle) list.push({ value: 'campaignType', label: 'By Campaign Type' });
     if (isMeta) list.push({ value: 'placement', label: 'By Placement' });
+    list.push({ value: 'cardType', label: 'By Card Type' });
     list.push({ value: 'campaign', label: 'By Campaign' });
     list.push({ value: 'adGroup',  label: 'By Ad Group' });
     list.push({ value: 'adLevel',  label: 'By Ad Level' });
@@ -140,7 +141,8 @@ export function PerformanceBreakdownCard({ rows, platformKey, platforms, classNa
       {(activeLevel === 'audienceType' ||
         activeLevel === 'objective' ||
         activeLevel === 'campaignType' ||
-        activeLevel === 'placement') && (
+        activeLevel === 'placement' ||
+        activeLevel === 'cardType') && (
         <DimensionBreakdownTable
           rows={rows}
           pick={DIMENSION_PICKERS[activeLevel].pick}
