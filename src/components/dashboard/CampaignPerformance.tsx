@@ -119,6 +119,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         platform: hidePlatformColumn && uniquePlatforms.length > 1 ? null : platformKey,
         platformLabel,
         spend: a.spend,
+        shareOfSpend: 0,
         impressions: a.impressions,
         clicks: a.clicks,
         ctr: a.ctr,
@@ -129,9 +130,15 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     });
     // Hide rows where every key metric is zero — these are noise from empty
     // BigQuery campaign rollups and clutter the table.
-    return out.filter(r =>
+    const filtered = out.filter(r =>
       r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0
     );
+    // Compute share of spend across the visible set so percentages sum to ~100%.
+    const totalSpend = filtered.reduce((s, r) => s + r.spend, 0);
+    if (totalSpend > 0) {
+      for (const r of filtered) r.shareOfSpend = (r.spend / totalSpend) * 100;
+    }
+    return filtered;
   }, [data.rows, platformFilter, hidePlatformColumn]);
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
