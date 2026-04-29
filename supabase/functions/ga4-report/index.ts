@@ -26,6 +26,8 @@ interface ApiResponse<T> {
 
 interface ReportBody {
   propertyId?: string;
+  /** Optional subset of configured property IDs to include. If omitted, all configured properties are aggregated. */
+  propertyIds?: string[];
   startDate: string;
   endDate: string;
   dimensions?: string[];
