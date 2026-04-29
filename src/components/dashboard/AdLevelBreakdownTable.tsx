@@ -62,6 +62,7 @@ interface AggRow {
   key: string;
   name: string;
   campaignName: string;
+  platform: PlatformKey;
   spend: number;
   shareOfSpend: number;
   impressions: number;
