@@ -265,22 +265,13 @@ export function PlatformPageShell({
         </div>
       </div>
 
-      {/* Breakdowns by Market / Channel / Objective (parsed from campaign names) */}
+      {/* Combined Performance Breakdown — switch dimension via the dropdown
+          (Audience Type, Objective, Campaign, Ad Group, Ad Level, …). */}
       {scoped.length > 0 && (
-        <div className="print-break-before">
-          <BreakdownDimensionCard rows={scoped} platformKey={platformKey} />
-        </div>
+        <PerformanceBreakdownCard rows={scoped} platformKey={platformKey} />
       )}
 
       {midExtras?.({ totals })}
-
-      {/* Campaign Performance — moved above Conversion Mix / Funnel */}
-      {scoped.length > 0 && (
-        <div className="space-y-2.5 md:space-y-3 print-break-before">
-          <SectionHeader title="Campaign Performance" subtitle="Top campaigns ranked by spend" />
-          <CampaignPerformance platformFilter={platformKey} hidePlatformColumn />
-        </div>
-      )}
 
       {/* Conversion Mix + Funnel — side by side on desktop */}
       {(hasConversions || totals.impressions > 0 || totals.clicks > 0) && (
