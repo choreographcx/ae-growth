@@ -1,16 +1,32 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DashboardDailyRow,
-  aggregateRows,
   normalizePlatform,
 } from '@/hooks/useDashboardDaily';
 import { PlatformKey } from '@/types/dashboard';
 import { platformIconEntries } from '@/lib/platformIcons';
+
+interface AdBreakdownRpcRow {
+  platform: string;
+  campaign_name: string | null;
+  ad_group_id: string | null;
+  ad_group_name: string | null;
+  ad_id: string | null;
+  ad_name: string | null;
+  impressions: number;
+  clicks: number;
+  cost: number;
+  conversions_lower_funnel: number;
+  conversions_all: number;
+}
 
 const platformIconBg: Record<PlatformKey, string> = {
   meta:         'bg-blue-50 text-blue-600',
