@@ -80,7 +80,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
    *  user back to it after they've manually picked a different range.
    *  Also pre-applied when we restored a persisted dateRange from a prior session. */
   const [defaultRangeApplied, setDefaultRangeApplied] = useState<boolean>(() => hasPersisted('dateRange'));
-  const lastRefresh = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // Stable per-mount timestamp; recomputed only when underlying data refetches.
+  const lastRefresh = useMemo(
+    () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    []
+  );
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(() => loadPersisted('selectedPlatforms', [] as string[]));
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>(() => loadPersisted('selectedCampaigns', [] as string[]));
