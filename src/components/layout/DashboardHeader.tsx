@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Download, CalendarIcon, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -42,6 +42,15 @@ export function DateRangePicker({ compact = false }: { compact?: boolean }) {
   );
   const [draftRange, setDraftRange] = useState(range);
   const [calendarMonth, setCalendarMonth] = useState(draftRange.from);
+
+  useEffect(() => {
+    const preset = presets.find(p => p.label === dateRange);
+    if (!preset) return;
+    const next = { from: preset.from, to: preset.to };
+    setRange(next);
+    setDraftRange(next);
+    setCalendarMonth(next.from);
+  }, [dateRange]);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
