@@ -6,6 +6,7 @@ import { SectionHeader } from './SectionHeader';
 import { AdLevelBreakdownTable } from './AdLevelBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { resolveCampaignObjective } from '@/lib/campaignNaming';
+import { CARD_TYPE_LABELS, classifyCardType } from '@/lib/cardType';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey, PlatformSummary } from '@/types/dashboard';
 
@@ -24,6 +25,7 @@ type Level =
   | 'objective'
   | 'campaignType'
   | 'placement'
+  | 'cardType'
   | 'platform'
   | 'campaign'
   | 'adGroup'
@@ -40,7 +42,7 @@ interface PerformanceBreakdownCardProps {
 }
 
 const DIMENSION_PICKERS: Record<
-  'audienceType' | 'objective' | 'campaignType' | 'placement',
+  'audienceType' | 'objective' | 'campaignType' | 'placement' | 'cardType',
   { title: string; pick: (r: DashboardDailyRow) => string | null | undefined }
 > = {
   audienceType: { title: 'By Audience Type', pick: r => r.audience_type },
@@ -55,6 +57,10 @@ const DIMENSION_PICKERS: Record<
       if (v.includes('instagram') || v === 'ig') return 'Instagram';
       return null;
     },
+  },
+  cardType: {
+    title: 'By Card Type',
+    pick: r => CARD_TYPE_LABELS[classifyCardType(r.campaign_name)],
   },
 };
 
