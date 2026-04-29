@@ -3,6 +3,7 @@ import { Globe, Loader2 } from 'lucide-react';
 import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
 import { useGa4Report } from '@/hooks/useGa4Report';
+import { useGa4Sources } from '@/hooks/useGa4Sources';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -151,7 +152,7 @@ export default function Ga4Page() {
     <div className="space-y-5 md:space-y-7">
       <SectionHeader
         title="Web Analytics (GA4)"
-        subtitle={`Live data from the GA4 Data API · Property ${propertyId}`}
+        subtitle={`Live data from the GA4 Data API · ${activeSources.length} ${activeSources.length === 1 ? 'property' : 'properties'}`}
         showMobileDatePicker
         showFilters
         hideFiltersButton
