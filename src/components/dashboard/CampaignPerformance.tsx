@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useMemo, useState, Fragment } from 'react';
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
@@ -26,6 +26,20 @@ interface CampaignRow {
   platformLabel: string;
   spend: number;
   shareOfSpend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  conversionsLowerFunnel: number;
+  cpa: number;
+  /** Raw rows that compose this campaign — used to build the ad-group sub-table on expand. */
+  rawRows: DashboardDailyRow[];
+}
+
+interface AdGroupRow {
+  key: string;
+  name: string;
+  spend: number;
   impressions: number;
   clicks: number;
   ctr: number;
@@ -126,6 +140,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         cpc: a.cpc,
         conversionsLowerFunnel: a.conversionsLowerFunnel,
         cpa: a.cpaLowerFunnel,
+        rawRows: rows,
       });
     });
     // Hide rows where every key metric is zero — these are noise from empty
@@ -143,6 +158,45 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (key: string) => {
+    setExpandedKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const buildAdGroups = (rows: DashboardDailyRow[]): AdGroupRow[] => {
+    const buckets = new Map<string, DashboardDailyRow[]>();
+    for (const r of rows) {
+      const name = (r.ad_group_name || '').trim() || '(unspecified)';
+      const id = r.ad_group_id || '';
+      const key = `${id}::${name.toLowerCase()}`;
+      let arr = buckets.get(key);
+      if (!arr) { arr = []; buckets.set(key, arr); }
+      arr.push(r);
+    }
+    const out: AdGroupRow[] = [];
+    buckets.forEach((rs, key) => {
+      const a = aggregateRows(rs, 'all');
+      out.push({
+        key,
+        name: (rs[0].ad_group_name || '').trim() || '(unspecified)',
+        spend: a.spend,
+        impressions: a.impressions,
+        clicks: a.clicks,
+        ctr: a.ctr,
+        cpc: a.cpc,
+        conversionsLowerFunnel: a.conversionsLowerFunnel,
+        cpa: a.cpaLowerFunnel,
+      });
+    });
+    return out
+      .filter(r => r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0)
+      .sort((a, b) => b.spend - a.spend);
+  };
 
   const sorted = useMemo(() => {
     const list = [...campaigns];
@@ -220,6 +274,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
+              <th className="w-8 px-2 py-3" aria-label="Expand" />
               {cols.map(c => (
                 <th
                   key={c.key as string}
@@ -238,25 +293,102 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
             </tr>
           </thead>
           <tbody>
-            {sorted.map((row, rowIdx) => (
-              <tr key={row.key} className={cn(
-                "border-b border-border/60 last:border-0 hover:bg-muted/20 transition-colors",
-                rowIdx % 2 === 1 && "bg-muted/[0.04]"
-              )}>
-                {cols.map(c => (
-                  <td
-                    key={c.key as string}
-                    className={cn(
-                      "px-4 py-3 text-xs tabular-nums",
-                      c.key === 'campaignLabel'
-                        ? 'font-semibold text-card-foreground text-left max-w-[320px]'
-                        : 'text-card-foreground whitespace-nowrap',
-                      c.align === 'right' ? 'text-right' : 'text-left',
-                    )}
-                  >
-                    {c.format(row)}
-                  </td>
-                ))}
+            {sorted.map((row, rowIdx) => {
+              const isOpen = expandedKeys.has(row.key);
+              const adGroups = isOpen ? buildAdGroups(row.rawRows) : [];
+              return (
+                <Fragment key={row.key}>
+                  <tr className={cn(
+                    "border-b border-border/60 hover:bg-muted/20 transition-colors",
+                    rowIdx % 2 === 1 && "bg-muted/[0.04]",
+                    isOpen && "bg-muted/30 border-b-0"
+                  )}>
+                    <td className="w-8 px-2 py-3 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(row.key)}
+                        aria-label={isOpen ? 'Collapse ad groups' : 'Expand ad groups'}
+                        aria-expanded={isOpen}
+                        className="flex items-center justify-center w-5 h-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                      >
+                        <ChevronRight
+                          size={14}
+                          className={cn("transition-transform", isOpen && "rotate-90")}
+                        />
+                      </button>
+                    </td>
+                    {cols.map(c => (
+                      <td
+                        key={c.key as string}
+                        className={cn(
+                          "px-4 py-3 text-xs tabular-nums",
+                          c.key === 'campaignLabel'
+                            ? 'font-semibold text-card-foreground text-left max-w-[320px]'
+                            : 'text-card-foreground whitespace-nowrap',
+                          c.align === 'right' ? 'text-right' : 'text-left',
+                        )}
+                      >
+                        {c.format(row)}
+                      </td>
+                    ))}
+                  </tr>
+                  {isOpen && (
+                    <tr className="bg-muted/20 border-b border-border/60">
+                      <td colSpan={cols.length + 1} className="px-3 pb-4 pt-1">
+                        <AdGroupSubTable rows={adGroups} currency={currency} />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Ad-group sub-table (rendered inside an expanded campaign row) ─── */
+
+function AdGroupSubTable({ rows, currency }: { rows: AdGroupRow[]; currency: string }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-lg border border-border/60 bg-card/50 px-4 py-3 text-[11px] text-muted-foreground">
+        No ad-group rows for this campaign in the selected range.
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-lg border border-border/60 bg-card/80 overflow-hidden">
+      <div className="px-3 py-2 border-b border-border/60 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+        Ad Groups · {rows.length}
+      </div>
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              <th className="px-3 py-2 text-left font-medium">Ad Group</th>
+              <th className="px-3 py-2 text-right font-medium">Spend</th>
+              <th className="px-3 py-2 text-right font-medium">Impr.</th>
+              <th className="px-3 py-2 text-right font-medium">Clicks</th>
+              <th className="px-3 py-2 text-right font-medium">CTR</th>
+              <th className="px-3 py-2 text-right font-medium">CPC</th>
+              <th className="px-3 py-2 text-right font-medium">LF Conv.</th>
+              <th className="px-3 py-2 text-right font-medium">CPA (LF)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.key} className={cn("border-t border-border/40", i % 2 === 1 && "bg-muted/[0.04]")}>
+                <td className="px-3 py-2 text-card-foreground max-w-[280px] truncate" title={r.name}>{r.name}</td>
+                <td className="px-3 py-2 text-right tabular-nums"><span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(r.spend)}</span></td>
+                <td className="px-3 py-2 text-right tabular-nums">{fmtCompact(r.impressions)}</td>
+                <td className="px-3 py-2 text-right tabular-nums">{fmtCompact(r.clicks)}</td>
+                <td className="px-3 py-2 text-right tabular-nums">{r.ctr.toFixed(2)}%</td>
+                <td className="px-3 py-2 text-right tabular-nums"><CurrencyValue amount={r.cpc} decimals={2} currency={currency} /></td>
+                <td className="px-3 py-2 text-right tabular-nums">{Math.round(r.conversionsLowerFunnel).toLocaleString()}</td>
+                <td className="px-3 py-2 text-right tabular-nums">{r.cpa > 0 ? <CurrencyValue amount={r.cpa} decimals={2} currency={currency} /> : '—'}</td>
               </tr>
             ))}
           </tbody>
