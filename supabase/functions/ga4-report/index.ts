@@ -351,6 +351,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('ga4-report error:', msg);
-    return respond({ ok: false, error: msg, status: 500 });
+    return respond({ ok: false, error: 'Internal server error', status: 500 });
   }
 });
