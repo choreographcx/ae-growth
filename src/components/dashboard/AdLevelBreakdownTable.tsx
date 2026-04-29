@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
@@ -10,6 +10,41 @@ import {
   normalizePlatform,
 } from '@/hooks/useDashboardDaily';
 import { PlatformKey } from '@/types/dashboard';
+import { platformIconEntries } from '@/lib/platformIcons';
+
+const platformIconBg: Record<PlatformKey, string> = {
+  meta:         'bg-blue-50 text-blue-600',
+  google:       'bg-emerald-50 text-emerald-600',
+  tiktok:       'bg-pink-50 text-pink-600',
+  snapchat:     'bg-yellow-50 text-yellow-600',
+  x:            'bg-slate-100 text-slate-700',
+  linkedin:     'bg-sky-50 text-sky-600',
+  programmatic: 'bg-violet-50 text-violet-600',
+};
+
+function PlatformIcon({ platform, size = 12 }: { platform: PlatformKey; size?: number }) {
+  const entry = platformIconEntries[platform];
+  if (entry.type === 'lucide') {
+    const Icon = entry.icon;
+    return <Icon size={size} />;
+  }
+  const Comp = entry.Component;
+  return <Comp size={size} />;
+}
+
+/**
+ * Strip redundant naming segments from ad / ad-group names. Since this dashboard
+ * is fully scoped to AMEX KSA, segments matching "AMEX" or "KSA" are noise and
+ * are removed from the display string. Matching is case-insensitive and only
+ * exact segment matches (split by underscore) are dropped.
+ */
+const REDUNDANT_SEGMENTS = new Set(['amex', 'ksa']);
+function cleanAdName(name: string): string {
+  if (!name) return name;
+  const parts = name.split('_').map(p => p.trim());
+  const kept = parts.filter(p => p.length > 0 && !REDUNDANT_SEGMENTS.has(p.toLowerCase()));
+  return kept.length > 0 ? kept.join('_') : name;
+}
 
 type Level = 'ad_group' | 'ad';
 
