@@ -410,47 +410,12 @@ function ModularPlatformCard({
             </Select>
           </div>
 
-          {/* Account IDs */}
-          <div>
-            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Account IDs</Label>
-            <div className="mt-1.5 space-y-1.5">
-              {cfg.accountIds.map((id, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <Input
-                    value={id}
-                    onChange={e => {
-                      const updated = [...cfg.accountIds];
-                      updated[i] = e.target.value;
-                      updatePlatform(p.key, { accountIds: updated });
-                    }}
-                    placeholder={p.placeholder}
-                    className="flex-1 h-7 text-xs font-mono"
-                  />
-                  <button
-                    onClick={() => updatePlatform(p.key, { accountIds: cfg.accountIds.filter((_, idx) => idx !== i) })}
-                    className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => updatePlatform(p.key, { accountIds: [...cfg.accountIds, ''] })}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              >
-                <Plus size={10} /> Add Account ID
-              </button>
-            </div>
-          </div>
+          {/* Account IDs removed — data flows directly via BigQuery, no per-platform IDs needed. */}
 
           {/* Toggles row removed — Overview/Diagnostics inclusion is implicit when the platform is enabled. */}
 
-          {/* Footer status line */}
-          <div className="flex items-center justify-between pt-2 border-t border-border/30">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              {hasIds ? <Wifi size={10} className="text-emerald-500" /> : <WifiOff size={10} className="text-amber-500" />}
-              <span>{hasIds ? 'Connected' : 'Not connected'}</span>
-            </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end pt-2 border-t border-border/30">
             <button
               onClick={() => setAdvancedOpen(!advancedOpen)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
