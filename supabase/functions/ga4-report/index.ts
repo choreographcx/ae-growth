@@ -98,6 +98,7 @@ function mergeGa4Responses(
     totals: [{ metricValues: totalSums.map((value) => ({ value: String(value) })) }],
     rowCount: mergedRows.length,
   };
+}
 
 const rsaImportAlgorithm: RsaHashedImportParams = {
   name: 'RSASSA-PKCS1-v1_5',

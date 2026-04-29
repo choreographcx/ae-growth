@@ -198,13 +198,13 @@ export default function Ga4Page() {
             }`}
             title={isLastChecked ? 'At least one property must be selected' : `Toggle ${display}`}
           >
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             <Checkbox
               checked={checked}
               disabled={isLastChecked}
               onCheckedChange={() => toggleProperty(s.property_id)}
               aria-label={`Show ${display}`}
             />
-            <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             {display}
           </label>
         );
