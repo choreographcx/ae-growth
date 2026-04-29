@@ -171,7 +171,7 @@ export default function Ga4Page() {
   if (!enabled) {
     return (
       <div className="space-y-5 md:space-y-7">
-        <SectionHeader title="Web Analytics (GA4)" subtitle="Live data from the GA4 Data API" />
+        <SectionHeader title="Web Analytics (GA4)" />
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground flex items-center gap-2">
             <Globe className="h-4 w-4" />
