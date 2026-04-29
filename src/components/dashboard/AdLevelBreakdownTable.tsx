@@ -93,16 +93,14 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
   const aggregated = useMemo<AggRow[]>(() => {
     const buckets = new Map<string, DashboardDailyRow[]>();
     for (const r of rows) {
-      if (platformKey) {
-        const p = normalizePlatform(r.platform);
-        if (p !== platformKey) continue;
-      }
+      const p = normalizePlatform(r.platform);
+      if (platformKey && p !== platformKey) continue;
       const name = level === 'ad_group'
         ? (r.ad_group_name || '').trim()
         : (r.ad_name || '').trim();
       if (!name) continue;
       const id = level === 'ad_group' ? (r.ad_group_id || '') : (r.ad_id || '');
-      const key = `${id}::${name.toLowerCase()}`;
+      const key = `${p}::${id}::${name.toLowerCase()}`;
       let arr = buckets.get(key);
       if (!arr) { arr = []; buckets.set(key, arr); }
       arr.push(r);
@@ -110,14 +108,15 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
     const out: AggRow[] = [];
     buckets.forEach((rs, key) => {
       const a = aggregateRows(rs, 'all');
-      const name = level === 'ad_group'
+      const rawName = level === 'ad_group'
         ? (rs[0].ad_group_name || '').trim()
         : (rs[0].ad_name || '').trim();
       const campaignNames = Array.from(new Set(rs.map(r => r.campaign_name).filter(Boolean))) as string[];
       out.push({
         key,
-        name,
-        campaignName: campaignNames.length > 1 ? `${campaignNames.length} campaigns` : (campaignNames[0] || '—'),
+        name: cleanAdName(rawName),
+        campaignName: campaignNames.length > 1 ? `${campaignNames.length} campaigns` : cleanAdName(campaignNames[0] || '—'),
+        platform: normalizePlatform(rs[0].platform),
         spend: a.spend,
         shareOfSpend: 0,
         impressions: a.impressions,
