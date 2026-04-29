@@ -298,6 +298,7 @@ function MobileCampaignCards({ data, currency, className, hidePlatform }: { data
               <KpiTile label="CPC" value={<CurrencyValue amount={row.cpc} decimals={2} currency={currency} />} />
               <KpiTile label="Impr." value={fmtCompact(row.impressions)} />
               <KpiTile label="Clicks" value={fmtCompact(row.clicks)} />
+              <KpiTile label="% Spend" value={`${row.shareOfSpend.toFixed(1)}%`} />
             </div>
           </div>
         </div>
