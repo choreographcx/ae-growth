@@ -40,7 +40,6 @@ export function TemplatesPortabilitySection({ client }: Props) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateType, setTemplateType] = useState('lead_gen');
-  const [includeAccounts, setIncludeAccounts] = useState(false);
   const [includeBranding, setIncludeBranding] = useState(true);
   const [includeAlerts, setIncludeAlerts] = useState(true);
 
