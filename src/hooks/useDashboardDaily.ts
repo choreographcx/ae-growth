@@ -18,6 +18,11 @@ export interface DashboardDailyRow {
   campaign_type?: string | null;
   campaign_objective?: string | null;
   audience_type?: string | null;
+  /** Ad-group / ad-level dimensions for drill-down. May be null on aggregate rows. */
+  ad_group_id?: string | null;
+  ad_group_name?: string | null;
+  ad_id?: string | null;
+  ad_name?: string | null;
   impressions: number;
   clicks: number;
   cost: number;
