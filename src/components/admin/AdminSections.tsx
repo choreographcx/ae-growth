@@ -70,8 +70,8 @@ export function SetupStatusSummary() {
         <StatusPill label="Branding" status={hasBranding ? 'complete' : 'missing'} detail={hasBranding ? 'Complete' : 'Missing'} />
         <StatusPill
           label="Platforms"
-          status={needsAttention > 0 ? 'warning' : enabledCount > 0 ? 'complete' : 'missing'}
-          detail={`${enabledCount} enabled · ${connectedCount} connected${needsAttention > 0 ? ` · ${needsAttention} need attention` : ''}`}
+          status={enabledCount > 0 ? 'complete' : 'missing'}
+          detail={`${enabledCount} enabled`}
         />
         <StatusPill label="Measurement" status={hasMeasurement ? 'complete' : 'warning'} detail={hasMeasurement ? 'Complete' : 'Incomplete'} />
         <StatusPill label="Reporting" status={hasReporting ? 'complete' : 'default'} detail={hasReporting ? 'Configured' : 'Needs Review'} />
