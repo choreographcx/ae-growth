@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ClientProfile, PlatformKey, PLATFORM_ORDER } from '@/types/dashboard';
+import { CardType } from '@/lib/cardType';
 import { defaultClient, savedClients } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -33,6 +34,9 @@ interface DashboardContextType {
   setSelectedMarkets: (v: string[]) => void;
   selectedChannels: string[];
   setSelectedChannels: (v: string[]) => void;
+  /** Selected card-type buckets. Empty array = all four buckets shown. */
+  selectedCardTypes: CardType[];
+  setSelectedCardTypes: (v: CardType[]) => void;
   saveConfig: () => Promise<void>;
   isSaving: boolean;
   configLoaded: boolean;
@@ -91,6 +95,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>(() => loadPersisted('selectedObjectives', [] as string[]));
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>(() => loadPersisted('selectedMarkets', [] as string[]));
   const [selectedChannels, setSelectedChannels] = useState<string[]>(() => loadPersisted('selectedChannels', [] as string[]));
+  const [selectedCardTypes, setSelectedCardTypes] = useState<CardType[]>(() => loadPersisted('selectedCardTypes', [] as CardType[]));
 
   // Persist filter + date selections so they survive reload / re-entry.
   useEffect(() => { savePersisted('dateRange', dateRange); }, [dateRange]);
@@ -100,6 +105,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   useEffect(() => { savePersisted('selectedObjectives', selectedObjectives); }, [selectedObjectives]);
   useEffect(() => { savePersisted('selectedMarkets', selectedMarkets); }, [selectedMarkets]);
   useEffect(() => { savePersisted('selectedChannels', selectedChannels); }, [selectedChannels]);
+  useEffect(() => { savePersisted('selectedCardTypes', selectedCardTypes); }, [selectedCardTypes]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -139,6 +145,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedObjectives,
     selectedMarkets,
     selectedChannels,
+    selectedCardTypes,
     costMultiplierByPlatform,
     excludedCampaignTokensByPlatform,
   });
@@ -239,6 +246,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedObjectives, setSelectedObjectives,
       selectedMarkets, setSelectedMarkets,
       selectedChannels, setSelectedChannels,
+      selectedCardTypes, setSelectedCardTypes,
       saveConfig, isSaving, configLoaded, lastSavedAt,
       data,
       layoutEdit, setLayoutEdit,
@@ -314,6 +322,8 @@ const fallback: DashboardContextType = {
   setSelectedMarkets: () => {},
   selectedChannels: [],
   setSelectedChannels: () => {},
+  selectedCardTypes: [],
+  setSelectedCardTypes: () => {},
   saveConfig: async () => {},
   isSaving: false,
   configLoaded: false,
