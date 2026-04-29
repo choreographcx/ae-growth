@@ -40,13 +40,11 @@ export function TemplatesPortabilitySection({ client }: Props) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateType, setTemplateType] = useState('lead_gen');
-  const [includeAccounts, setIncludeAccounts] = useState(false);
   const [includeBranding, setIncludeBranding] = useState(true);
   const [includeAlerts, setIncludeAlerts] = useState(true);
 
   const checklist = useMemo<ChecklistItem[]>(() => {
     const enabledPlatforms = Object.values(client.platforms).filter(p => p.enabled);
-    const connectedAccounts = enabledPlatforms.filter(p => p.accountIds.filter(Boolean).length > 0);
     const hasBudgets = enabledPlatforms.some(p => (p.budget || 0) > 0);
     const hasBranding = !!(client as any).branding?.primaryColor;
     const hasMeasurement = !!(client.ga4PropertyId && client.primaryConversion);
@@ -69,11 +67,9 @@ export function TemplatesPortabilitySection({ client }: Props) {
       {
         key: 'platforms',
         label: 'Platform Setup',
-        status: enabledPlatforms.length > 0
-          ? connectedAccounts.length === enabledPlatforms.length ? 'complete' : 'warning'
-          : 'incomplete',
+        status: enabledPlatforms.length > 0 ? 'complete' : 'incomplete',
         detail: enabledPlatforms.length > 0
-          ? `${enabledPlatforms.length} enabled, ${connectedAccounts.length} connected${!hasBudgets ? ' · No budgets' : ''}`
+          ? `${enabledPlatforms.length} enabled${!hasBudgets ? ' · No budgets' : ''}`
           : 'No platforms enabled',
       },
       {
@@ -247,7 +243,6 @@ export function TemplatesPortabilitySection({ client }: Props) {
             </div>
             <div className="space-y-3 pt-2 border-t border-border/50">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Include in Template</Label>
-              <ToggleRow label="Account IDs & credentials" checked={includeAccounts} onChange={setIncludeAccounts} hint="Sensitive — usually excluded" />
               <ToggleRow label="Branding & theme settings" checked={includeBranding} onChange={setIncludeBranding} />
               <ToggleRow label="Alert rules & thresholds" checked={includeAlerts} onChange={setIncludeAlerts} />
             </div>

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2, Wifi, WifiOff } from 'lucide-react';
+import { Save, Plus, X, Upload, Download, Building2, Clock, Users, Check, Palette, LayoutGrid, BarChart3, FileText, Bell, Package, ChevronDown, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,14 +25,14 @@ import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
 import { PlatformIntegrityPanel } from '@/components/admin/PlatformIntegrityPanel';
 
-const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
-  { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
-  { key: 'google', label: 'Google Ads', idLabel: 'Customer ID(s)', placeholder: '123-456-7890' },
-  { key: 'tiktok', label: 'TikTok', idLabel: 'Ad Account ID(s)', placeholder: 'tt_123456789' },
-  { key: 'snapchat', label: 'Snapchat', idLabel: 'Ad Account ID(s)', placeholder: 'sc_123456789' },
-  { key: 'x', label: 'X', idLabel: 'Account ID(s)', placeholder: 'x_123456789' },
-  { key: 'linkedin', label: 'LinkedIn', idLabel: 'Account ID(s)', placeholder: 'li_123456789' },
-  { key: 'programmatic', label: 'Programmatic', idLabel: 'Advertiser / Seat / Partner ID(s)', placeholder: 'prog_123456789' },
+const allPlatforms: { key: PlatformKey; label: string }[] = [
+  { key: 'meta', label: 'Meta' },
+  { key: 'google', label: 'Google Ads' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'snapchat', label: 'Snapchat' },
+  { key: 'x', label: 'X' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'programmatic', label: 'Programmatic' },
 ];
 
 const standardMetrics = [
@@ -53,8 +53,6 @@ export default function AdminPage() {
   const { isAdmin } = useAuth();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
-  const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
-  const needsSetup = Object.values(client.platforms).filter(p => p.enabled && p.accountIds.filter(Boolean).length === 0).length;
 
   const currency = client.currency;
 
@@ -160,22 +158,18 @@ export default function AdminPage() {
           id="platforms"
           icon={<LayoutGrid size={16} />}
           title="Platform Setup"
-          subtitle="Enable platforms, set budgets, and manage account connections"
+          subtitle="Enable platforms and set budgets"
           badge={<Badge variant="secondary" className="text-[9px] font-normal text-white">{enabledCount} / {allPlatforms.length} platforms</Badge>}
         >
           {/* Platform summary strip */}
           <div className="flex flex-wrap items-center gap-4 py-3 mb-4 border-b border-border/50 text-xs text-muted-foreground">
             <span><strong className="text-card-foreground">{enabledCount}</strong> enabled</span>
-            <span><strong className="text-card-foreground">{totalAccounts}</strong> connected accounts</span>
             <span>
               <strong className="text-card-foreground">
                 <CurrencySymbol currency={currency} />
                 {Object.values(client.platforms).filter(p => p.enabled).reduce((s, p) => s + (p.budget || 0), 0).toLocaleString()}
               </strong> total budget
             </span>
-            {needsSetup > 0 && (
-              <span className="text-amber-600">{needsSetup} need setup</span>
-            )}
           </div>
 
           {/* BigQuery currency integrity warnings */}
@@ -307,7 +301,6 @@ function ModularPlatformCard({
   parseBudgetString: (s: string) => number;
 }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const hasIds = cfg.accountIds.filter(Boolean).length > 0;
 
   const iconEntry = platformIconEntries[p.key];
   const PlatformIcon = iconEntry.type === 'custom'
@@ -319,8 +312,7 @@ function ModularPlatformCard({
 
   const statusBadge = () => {
     if (!cfg.enabled) return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border text-muted-foreground">Disabled</Badge>;
-    if (!hasIds) return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-amber-300 text-amber-600 bg-amber-50">Missing ID</Badge>;
-    return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-600 bg-emerald-50">Connected</Badge>;
+    return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-600 bg-emerald-50">Enabled</Badge>;
   };
 
   return (
@@ -342,9 +334,10 @@ function ModularPlatformCard({
             {statusBadge()}
           </div>
           <p className="text-[10px] text-muted-foreground mt-0.5">
-            {cfg.accountIds.filter(Boolean).length} account{cfg.accountIds.filter(Boolean).length !== 1 ? 's' : ''}
-            {cfg.enabled && cfg.budget > 0 && (
-              <> · <CurrencySymbol currency={currency} />{formatBudgetNumber(cfg.budget)}</>
+            {cfg.enabled && cfg.budget > 0 ? (
+              <><CurrencySymbol currency={currency} />{formatBudgetNumber(cfg.budget)}</>
+            ) : (
+              <>{cfg.enabled ? 'No budget set' : 'Disabled'}</>
             )}
           </p>
         </div>
@@ -417,47 +410,12 @@ function ModularPlatformCard({
             </Select>
           </div>
 
-          {/* Account IDs */}
-          <div>
-            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Account IDs</Label>
-            <div className="mt-1.5 space-y-1.5">
-              {cfg.accountIds.map((id, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <Input
-                    value={id}
-                    onChange={e => {
-                      const updated = [...cfg.accountIds];
-                      updated[i] = e.target.value;
-                      updatePlatform(p.key, { accountIds: updated });
-                    }}
-                    placeholder={p.placeholder}
-                    className="flex-1 h-7 text-xs font-mono"
-                  />
-                  <button
-                    onClick={() => updatePlatform(p.key, { accountIds: cfg.accountIds.filter((_, idx) => idx !== i) })}
-                    className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => updatePlatform(p.key, { accountIds: [...cfg.accountIds, ''] })}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-              >
-                <Plus size={10} /> Add Account ID
-              </button>
-            </div>
-          </div>
+          {/* Account IDs removed — data flows directly via BigQuery, no per-platform IDs needed. */}
 
           {/* Toggles row removed — Overview/Diagnostics inclusion is implicit when the platform is enabled. */}
 
-          {/* Footer status line */}
-          <div className="flex items-center justify-between pt-2 border-t border-border/30">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              {hasIds ? <Wifi size={10} className="text-emerald-500" /> : <WifiOff size={10} className="text-amber-500" />}
-              <span>{hasIds ? 'Connected' : 'Not connected'}</span>
-            </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end pt-2 border-t border-border/30">
             <button
               onClick={() => setAdvancedOpen(!advancedOpen)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
