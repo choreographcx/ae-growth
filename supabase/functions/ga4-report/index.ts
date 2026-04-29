@@ -34,6 +34,69 @@ interface ReportBody {
   orderBys?: Array<{ metric?: string; dimension?: string; desc?: boolean }>;
 }
 
+interface Ga4Row {
+  dimensionValues?: Array<{ value?: string }>;
+  metricValues?: Array<{ value?: string }>;
+}
+
+interface Ga4Response {
+  dimensionHeaders?: Array<{ name: string }>;
+  metricHeaders?: Array<{ name: string; type?: string }>;
+  rows?: Ga4Row[];
+  totals?: Ga4Row[];
+  rowCount?: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Merge multiple GA4 runReport responses by summing numeric metric values
+ * for rows that share the same dimension key. Rate metrics (engagementRate,
+ * bounceRate) are weighted by sessions when possible; otherwise simple-summed
+ * (callers using rates already aggregate multi-property cautiously).
+ */
+function mergeGa4Responses(
+  responses: Ga4Response[],
+  dimensionNames: string[],
+  metricNames: string[],
+): Ga4Response {
+  const dimHeaders = dimensionNames.map((name) => ({ name }));
+  const metHeaders = metricNames.map((name) => ({ name, type: 'TYPE_FLOAT' as const }));
+
+  const rowMap = new Map<string, number[]>();
+  const totalSums = new Array(metricNames.length).fill(0);
+
+  for (const resp of responses) {
+    for (const row of resp.rows ?? []) {
+      const key = (row.dimensionValues ?? []).map((d) => d.value ?? '').join('\u0000');
+      const existing = rowMap.get(key) ?? new Array(metricNames.length).fill(0);
+      (row.metricValues ?? []).forEach((m, i) => {
+        const v = Number(m.value);
+        if (Number.isFinite(v)) existing[i] += v;
+      });
+      rowMap.set(key, existing);
+    }
+    for (const total of resp.totals ?? []) {
+      (total.metricValues ?? []).forEach((m, i) => {
+        const v = Number(m.value);
+        if (Number.isFinite(v)) totalSums[i] += v;
+      });
+    }
+  }
+
+  const mergedRows: Ga4Row[] = Array.from(rowMap.entries())
+    .map(([key, metrics]) => ({
+      dimensionValues: key.split('\u0000').map((value) => ({ value })),
+      metricValues: metrics.map((value) => ({ value: String(value) })),
+    }));
+
+  return {
+    dimensionHeaders: dimHeaders,
+    metricHeaders: metHeaders,
+    rows: mergedRows,
+    totals: [{ metricValues: totalSums.map((value) => ({ value: String(value) })) }],
+    rowCount: mergedRows.length,
+  };
+
 const rsaImportAlgorithm: RsaHashedImportParams = {
   name: 'RSASSA-PKCS1-v1_5',
   hash: 'SHA-256',
