@@ -821,6 +821,7 @@ export type Database = {
         }[]
       }
       get_active_ga4_property_id: { Args: never; Returns: string }
+      get_active_ga4_property_ids: { Args: never; Returns: string[] }
       get_dashboard_conversion_breakdown: {
         Args: {
           p_campaign_names?: string[]
@@ -970,6 +971,16 @@ export type Database = {
       internal_revoke_superadmin: {
         Args: { _target_user_id: string }
         Returns: undefined
+      }
+      list_ga4_sources: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          label: string
+          property_id: string
+        }[]
       }
     }
     Enums: {
