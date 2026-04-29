@@ -332,11 +332,24 @@ export {
  */
 async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
   const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-  const { data, error } = await (supabase.rpc as any)('get_dashboard_daily', {
-    p_start: fmt(start), p_end: fmt(end),
-  });
-  if (error) throw new Error(error.message);
-  return (data as DashboardDailyRow[]) || [];
+  const p_start = fmt(start);
+  const p_end = fmt(end);
+  const pageSize = 1000;
+  const rows: DashboardDailyRow[] = [];
+
+  for (let from = 0; from < 100000; from += pageSize) {
+    const { data, error } = await (supabase.rpc as any)('get_dashboard_daily', {
+      p_start,
+      p_end,
+    }).range(from, from + pageSize - 1);
+    if (error) throw new Error(error.message);
+
+    const page = (data as DashboardDailyRow[]) || [];
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+
+  throw new Error('Dashboard data range returned too many rows');
 }
 
 export function useDashboardDaily(
@@ -378,21 +391,24 @@ export function useDashboardDaily(
   const pEndKey   = format(prevEnd, 'yyyy-MM-dd');
 
   // Current period — blocks first paint.
-  // NOTE: queryKey version "v2" was bumped after the BigQuery fix that made
+  // NOTE: queryKey version "v3" was bumped after fetching was changed to
+  // paginate RPC results. Supabase/PostgREST caps a single RPC response, so
+  // yearly AESA ranges could silently miss platforms such as Meta without this.
+  // Earlier "v2" was bumped after the BigQuery fix that made
   // `campaign_name` reflect the latest canonical name per
   // (platform, account_id, campaign_id). Bumping the key invalidates any
   // cached rows that still carried older raw historical names, so Market
   // (and other parsed dimensions) is always derived from the current
   // canonical name and never from stale parsed values.
   const currentQ = useQuery({
-    queryKey: ['dashboard-daily', 'v2', startKey, endKey],
+    queryKey: ['dashboard-daily', 'v3', startKey, endKey],
     queryFn: () => fetchDashboardRange(range.start, range.end),
   });
 
   // Previous period — fired in parallel but does NOT gate the loading flag.
   // We don't need it for the first paint of charts/KPIs.
   const previousQ = useQuery({
-    queryKey: ['dashboard-daily', 'v2', pStartKey, pEndKey],
+    queryKey: ['dashboard-daily', 'v3', pStartKey, pEndKey],
     queryFn: () => fetchDashboardRange(prevStart, prevEnd),
     enabled: !currentQ.isLoading,
   });
