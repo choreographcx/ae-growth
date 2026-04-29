@@ -25,14 +25,14 @@ import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 import { TemplatesPortabilitySection } from '@/components/admin/TemplatesPortabilitySection';
 import { PlatformIntegrityPanel } from '@/components/admin/PlatformIntegrityPanel';
 
-const allPlatforms: { key: PlatformKey; label: string; idLabel: string; placeholder: string }[] = [
-  { key: 'meta', label: 'Meta', idLabel: 'Ad Account ID(s)', placeholder: 'act_123456789' },
-  { key: 'google', label: 'Google Ads', idLabel: 'Customer ID(s)', placeholder: '123-456-7890' },
-  { key: 'tiktok', label: 'TikTok', idLabel: 'Ad Account ID(s)', placeholder: 'tt_123456789' },
-  { key: 'snapchat', label: 'Snapchat', idLabel: 'Ad Account ID(s)', placeholder: 'sc_123456789' },
-  { key: 'x', label: 'X', idLabel: 'Account ID(s)', placeholder: 'x_123456789' },
-  { key: 'linkedin', label: 'LinkedIn', idLabel: 'Account ID(s)', placeholder: 'li_123456789' },
-  { key: 'programmatic', label: 'Programmatic', idLabel: 'Advertiser / Seat / Partner ID(s)', placeholder: 'prog_123456789' },
+const allPlatforms: { key: PlatformKey; label: string }[] = [
+  { key: 'meta', label: 'Meta' },
+  { key: 'google', label: 'Google Ads' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'snapchat', label: 'Snapchat' },
+  { key: 'x', label: 'X' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'programmatic', label: 'Programmatic' },
 ];
 
 const standardMetrics = [
