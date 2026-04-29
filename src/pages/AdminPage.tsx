@@ -301,7 +301,6 @@ function ModularPlatformCard({
   parseBudgetString: (s: string) => number;
 }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const hasIds = cfg.accountIds.filter(Boolean).length > 0;
 
   const iconEntry = platformIconEntries[p.key];
   const PlatformIcon = iconEntry.type === 'custom'
@@ -313,8 +312,7 @@ function ModularPlatformCard({
 
   const statusBadge = () => {
     if (!cfg.enabled) return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border text-muted-foreground">Disabled</Badge>;
-    if (!hasIds) return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-amber-300 text-amber-600 bg-amber-50">Missing ID</Badge>;
-    return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-600 bg-emerald-50">Connected</Badge>;
+    return <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-emerald-300 text-emerald-600 bg-emerald-50">Enabled</Badge>;
   };
 
   return (
