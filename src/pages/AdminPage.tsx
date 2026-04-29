@@ -53,8 +53,6 @@ export default function AdminPage() {
   const { isAdmin } = useAuth();
 
   const enabledCount = Object.values(client.platforms).filter(p => p.enabled).length;
-  const totalAccounts = Object.values(client.platforms).reduce((sum, p) => sum + p.accountIds.filter(Boolean).length, 0);
-  const needsSetup = Object.values(client.platforms).filter(p => p.enabled && p.accountIds.filter(Boolean).length === 0).length;
 
   const currency = client.currency;
 
