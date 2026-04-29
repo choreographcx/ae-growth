@@ -182,6 +182,36 @@ export default function Ga4Page() {
     );
   }
 
+  // Only show the toggle if there are 2+ properties — with 1 it's pointless.
+  const showPropertyToggle = activeSources.length > 1;
+  const propertyToggle = showPropertyToggle ? (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
+      {activeSources.map((s) => {
+        const checked = selectedIds.includes(s.property_id);
+        const isLastChecked = checked && selectedIds.length === 1;
+        const display = (s.label?.trim() || `Property ${s.property_id}`);
+        return (
+          <label
+            key={s.id}
+            className={`flex items-center gap-1.5 text-sm font-medium text-card-foreground select-none ${
+              isLastChecked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+            }`}
+            title={isLastChecked ? 'At least one property must be selected' : `Toggle ${display}`}
+          >
+            <Checkbox
+              checked={checked}
+              disabled={isLastChecked}
+              onCheckedChange={() => toggleProperty(s.property_id)}
+              aria-label={`Show ${display}`}
+            />
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            {display}
+          </label>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
     <div className="space-y-5 md:space-y-7">
       <SectionHeader
@@ -190,6 +220,8 @@ export default function Ga4Page() {
         showMobileDatePicker
         showFilters
         hideFiltersButton
+        action={propertyToggle}
+        actionBelow
       />
 
       {anyError && (
