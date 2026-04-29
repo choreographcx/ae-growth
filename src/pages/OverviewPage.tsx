@@ -1,13 +1,12 @@
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
-import { PerformanceBreakdown } from '@/components/dashboard/PerformanceBreakdown';
+import { PerformanceBreakdownCard } from '@/components/dashboard/PerformanceBreakdownCard';
 import { PlatformContributionCard } from '@/components/dashboard/PlatformContributionCard';
 import { EnhancedFunnelCard } from '@/components/dashboard/EnhancedFunnelCard';
 import { ConversionSplitCard } from '@/components/dashboard/ConversionSplitCard';
 import { AlertCard } from '@/components/dashboard/AlertCard';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { SortableSection } from '@/components/dashboard/SortableSection';
-import { BreakdownDimensionCard } from '@/components/dashboard/BreakdownDimensionCard';
 import { ConversionBreakdownCard } from '@/components/dashboard/ConversionBreakdownCard';
 import { Ga4OverviewTile } from '@/components/dashboard/Ga4OverviewTile';
 import { useEffect, useMemo } from 'react';
