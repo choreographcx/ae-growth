@@ -25,6 +25,7 @@ interface CampaignRow {
   platform: PlatformKey | null;
   platformLabel: string;
   spend: number;
+  shareOfSpend: number;
   impressions: number;
   clicks: number;
   ctr: number;
@@ -118,6 +119,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
         platform: hidePlatformColumn && uniquePlatforms.length > 1 ? null : platformKey,
         platformLabel,
         spend: a.spend,
+        shareOfSpend: 0,
         impressions: a.impressions,
         clicks: a.clicks,
         ctr: a.ctr,
@@ -128,9 +130,15 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     });
     // Hide rows where every key metric is zero — these are noise from empty
     // BigQuery campaign rollups and clutter the table.
-    return out.filter(r =>
+    const filtered = out.filter(r =>
       r.spend > 0 || r.impressions > 0 || r.clicks > 0 || r.conversionsLowerFunnel > 0
     );
+    // Compute share of spend across the visible set so percentages sum to ~100%.
+    const totalSpend = filtered.reduce((s, r) => s + r.spend, 0);
+    if (totalSpend > 0) {
+      for (const r of filtered) r.shareOfSpend = (r.spend / totalSpend) * 100;
+    }
+    return filtered;
   }, [data.rows, platformFilter, hidePlatformColumn]);
 
   const [sortKey, setSortKey] = useState<keyof CampaignRow>('spend');
@@ -191,6 +199,7 @@ export function CampaignPerformance({ limit = 25, className, platformFilter, hid
     },
     ...(hidePlatformColumn ? [] : [{ key: 'platformLabel' as keyof CampaignRow, label: 'Platform', format: (row: CampaignRow) => row.platformLabel as React.ReactNode }]),
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
+    { key: 'shareOfSpend',            label: '% Spend',   align: 'right', format: row => `${row.shareOfSpend.toFixed(1)}%` },
     { key: 'impressions',             label: 'Impr.',     align: 'right', format: row => fmtCompact(row.impressions) },
     { key: 'clicks',                  label: 'Clicks',    align: 'right', format: row => fmtCompact(row.clicks) },
     { key: 'ctr',                     label: 'CTR',       align: 'right', format: row => `${row.ctr.toFixed(2)}%` },
@@ -289,6 +298,7 @@ function MobileCampaignCards({ data, currency, className, hidePlatform }: { data
               <KpiTile label="CPC" value={<CurrencyValue amount={row.cpc} decimals={2} currency={currency} />} />
               <KpiTile label="Impr." value={fmtCompact(row.impressions)} />
               <KpiTile label="Clicks" value={fmtCompact(row.clicks)} />
+              <KpiTile label="% Spend" value={`${row.shareOfSpend.toFixed(1)}%`} />
             </div>
           </div>
         </div>
