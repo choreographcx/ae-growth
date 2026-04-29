@@ -4,7 +4,7 @@ import { CampaignPerformance } from './CampaignPerformance';
 import { PlatformComparison } from './PlatformComparison';
 import { SectionHeader } from './SectionHeader';
 import { AdLevelBreakdownTable } from './AdLevelBreakdownTable';
-import { DashboardDailyRow, normalizePlatform } from '@/hooks/useDashboardDaily';
+import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
 import { resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey, PlatformSummary } from '@/types/dashboard';
