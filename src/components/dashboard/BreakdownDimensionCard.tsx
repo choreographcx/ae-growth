@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { DimensionBreakdownTable } from './DimensionBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
-import { getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
+import { resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey } from '@/types/dashboard';
 
-type Dim = 'channel' | 'objective' | 'placement' | 'campaignType' | 'audienceType';
+type Dim = 'objective' | 'placement' | 'campaignType' | 'audienceType';
 
 const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => string | null | undefined; title: string }> = {
-  channel:   { label: 'By Channel',   pick: r => getCampaignChannel(r.campaign_name),   title: 'By Channel' },
   objective: { label: 'By Objective', pick: r => resolveCampaignObjective(r.campaign_objective, r.campaign_name), title: 'By Objective' },
   placement: {
     label: 'By Placement',
@@ -36,8 +35,8 @@ const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => stri
 interface Props {
   rows: DashboardDailyRow[];
   /** When provided, the dropdown options adapt to the platform.
-   *  Meta swaps Channel → Placement. Google Ads adds Campaign Type.
-   *  TikTok and Snapchat add Audience Type (and drop Channel). */
+   *  Meta adds Placement. Google Ads adds Campaign Type.
+   *  TikTok and Snapchat add Audience Type. Objective is always available. */
   platformKey?: PlatformKey;
 }
 
@@ -47,7 +46,7 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
   const isTikTok = platformKey === 'tiktok';
   const isSnapchat = platformKey === 'snapchat';
   const hasAudience = isMeta || isTikTok || isSnapchat;
-  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : hasAudience ? 'audienceType' : 'channel';
+  const initial: Dim = isMeta ? 'placement' : isGoogle ? 'campaignType' : hasAudience ? 'audienceType' : 'objective';
   const [dim, setDim] = useState<Dim>(initial);
   const cfg = PICKERS[dim];
 
@@ -60,11 +59,9 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {isMeta ? (
+            {isMeta && (
               <SelectItem value="placement">By Placement</SelectItem>
-            ) : !hasAudience ? (
-              <SelectItem value="channel">By Channel</SelectItem>
-            ) : null}
+            )}
             {isGoogle && (
               <SelectItem value="campaignType">By Campaign Type</SelectItem>
             )}
