@@ -179,7 +179,7 @@ function parseServiceAccount(raw: string): ServiceAccount {
   ].some((value) => value.includes('YOUR_'));
 
   if (looksLikePlaceholder) {
-    throw new Error('Vault secret bigquery_sa_json contains Google sample placeholder values; replace it with the real service-account JSON key');
+    throw new Error('Vault secret ga4_sa_json contains Google sample placeholder values; replace it with the real GA4 service-account JSON key');
   }
 
   if (!client_email || !private_key) {
