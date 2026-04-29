@@ -60,7 +60,6 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
         <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-3">Tracking Summary</h4>
         <div className="flex flex-wrap gap-2">
           <TrackingStatusPill label="GA4 Connected" connected={ga4Connected} />
-          <TrackingStatusPill label="GTM Connected" connected={gtmConnected} />
           <TrackingStatusPill label="Primary Conversion" connected={primaryMapped} />
           <div className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium',
@@ -87,9 +86,6 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
       <div className="pt-4 border-t border-border/50">
         <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Other Tracking</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <Field label="GA4 Stream ID" value={client.ga4StreamId} onChange={v => updateClient({ ga4StreamId: v })} placeholder="987654321" />
-          <Field label="GTM Container ID" value={client.gtmContainerId} onChange={v => updateClient({ gtmContainerId: v })} placeholder="GTM-XXXXX" />
-          <Field label="Primary Website Domain" value={client.websiteDomain} onChange={v => updateClient({ websiteDomain: v })} />
           <Field label="Tracking Owner" value={measurement.trackingOwner || ''} onChange={v => updateMeasurement({ trackingOwner: v })} placeholder="e.g. Media Team" />
           <Field label="Last Validation Date" value={measurement.lastValidationDate || ''} onChange={v => updateMeasurement({ lastValidationDate: v })} placeholder="e.g. 2025-04-01" />
         </div>
