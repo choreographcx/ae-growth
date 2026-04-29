@@ -52,47 +52,80 @@ export default function Ga4Page() {
   const { start, end } = dashData.range;
   const currency = client.currency || 'USD';
 
-  // Aggregate across ALL configured GA4 properties.
+  // Aggregate across configured GA4 properties (or a user-selected subset).
   const { sources, loading: sourcesLoading } = useGa4Sources();
-  const activeSources = sources.filter((s) => s.is_enabled);
+  const activeSources = useMemo(() => sources.filter((s) => s.is_enabled), [sources]);
   const enabled = !sourcesLoading && activeSources.length > 0;
+
+  // Selection state: which property IDs are currently shown. Default to all.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  useEffect(() => {
+    // Initialise / reconcile when the configured set changes.
+    setSelectedIds((prev) => {
+      const validIds = activeSources.map((s) => s.property_id);
+      const validSet = new Set(validIds);
+      const kept = prev.filter((id) => validSet.has(id));
+      // First load (or all properties were removed/re-added): default to all selected.
+      if (kept.length === 0) return validIds;
+      return kept;
+    });
+  }, [activeSources]);
+
+  const toggleProperty = (id: string) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) {
+        // Don't allow deselecting the last one — must keep at least one active.
+        if (prev.length === 1) return prev;
+        return prev.filter((x) => x !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  // Only send propertyIds when it's a strict subset; otherwise let edge function aggregate all.
+  const propertyIdsForQuery = selectedIds.length === activeSources.length ? undefined : selectedIds;
+  const queryEnabled = enabled && (propertyIdsForQuery === undefined || propertyIdsForQuery.length > 0);
 
   const totalsQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['date'],
     metrics: [
       'sessions', 'totalUsers', 'newUsers', 'engagedSessions',
       'engagementRate', 'averageSessionDuration', 'bounceRate',
       'screenPageViews', 'conversions', 'totalRevenue',
     ],
-    enabled,
+    enabled: queryEnabled,
   });
 
   const channelsQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['sessionDefaultChannelGroup'],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const sourcesQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['sessionSource', 'sessionMedium'],
     metrics: ['sessions', 'totalUsers', 'engagementRate', 'conversions', 'totalRevenue'],
     orderBys: [{ metric: 'sessions', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const pagesQ = useGa4Report({
     startDate: start, endDate: end,
+    propertyIds: propertyIdsForQuery,
     dimensions: ['pagePath'],
     metrics: ['screenPageViews', 'totalUsers', 'averageSessionDuration', 'bounceRate'],
     orderBys: [{ metric: 'screenPageViews', desc: true }],
     limit: 20,
-    enabled,
+    enabled: queryEnabled,
   });
 
   const totals = totalsQ.data?.totals ?? [];
