@@ -172,8 +172,15 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
       <div className={cn("space-y-2.5", className)}>
         {sorted.map(row => (
           <div key={row.key} className="bg-card rounded-lg border border-border shadow-sm overflow-hidden p-3">
-            <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.name}>{row.name}</p>
-            <p className="text-[11px] text-muted-foreground leading-tight truncate mb-2">{row.campaignName}</p>
+            <div className="flex items-start gap-2 mb-2">
+              <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0 mt-0.5", platformIconBg[row.platform])}>
+                <PlatformIcon platform={row.platform} size={12} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.name}>{row.name}</p>
+                <p className="text-[11px] text-muted-foreground leading-tight truncate">{row.campaignName}</p>
+              </div>
+            </div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">Spend</p>
             <p className="text-[24px] font-bold text-card-foreground tracking-tight leading-none mb-3">
               <CurrencyValue amount={row.spend} currency={currency} />
