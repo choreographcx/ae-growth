@@ -329,27 +329,22 @@ export {
 /**
  * Fetch the full unfiltered range from BigQuery via the supabase RPC.
  * Cached & deduped by react-query keyed on the date range.
+ *
+ * IMPORTANT: this used to paginate with `.range(from, to)` in a loop, but
+ * PostgREST `.range()` on an RPC does NOT push limit/offset into SQL — it
+ * re-executes the full server-side function for every page and slices the
+ * result. For a heavy BigQuery-FDW query that meant 5–20× the cost. The RPC
+ * already aggregates by (date, platform, publisher, campaign, …), so even a
+ * year of data fits comfortably in a single response.
  */
 async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
   const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-  const p_start = fmt(start);
-  const p_end = fmt(end);
-  const pageSize = 1000;
-  const rows: DashboardDailyRow[] = [];
-
-  for (let from = 0; from < 100000; from += pageSize) {
-    const { data, error } = await (supabase.rpc as any)('get_dashboard_daily', {
-      p_start,
-      p_end,
-    }).range(from, from + pageSize - 1);
-    if (error) throw new Error(error.message);
-
-    const page = (data as DashboardDailyRow[]) || [];
-    rows.push(...page);
-    if (page.length < pageSize) return rows;
-  }
-
-  throw new Error('Dashboard data range returned too many rows');
+  const { data, error } = await supabase.rpc('get_dashboard_daily', {
+    p_start: fmt(start),
+    p_end: fmt(end),
+  });
+  if (error) throw new Error(error.message);
+  return (data as DashboardDailyRow[]) ?? [];
 }
 
 export function useDashboardDaily(
