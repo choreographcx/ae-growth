@@ -1,6 +1,7 @@
 import { Globe, Loader2 } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useGa4Report } from '@/hooks/useGa4Report';
+import { useGa4Sources } from '@/hooks/useGa4Sources';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -17,20 +18,21 @@ function formatCompact(n: number): string {
  * single cell — visually matches KPIGroupCard.
  */
 export function Ga4OverviewTile() {
-  const { client, data: dashData } = useDashboard();
+  const { data: dashData } = useDashboard();
   const { start, end } = dashData.range;
 
-  const propertyId = (client.ga4PropertyId || '').trim();
-  const enabled = propertyId.length > 0;
+  // Aggregate across ALL configured GA4 properties (server-side fan-out).
+  const { sources, loading: sourcesLoading } = useGa4Sources();
+  const enabled = !sourcesLoading && sources.some((s) => s.is_enabled);
 
   const q = useGa4Report({
-    propertyId: propertyId || undefined,
     startDate: start, endDate: end,
     dimensions: [],
     metrics: ['sessions', 'totalUsers', 'engagedSessions', 'conversions'],
     enabled,
   });
 
+  if (sourcesLoading) return null;
   if (!enabled) return null;
   if (q.error && /No GA4 property/i.test((q.error as Error).message)) return null;
 

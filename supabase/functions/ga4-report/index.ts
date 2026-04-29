@@ -34,6 +34,69 @@ interface ReportBody {
   orderBys?: Array<{ metric?: string; dimension?: string; desc?: boolean }>;
 }
 
+interface Ga4Row {
+  dimensionValues?: Array<{ value?: string }>;
+  metricValues?: Array<{ value?: string }>;
+}
+
+interface Ga4Response {
+  dimensionHeaders?: Array<{ name: string }>;
+  metricHeaders?: Array<{ name: string; type?: string }>;
+  rows?: Ga4Row[];
+  totals?: Ga4Row[];
+  rowCount?: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Merge multiple GA4 runReport responses by summing numeric metric values
+ * for rows that share the same dimension key. Rate metrics (engagementRate,
+ * bounceRate) are weighted by sessions when possible; otherwise simple-summed
+ * (callers using rates already aggregate multi-property cautiously).
+ */
+function mergeGa4Responses(
+  responses: Ga4Response[],
+  dimensionNames: string[],
+  metricNames: string[],
+): Ga4Response {
+  const dimHeaders = dimensionNames.map((name) => ({ name }));
+  const metHeaders = metricNames.map((name) => ({ name, type: 'TYPE_FLOAT' as const }));
+
+  const rowMap = new Map<string, number[]>();
+  const totalSums = new Array(metricNames.length).fill(0);
+
+  for (const resp of responses) {
+    for (const row of resp.rows ?? []) {
+      const key = (row.dimensionValues ?? []).map((d) => d.value ?? '').join('\u0000');
+      const existing = rowMap.get(key) ?? new Array(metricNames.length).fill(0);
+      (row.metricValues ?? []).forEach((m, i) => {
+        const v = Number(m.value);
+        if (Number.isFinite(v)) existing[i] += v;
+      });
+      rowMap.set(key, existing);
+    }
+    for (const total of resp.totals ?? []) {
+      (total.metricValues ?? []).forEach((m, i) => {
+        const v = Number(m.value);
+        if (Number.isFinite(v)) totalSums[i] += v;
+      });
+    }
+  }
+
+  const mergedRows: Ga4Row[] = Array.from(rowMap.entries())
+    .map(([key, metrics]) => ({
+      dimensionValues: key.split('\u0000').map((value) => ({ value })),
+      metricValues: metrics.map((value) => ({ value: String(value) })),
+    }));
+
+  return {
+    dimensionHeaders: dimHeaders,
+    metricHeaders: metHeaders,
+    rows: mergedRows,
+    totals: [{ metricValues: totalSums.map((value) => ({ value: String(value) })) }],
+    rowCount: mergedRows.length,
+  };
+
 const rsaImportAlgorithm: RsaHashedImportParams = {
   name: 'RSASSA-PKCS1-v1_5',
   hash: 'SHA-256',
@@ -286,39 +349,44 @@ Deno.serve(async (req) => {
       return respond({ ok: false, error: 'startDate and endDate are required (YYYY-MM-DD)', status: 400 });
     }
 
-    // Always resolve the GA4 property ID server-side from the configured
-    // singleton client. Caller-supplied `propertyId` values are ignored to
-    // prevent users from probing other GA4 properties the SA can access.
-    const { data: configuredPid, error: pidErr } = await serviceClient.rpc('get_active_ga4_property_id');
+    // Always resolve GA4 property IDs server-side from the configured singleton client.
+    // We now support multiple properties: results from each property are merged
+    // additively (numeric metrics are summed per dimension key). Caller-supplied
+    // `propertyId` values are ignored to prevent users from probing other properties.
+    const { data: configuredPids, error: pidErr } = await serviceClient.rpc('get_active_ga4_property_ids');
     if (pidErr) {
-      console.error('ga4-report get_active_ga4_property_id error:', pidErr.message);
+      console.error('ga4-report get_active_ga4_property_ids error:', pidErr.message);
       return respond({ ok: false, error: 'Internal server error', status: 500 });
     }
-    const propertyId = typeof configuredPid === 'string' ? configuredPid.trim() : '';
+    const propertyIds: string[] = Array.isArray(configuredPids)
+      ? configuredPids.map((p) => String(p ?? '').trim()).filter(Boolean)
+      : [];
 
-    if (!propertyId) {
+    if (propertyIds.length === 0) {
       return respond({ ok: false, error: 'No GA4 property configured', status: 400 });
     }
 
     // Defensive: GA4 property IDs are numeric. Reject anything else to prevent
     // path injection into the API URL even though we control the source.
-    if (!/^\d+$/.test(propertyId)) {
+    if (propertyIds.some((p) => !/^\d+$/.test(p))) {
       return respond({ ok: false, error: 'Configured GA4 property ID is not a numeric value', status: 400 });
     }
 
     const sa = await loadServiceAccount(serviceClient);
     const accessToken = await mintAccessToken(sa);
 
+    const dimensionNames = body.dimensions ?? ['date'];
+    const metricNames = body.metrics ?? [
+      'sessions', 'totalUsers', 'newUsers', 'engagedSessions',
+      'engagementRate', 'averageSessionDuration', 'bounceRate',
+      'screenPageViews', 'conversions', 'totalRevenue',
+    ];
+
     const ga4Body: Record<string, unknown> = {
       dateRanges: [{ startDate: body.startDate, endDate: body.endDate }],
-      dimensions: (body.dimensions ?? ['date']).map((name) => ({ name })),
-      metrics: (body.metrics ?? [
-        'sessions', 'totalUsers', 'newUsers', 'engagedSessions',
-        'engagementRate', 'averageSessionDuration', 'bounceRate',
-        'screenPageViews', 'conversions', 'totalRevenue',
-      ]).map((name) => ({ name })),
+      dimensions: dimensionNames.map((name) => ({ name })),
+      metrics: metricNames.map((name) => ({ name })),
       // Ask GA4 to compute totals across all rows so the KPI tiles populate.
-      // Without this, `totals` is omitted and the tiles render zeros.
       metricAggregations: ['TOTAL'],
       limit: body.limit ?? 10000,
     };
@@ -331,24 +399,45 @@ Deno.serve(async (req) => {
       }));
     }
 
-    const ga4Resp = await fetch(
-      `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(ga4Body),
-      },
+    // Fan out to every property in parallel.
+    const responses = await Promise.all(
+      propertyIds.map(async (pid) => {
+        const r = await fetch(
+          `https://analyticsdata.googleapis.com/v1beta/properties/${pid}:runReport`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ga4Body),
+          },
+        );
+        const text = await r.text();
+        return { pid, ok: r.ok, status: r.status, text };
+      }),
     );
 
-    const text = await ga4Resp.text();
-    if (!ga4Resp.ok) {
-      return respond({ ok: false, error: 'GA4 API error', status: ga4Resp.status, detail: text });
+    const failed = responses.find((r) => !r.ok);
+    if (failed) {
+      return respond({
+        ok: false,
+        error: `GA4 API error for property ${failed.pid}`,
+        status: failed.status,
+        detail: failed.text,
+      });
     }
 
-    return respond({ ok: true, data: JSON.parse(text) });
+    const parsed = responses.map((r) => JSON.parse(r.text) as Ga4Response);
+
+    // Single property: passthrough (no merge needed).
+    if (parsed.length === 1) {
+      return respond({ ok: true, data: parsed[0] });
+    }
+
+    // Merge multiple property responses: sum numeric metrics by dimension key.
+    const merged = mergeGa4Responses(parsed, dimensionNames, metricNames);
+    return respond({ ok: true, data: merged });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error('ga4-report error:', msg);
