@@ -834,6 +834,20 @@ export type Database = {
           total_impressions: number
         }[]
       }
+      diag_platform_monthly: {
+        Args: { p_end?: string; p_platform_key: string; p_start?: string }
+        Returns: {
+          is_conversion_row: boolean
+          month: string
+          platform: string
+          rows_count: number
+          total_clicks: number
+          total_conversions_all: number
+          total_cost: number
+          total_cost_usd: number
+          total_impressions: number
+        }[]
+      }
       get_active_ga4_property_id: { Args: never; Returns: string }
       get_active_ga4_property_ids: { Args: never; Returns: string[] }
       get_dashboard_ad_breakdown: {
