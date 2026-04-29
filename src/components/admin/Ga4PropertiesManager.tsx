@@ -36,7 +36,7 @@ export function Ga4PropertiesManager() {
           </p>
         </div>
         {sources.length > 0 && (
-          <Badge variant="secondary" className="text-[10px] text-white">
+          <Badge variant="secondary" className="text-[10px] text-primary-foreground">
             {sources.filter((s) => s.is_enabled).length} active
           </Badge>
         )}
