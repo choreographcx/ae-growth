@@ -334,9 +334,10 @@ function ModularPlatformCard({
             {statusBadge()}
           </div>
           <p className="text-[10px] text-muted-foreground mt-0.5">
-            {cfg.accountIds.filter(Boolean).length} account{cfg.accountIds.filter(Boolean).length !== 1 ? 's' : ''}
-            {cfg.enabled && cfg.budget > 0 && (
-              <> · <CurrencySymbol currency={currency} />{formatBudgetNumber(cfg.budget)}</>
+            {cfg.enabled && cfg.budget > 0 ? (
+              <><CurrencySymbol currency={currency} />{formatBudgetNumber(cfg.budget)}</>
+            ) : (
+              <>{cfg.enabled ? 'No budget set' : 'Disabled'}</>
             )}
           </p>
         </div>
