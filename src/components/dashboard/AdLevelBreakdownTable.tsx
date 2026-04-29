@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
@@ -10,6 +10,41 @@ import {
   normalizePlatform,
 } from '@/hooks/useDashboardDaily';
 import { PlatformKey } from '@/types/dashboard';
+import { platformIconEntries } from '@/lib/platformIcons';
+
+const platformIconBg: Record<PlatformKey, string> = {
+  meta:         'bg-blue-50 text-blue-600',
+  google:       'bg-emerald-50 text-emerald-600',
+  tiktok:       'bg-pink-50 text-pink-600',
+  snapchat:     'bg-yellow-50 text-yellow-600',
+  x:            'bg-slate-100 text-slate-700',
+  linkedin:     'bg-sky-50 text-sky-600',
+  programmatic: 'bg-violet-50 text-violet-600',
+};
+
+function PlatformIcon({ platform, size = 12 }: { platform: PlatformKey; size?: number }) {
+  const entry = platformIconEntries[platform];
+  if (entry.type === 'lucide') {
+    const Icon = entry.icon;
+    return <Icon size={size} />;
+  }
+  const Comp = entry.Component;
+  return <Comp size={size} />;
+}
+
+/**
+ * Strip redundant naming segments from ad / ad-group names. Since this dashboard
+ * is fully scoped to AMEX KSA, segments matching "AMEX" or "KSA" are noise and
+ * are removed from the display string. Matching is case-insensitive and only
+ * exact segment matches (split by underscore) are dropped.
+ */
+const REDUNDANT_SEGMENTS = new Set(['amex', 'ksa']);
+function cleanAdName(name: string): string {
+  if (!name) return name;
+  const parts = name.split('_').map(p => p.trim());
+  const kept = parts.filter(p => p.length > 0 && !REDUNDANT_SEGMENTS.has(p.toLowerCase()));
+  return kept.length > 0 ? kept.join('_') : name;
+}
 
 type Level = 'ad_group' | 'ad';
 
@@ -27,6 +62,7 @@ interface AggRow {
   key: string;
   name: string;
   campaignName: string;
+  platform: PlatformKey;
   spend: number;
   shareOfSpend: number;
   impressions: number;
@@ -57,16 +93,14 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
   const aggregated = useMemo<AggRow[]>(() => {
     const buckets = new Map<string, DashboardDailyRow[]>();
     for (const r of rows) {
-      if (platformKey) {
-        const p = normalizePlatform(r.platform);
-        if (p !== platformKey) continue;
-      }
+      const p = normalizePlatform(r.platform);
+      if (platformKey && p !== platformKey) continue;
       const name = level === 'ad_group'
         ? (r.ad_group_name || '').trim()
         : (r.ad_name || '').trim();
       if (!name) continue;
       const id = level === 'ad_group' ? (r.ad_group_id || '') : (r.ad_id || '');
-      const key = `${id}::${name.toLowerCase()}`;
+      const key = `${p}::${id}::${name.toLowerCase()}`;
       let arr = buckets.get(key);
       if (!arr) { arr = []; buckets.set(key, arr); }
       arr.push(r);
@@ -74,14 +108,15 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
     const out: AggRow[] = [];
     buckets.forEach((rs, key) => {
       const a = aggregateRows(rs, 'all');
-      const name = level === 'ad_group'
+      const rawName = level === 'ad_group'
         ? (rs[0].ad_group_name || '').trim()
         : (rs[0].ad_name || '').trim();
       const campaignNames = Array.from(new Set(rs.map(r => r.campaign_name).filter(Boolean))) as string[];
       out.push({
         key,
-        name,
-        campaignName: campaignNames.length > 1 ? `${campaignNames.length} campaigns` : (campaignNames[0] || '—'),
+        name: cleanAdName(rawName),
+        campaignName: campaignNames.length > 1 ? `${campaignNames.length} campaigns` : cleanAdName(campaignNames[0] || '—'),
+        platform: normalizePlatform(rs[0].platform),
         spend: a.spend,
         shareOfSpend: 0,
         impressions: a.impressions,
@@ -137,8 +172,15 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
       <div className={cn("space-y-2.5", className)}>
         {sorted.map(row => (
           <div key={row.key} className="bg-card rounded-lg border border-border shadow-sm overflow-hidden p-3">
-            <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.name}>{row.name}</p>
-            <p className="text-[11px] text-muted-foreground leading-tight truncate mb-2">{row.campaignName}</p>
+            <div className="flex items-start gap-2 mb-2">
+              <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0 mt-0.5", platformIconBg[row.platform])}>
+                <PlatformIcon platform={row.platform} size={12} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold text-card-foreground leading-tight truncate" title={row.name}>{row.name}</p>
+                <p className="text-[11px] text-muted-foreground leading-tight truncate">{row.campaignName}</p>
+              </div>
+            </div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider leading-none mb-1">Spend</p>
             <p className="text-[24px] font-bold text-card-foreground tracking-tight leading-none mb-3">
               <CurrencyValue amount={row.spend} currency={currency} />
@@ -160,9 +202,14 @@ export function AdLevelBreakdownTable({ rows, level, platformKey, className, lim
   type Col = { key: keyof AggRow; label: string; align?: 'right'; format: (row: AggRow) => React.ReactNode };
   const cols: Col[] = [
     { key: 'name', label: level === 'ad_group' ? 'Ad Group' : 'Ad', format: row => (
-        <div className="min-w-0">
-          <div className="truncate font-semibold text-card-foreground" title={row.name}>{row.name}</div>
-          <div className="truncate text-[10px] text-muted-foreground" title={row.campaignName}>{row.campaignName}</div>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={cn("flex items-center justify-center w-6 h-6 rounded shrink-0", platformIconBg[row.platform])}>
+            <PlatformIcon platform={row.platform} size={12} />
+          </span>
+          <div className="min-w-0">
+            <div className="truncate font-semibold text-card-foreground" title={row.name}>{row.name}</div>
+            <div className="truncate text-[10px] text-muted-foreground" title={row.campaignName}>{row.campaignName}</div>
+          </div>
         </div>
       ) },
     { key: 'spend',                   label: 'Spend',     align: 'right', format: row => <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{fmtCompact(row.spend)}</span> },
