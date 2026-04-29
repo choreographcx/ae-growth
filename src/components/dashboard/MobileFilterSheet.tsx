@@ -8,13 +8,14 @@ import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PlatformKey } from '@/types/dashboard';
+import { CARD_TYPE_LABELS, CARD_TYPE_ORDER, CardType } from '@/lib/cardType';
 
 interface MobileFilterSheetProps {
   showPlatformsFilter: boolean;
   scopeToPlatform?: PlatformKey;
 }
 
-type FilterKey = 'platforms' | 'markets' | 'channels' | 'campaigns' | 'objectives';
+type FilterKey = 'platforms' | 'cardTypes' | 'markets' | 'channels' | 'campaigns' | 'objectives';
 
 interface FilterDef {
   key: FilterKey;
@@ -38,6 +39,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
     selectedObjectives, setSelectedObjectives,
     selectedMarkets, setSelectedMarkets,
     selectedChannels, setSelectedChannels,
+    selectedCardTypes, setSelectedCardTypes,
   } = useDashboard();
 
   const [open, setOpen] = useState(false);
@@ -68,11 +70,32 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
     return data.availableChannels;
   }, [scopeToPlatform, data.channelsByPlatform, data.availableChannels]);
 
+  // Card-type bucket UI works on labels; we map back to keys before storing.
+  const cardTypeOptions = useMemo(() => CARD_TYPE_ORDER.map(k => CARD_TYPE_LABELS[k]), []);
+  const cardTypeLabelToKey = useMemo(() => {
+    const m = new Map<string, CardType>();
+    for (const k of CARD_TYPE_ORDER) m.set(CARD_TYPE_LABELS[k], k);
+    return m;
+  }, []);
+  const selectedCardTypeLabels = useMemo(
+    () => selectedCardTypes.map(k => CARD_TYPE_LABELS[k]),
+    [selectedCardTypes],
+  );
+  const setSelectedCardTypeLabels = (labels: string[]) => {
+    const next: CardType[] = [];
+    for (const l of labels) {
+      const k = cardTypeLabelToKey.get(l);
+      if (k) next.push(k);
+    }
+    setSelectedCardTypes(next);
+  };
+
   const filters: FilterDef[] = useMemo(() => {
     const list: FilterDef[] = [];
     if (showPlatformsFilter) {
       list.push({ key: 'platforms', label: 'Platforms', options: platformOptions, selected: selectedPlatforms, setSelected: setSelectedPlatforms });
     }
+    list.push({ key: 'cardTypes', label: 'Card Type', options: cardTypeOptions, selected: selectedCardTypeLabels, setSelected: setSelectedCardTypeLabels });
     if (marketOptions.length > 0) {
       list.push({ key: 'markets', label: 'Markets', options: marketOptions, selected: selectedMarkets, setSelected: setSelectedMarkets });
     }
@@ -86,6 +109,7 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
     return list;
   }, [
     showPlatformsFilter, platformOptions, selectedPlatforms, setSelectedPlatforms,
+    cardTypeOptions, selectedCardTypeLabels,
     marketOptions, selectedMarkets, setSelectedMarkets,
     channelOptions, selectedChannels, setSelectedChannels,
     campaignNames, selectedCampaigns, setSelectedCampaigns,
@@ -94,11 +118,13 @@ export function MobileFilterSheet({ showPlatformsFilter, scopeToPlatform }: Mobi
 
   const totalSelected =
     (showPlatformsFilter ? selectedPlatforms.length : 0) +
+    selectedCardTypes.length +
     selectedMarkets.length + selectedChannels.length +
     selectedCampaigns.length + selectedObjectives.length;
 
   const clearAll = () => {
     if (showPlatformsFilter) setSelectedPlatforms([]);
+    setSelectedCardTypes([]);
     setSelectedMarkets([]);
     setSelectedChannels([]);
     setSelectedCampaigns([]);
