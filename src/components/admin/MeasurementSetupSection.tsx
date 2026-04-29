@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ClientProfile } from '@/types/dashboard';
 import { CheckCircle2, AlertCircle, X, Plus, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Ga4PropertiesManager } from './Ga4PropertiesManager';
 
 const LOOKBACK_OPTIONS = ['7 days', '14 days', '30 days', '60 days', '90 days'];
 const COUNTING_OPTIONS = [
@@ -77,11 +78,15 @@ export function MeasurementSetupSection({ client, updateClient }: Props) {
         </div>
       </div>
 
-      {/* Analytics & Tracking IDs */}
+      {/* GA4 Properties (1..N) */}
       <div className="pt-4 border-t border-border/50">
-        <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Analytics & Tracking</h4>
+        <Ga4PropertiesManager />
+      </div>
+
+      {/* Other Tracking IDs */}
+      <div className="pt-4 border-t border-border/50">
+        <h4 className="text-xs font-semibold text-card-foreground uppercase tracking-wider mb-4">Other Tracking</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <Field label="GA4 Property ID" value={client.ga4PropertyId} onChange={v => updateClient({ ga4PropertyId: v })} placeholder="123456789" />
           <Field label="GA4 Stream ID" value={client.ga4StreamId} onChange={v => updateClient({ ga4StreamId: v })} placeholder="987654321" />
           <Field label="GTM Container ID" value={client.gtmContainerId} onChange={v => updateClient({ gtmContainerId: v })} placeholder="GTM-XXXXX" />
           <Field label="Primary Website Domain" value={client.websiteDomain} onChange={v => updateClient({ websiteDomain: v })} />
