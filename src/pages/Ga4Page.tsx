@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Globe, Loader2 } from 'lucide-react';
 import { LoadingOverlay } from '@/components/layout/LoadingOverlay';
 import { useDashboard } from '@/context/DashboardContext';
@@ -7,6 +7,7 @@ import { useGa4Sources } from '@/hooks/useGa4Sources';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CurrencySymbol } from '@/lib/currency';
 import { format, parse } from 'date-fns';
 
