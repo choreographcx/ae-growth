@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { DimensionBreakdownTable } from './DimensionBreakdownTable';
 import { DashboardDailyRow } from '@/hooks/useDashboardDaily';
-import { getCampaignMarket, getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
+import { getCampaignChannel, resolveCampaignObjective } from '@/lib/campaignNaming';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlatformKey } from '@/types/dashboard';
 
-type Dim = 'market' | 'channel' | 'objective' | 'placement' | 'campaignType' | 'audienceType';
+type Dim = 'channel' | 'objective' | 'placement' | 'campaignType' | 'audienceType';
 
 const PICKERS: Record<Dim, { label: string; pick: (r: DashboardDailyRow) => string | null | undefined; title: string }> = {
-  market:    { label: 'By Market',    pick: r => getCampaignMarket(r.campaign_name),    title: 'By Market' },
   channel:   { label: 'By Channel',   pick: r => getCampaignChannel(r.campaign_name),   title: 'By Channel' },
   objective: { label: 'By Objective', pick: r => resolveCampaignObjective(r.campaign_objective, r.campaign_name), title: 'By Objective' },
   placement: {
@@ -73,7 +72,6 @@ export function BreakdownDimensionCard({ rows, platformKey }: Props) {
               <SelectItem value="audienceType">By Audience Type</SelectItem>
             )}
             <SelectItem value="objective">By Objective</SelectItem>
-            <SelectItem value="market">By Market</SelectItem>
           </SelectContent>
         </Select>
       </div>
