@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Preconnect to critical origins to remove ~316ms of latency (GTmetrix recommendation) -->
-    <link rel="preconnect" href="https://ldydiabaczrjferglbar.supabase.co" crossorigin />
+    <!-- Preconnect to critical origins to shorten the request chain (GTmetrix: avoid chaining critical requests) -->
+    <link rel="preconnect" href="https://zmftodcdtlnsnzbentxq.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://zmftodcdtlnsnzbentxq.supabase.co" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload the one Inter weight used above the fold to remove the font from the critical chain -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50Sjla1ZL7.woff2" />
 
     <!-- Self-referenced favicon (replaces the 41KB favicon.ico that was loaded twice) -->
 
