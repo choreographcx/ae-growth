@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useMemo, useState, Fragment } from 'react';
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/context/DashboardContext';
 import { CurrencySymbol } from '@/lib/currency';
@@ -26,6 +26,20 @@ interface CampaignRow {
   platformLabel: string;
   spend: number;
   shareOfSpend: number;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  cpc: number;
+  conversionsLowerFunnel: number;
+  cpa: number;
+  /** Raw rows that compose this campaign — used to build the ad-group sub-table on expand. */
+  rawRows: DashboardDailyRow[];
+}
+
+interface AdGroupRow {
+  key: string;
+  name: string;
+  spend: number;
   impressions: number;
   clicks: number;
   ctr: number;
