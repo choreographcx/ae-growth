@@ -355,7 +355,7 @@ async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDai
     const monthEnd = endOfMonth(cur);
     const chunkEnd = monthEnd > end ? end : monthEnd;
     chunks.push({ s: chunkStart, e: chunkEnd });
-    cur = startOfMonth(subMonths(cur, -1));
+    cur = addMonths(cur, 1);
   }
   const results = await Promise.all(chunks.map(async ({ s, e }) => {
     const { data, error } = await supabase.rpc('get_dashboard_daily', {
