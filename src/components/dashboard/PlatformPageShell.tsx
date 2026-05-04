@@ -45,6 +45,8 @@ interface PlatformPageShellProps {
   warnOnWastedSpend?: boolean;
   /** Optional row-level filter applied AFTER platform scoping (e.g. publisher_platform). */
   extraRowFilter?: (r: import('@/hooks/useDashboardDaily').DashboardDailyRow) => boolean;
+  /** Optional publisher_platform filter forwarded to the conversion breakdown RPC. */
+  publisherPlatforms?: string[];
 }
 
 /**
