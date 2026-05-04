@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { PlatformKey, KPIGroupData } from '@/types/dashboard';
 import { useDashboard } from '@/context/DashboardContext';
 import { aggregateRows, normalizePlatform, pctChange, buildTimeSeries, buildCpaSeries } from '@/hooks/useDashboardDaily';
-import { useConversionBreakdown } from '@/hooks/useConversionBreakdown';
+
 import { CurrencySymbol, applyCurrencyToKPIGroups } from '@/lib/currency';
 import { KPIGroupCard } from '@/components/dashboard/KPIGroupCard';
 import { TrendChartCard } from '@/components/dashboard/TrendChartCard';
