@@ -278,6 +278,7 @@ export function PlatformPageShell({
             start={range.start}
             end={range.end}
             sourceRows={scoped}
+            publisherPlatforms={publisherPlatforms}
           />
         </div>
       )}
