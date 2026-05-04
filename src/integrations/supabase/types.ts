@@ -104,6 +104,108 @@ export type Database = {
         }
         Relationships: []
       }
+      bq_lovable_conversions: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          ad_group_id: string | null
+          ad_group_name: string | null
+          ad_id: string | null
+          ad_name: string | null
+          adset_name: string | null
+          all_conversions: number | null
+          audience_type: string | null
+          campaign_id: string | null
+          campaign_name: string | null
+          campaign_objective: string | null
+          campaign_type: string | null
+          conversion_funnel_group: string | null
+          conversion_name: string | null
+          conversion_name_norm: string | null
+          conversion_type: string | null
+          conversion_value: number | null
+          conversions_all: number | null
+          conversions_lower_funnel: number | null
+          conversions_upper_funnel: number | null
+          data_source_name: string | null
+          date: string | null
+          is_conversion_row: boolean | null
+          lower_funnel_conversions: number | null
+          market: string | null
+          market_mapping_method: string | null
+          platform: string | null
+          publisher_platform: string | null
+          source_platform: string | null
+          upper_funnel_conversions: number | null
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          ad_group_id?: string | null
+          ad_group_name?: string | null
+          ad_id?: string | null
+          ad_name?: string | null
+          adset_name?: string | null
+          all_conversions?: number | null
+          audience_type?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          campaign_objective?: string | null
+          campaign_type?: string | null
+          conversion_funnel_group?: string | null
+          conversion_name?: string | null
+          conversion_name_norm?: string | null
+          conversion_type?: string | null
+          conversion_value?: number | null
+          conversions_all?: number | null
+          conversions_lower_funnel?: number | null
+          conversions_upper_funnel?: number | null
+          data_source_name?: string | null
+          date?: string | null
+          is_conversion_row?: boolean | null
+          lower_funnel_conversions?: number | null
+          market?: string | null
+          market_mapping_method?: string | null
+          platform?: string | null
+          publisher_platform?: string | null
+          source_platform?: string | null
+          upper_funnel_conversions?: number | null
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          ad_group_id?: string | null
+          ad_group_name?: string | null
+          ad_id?: string | null
+          ad_name?: string | null
+          adset_name?: string | null
+          all_conversions?: number | null
+          audience_type?: string | null
+          campaign_id?: string | null
+          campaign_name?: string | null
+          campaign_objective?: string | null
+          campaign_type?: string | null
+          conversion_funnel_group?: string | null
+          conversion_name?: string | null
+          conversion_name_norm?: string | null
+          conversion_type?: string | null
+          conversion_value?: number | null
+          conversions_all?: number | null
+          conversions_lower_funnel?: number | null
+          conversions_upper_funnel?: number | null
+          data_source_name?: string | null
+          date?: string | null
+          is_conversion_row?: boolean | null
+          lower_funnel_conversions?: number | null
+          market?: string | null
+          market_mapping_method?: string | null
+          platform?: string | null
+          publisher_platform?: string | null
+          source_platform?: string | null
+          upper_funnel_conversions?: number | null
+        }
+        Relationships: []
+      }
       bq_lovable_overview: {
         Row: {
           account_id: string | null
