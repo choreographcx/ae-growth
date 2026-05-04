@@ -347,12 +347,25 @@ export {
  */
 async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
   const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-  const { data, error } = await supabase.rpc('get_dashboard_daily', {
-    p_start: fmt(start),
-    p_end: fmt(end),
-  });
-  if (error) throw new Error(error.message);
-  return (data as DashboardDailyRow[]) ?? [];
+  // Chunk into monthly windows to stay under PostgREST's default 1000-row response cap.
+  const chunks: Array<{ s: Date; e: Date }> = [];
+  let cur = startOfMonth(start);
+  while (cur <= end) {
+    const chunkStart = cur < start ? start : cur;
+    const monthEnd = endOfMonth(cur);
+    const chunkEnd = monthEnd > end ? end : monthEnd;
+    chunks.push({ s: chunkStart, e: chunkEnd });
+    cur = startOfMonth(subMonths(cur, -1));
+  }
+  const results = await Promise.all(chunks.map(async ({ s, e }) => {
+    const { data, error } = await supabase.rpc('get_dashboard_daily', {
+      p_start: fmt(s),
+      p_end: fmt(e),
+    });
+    if (error) throw new Error(error.message);
+    return (data as DashboardDailyRow[]) ?? [];
+  }));
+  return results.flat();
 }
 
 export function useDashboardDaily(
