@@ -88,6 +88,14 @@ export default function MetaPage() {
     },
   ];
 
+  const publisherPlatforms = useMemo(() => {
+    if (bothActive) return undefined;
+    const list: string[] = [];
+    if (enabled.facebook) list.push('facebook');
+    if (enabled.instagram) list.push('instagram');
+    return list;
+  }, [bothActive, enabled.facebook, enabled.instagram]);
+
   return (
     <PlatformPageShell
       platformKey="meta"
@@ -95,6 +103,7 @@ export default function MetaPage() {
       buildKpiCards={buildKpis}
       warnOnWastedSpend
       extraRowFilter={extraRowFilter}
+      publisherPlatforms={publisherPlatforms}
       titleAction={
         <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-1.5 shadow-sm">
           <label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground cursor-pointer select-none">
