@@ -63,35 +63,21 @@ export default function OverviewPage() {
     platformSummaries, spendSeries, ctrSeries,
   } = data;
 
-  // Overview always uses LOWER FUNNEL conversions for cross-platform comparability.
-  // Source the lower-funnel total from the same RPC that powers the Conversion
-  // Breakdown card so the KPI value stays in lockstep with what's listed there.
-  const breakdownCur = useConversionBreakdown({ start: data.range.start, end: data.range.end });
-
-  /** Sum lower-funnel rows from the breakdown RPC (matches Conversion Breakdown card). */
-  const sumLowerFunnel = (rows: { conversion_funnel_group: string; conversions_all: number }[]) =>
-    rows.reduce((sum, r) =>
-      (r.conversion_funnel_group || '').toLowerCase().includes('lower')
-        ? sum + (+r.conversions_all || 0)
-        : sum, 0);
-
-  const lfBreakdownTotal = useMemo(() => sumLowerFunnel(breakdownCur.rows), [breakdownCur.rows]);
-
-  // Use the breakdown total as the conversion count, but keep spend/clicks/LPV
-  // from the daily aggregate to compute CPA / CVR / etc.
+  // Overview KPIs source lower-funnel conversions directly from bq_lovable_overview
+  // (via get_dashboard_daily) — no separate breakdown RPC call needed.
   const lfBase = useMemo(() => aggregateRows(rows, 'lower_funnel'), [rows]);
   const lfBasePrev = useMemo(() => previousRows.length ? aggregateRows(previousRows, 'lower_funnel') : null, [previousRows]);
   const lf = useMemo(() => {
-    const conv = lfBreakdownTotal;
+    const conv = lfBase.conversionsLowerFunnel;
     return {
       ...lfBase,
       conversions: conv,
       conversionsLowerFunnel: conv,
       cpaLowerFunnel: lfBase.spend > 0 && conv > 0 ? lfBase.spend / conv : 0,
-      cvrLowerFunnel: lfBase.landingPageViews > 0 ? (conv / lfBase.landingPageViews) * 100 : 0,
+      cvrLowerFunnel: lfBase.clicks > 0 ? (conv / lfBase.clicks) * 100 : 0,
       conversionRateLowerFunnel: lfBase.clicks > 0 ? (conv / lfBase.clicks) * 100 : 0,
     };
-  }, [lfBase, lfBreakdownTotal]);
+  }, [lfBase]);
   // Previous-period LF derived from the cheap daily aggregate (no extra RPC).
   // Slight definitional drift vs. the breakdown RPC for the current period is
   // acceptable here since this only powers the % delta arrow on the KPI tile.
