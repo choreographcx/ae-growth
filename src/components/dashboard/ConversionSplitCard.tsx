@@ -42,10 +42,8 @@ export function ConversionSplitCard({
     let lower = 0;
     let upper = 0;
     for (const r of rows) {
-      const g = (r.conversion_funnel_group || '').toLowerCase();
-      const v = r.conversions_all || 0;
-      if (g.includes('lower')) lower += v;
-      else if (g.includes('upper')) upper += v;
+      lower += r.lower_funnel_conversions || 0;
+      upper += r.upper_funnel_conversions || 0;
     }
     return { lowerFunnel: lower, upperFunnel: upper };
   }, [rows, fallbackLowerFunnel, fallbackUpperFunnel]);
