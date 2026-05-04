@@ -995,21 +995,42 @@ export type Database = {
           platform: string
         }[]
       }
-      get_dashboard_conversion_breakdown: {
-        Args: {
-          p_campaign_names?: string[]
-          p_end: string
-          p_platforms?: string[]
-          p_start: string
-          p_suppressed_conversions?: Json
-        }
-        Returns: {
-          conversion_funnel_group: string
-          conversion_name: string
-          conversions_all: number
-          platform: string
-        }[]
-      }
+      get_dashboard_conversion_breakdown:
+        | {
+            Args: {
+              p_campaign_names?: string[]
+              p_end: string
+              p_platforms?: string[]
+              p_start: string
+              p_suppressed_conversions?: Json
+            }
+            Returns: {
+              conversion_funnel_group: string
+              conversion_name: string
+              conversions_all: number
+              platform: string
+            }[]
+          }
+        | {
+            Args: {
+              p_campaign_names?: string[]
+              p_end: string
+              p_platforms?: string[]
+              p_publisher_platforms?: string[]
+              p_start: string
+              p_suppressed_conversions?: Json
+            }
+            Returns: {
+              conversion_funnel_group: string
+              conversion_name: string
+              conversion_type: string
+              conversion_value: number
+              conversions_all: number
+              lower_funnel_conversions: number
+              platform: string
+              upper_funnel_conversions: number
+            }[]
+          }
       get_dashboard_daily: {
         Args: {
           p_campaign_names?: string[]
