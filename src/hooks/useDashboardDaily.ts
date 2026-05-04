@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, subYears, endOfYear, differenceInCalendarDays, parse, isValid } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, subMonths, addMonths, startOfYear, subYears, endOfYear, differenceInCalendarDays, parse, isValid } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { PlatformKey, PlatformSummary, TimeSeriesPoint } from '@/types/dashboard';
 import { parseCampaignName, UNKNOWN } from '@/lib/campaignNaming';
@@ -347,12 +347,25 @@ export {
  */
 async function fetchDashboardRange(start: Date, end: Date): Promise<DashboardDailyRow[]> {
   const fmt = (d: Date) => format(d, 'yyyy-MM-dd');
-  const { data, error } = await supabase.rpc('get_dashboard_daily', {
-    p_start: fmt(start),
-    p_end: fmt(end),
-  });
-  if (error) throw new Error(error.message);
-  return (data as DashboardDailyRow[]) ?? [];
+  // Chunk into monthly windows to stay under PostgREST's default 1000-row response cap.
+  const chunks: Array<{ s: Date; e: Date }> = [];
+  let cur = startOfMonth(start);
+  while (cur <= end) {
+    const chunkStart = cur < start ? start : cur;
+    const monthEnd = endOfMonth(cur);
+    const chunkEnd = monthEnd > end ? end : monthEnd;
+    chunks.push({ s: chunkStart, e: chunkEnd });
+    cur = addMonths(cur, 1);
+  }
+  const results = await Promise.all(chunks.map(async ({ s, e }) => {
+    const { data, error } = await supabase.rpc('get_dashboard_daily', {
+      p_start: fmt(s),
+      p_end: fmt(e),
+    });
+    if (error) throw new Error(error.message);
+    return (data as DashboardDailyRow[]) ?? [];
+  }));
+  return results.flat();
 }
 
 export function useDashboardDaily(
@@ -400,7 +413,7 @@ export function useDashboardDaily(
   // FDW query per page) to a single RPC call. This invalidates any cached
   // entries from the slow paginated path.
   const currentQ = useQuery({
-    queryKey: ['dashboard-daily', 'v4', startKey, endKey],
+    queryKey: ['dashboard-daily', 'v5', startKey, endKey],
     queryFn: () => fetchDashboardRange(range.start, range.end),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -410,7 +423,7 @@ export function useDashboardDaily(
   // Previous period — fired in parallel but does NOT gate the loading flag.
   // We don't need it for the first paint of charts/KPIs.
   const previousQ = useQuery({
-    queryKey: ['dashboard-daily', 'v4', pStartKey, pEndKey],
+    queryKey: ['dashboard-daily', 'v5', pStartKey, pEndKey],
     queryFn: () => fetchDashboardRange(prevStart, prevEnd),
     enabled: !currentQ.isLoading,
     staleTime: 5 * 60 * 1000,
