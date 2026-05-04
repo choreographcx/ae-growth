@@ -413,7 +413,7 @@ export function useDashboardDaily(
   // FDW query per page) to a single RPC call. This invalidates any cached
   // entries from the slow paginated path.
   const currentQ = useQuery({
-    queryKey: ['dashboard-daily', 'v4', startKey, endKey],
+    queryKey: ['dashboard-daily', 'v5', startKey, endKey],
     queryFn: () => fetchDashboardRange(range.start, range.end),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -423,7 +423,7 @@ export function useDashboardDaily(
   // Previous period — fired in parallel but does NOT gate the loading flag.
   // We don't need it for the first paint of charts/KPIs.
   const previousQ = useQuery({
-    queryKey: ['dashboard-daily', 'v4', pStartKey, pEndKey],
+    queryKey: ['dashboard-daily', 'v5', pStartKey, pEndKey],
     queryFn: () => fetchDashboardRange(prevStart, prevEnd),
     enabled: !currentQ.isLoading,
     staleTime: 5 * 60 * 1000,
