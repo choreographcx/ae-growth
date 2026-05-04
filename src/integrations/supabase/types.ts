@@ -113,6 +113,7 @@ export type Database = {
           ad_id: string | null
           ad_name: string | null
           adset_name: string | null
+          all_conversions: number | null
           audience_type: string | null
           campaign_id: string | null
           campaign_name: string | null
@@ -142,17 +143,21 @@ export type Database = {
           impressions: number | null
           is_wasted_spend: boolean | null
           landing_page_views: number | null
+          lower_funnel_conversions: number | null
+          lpv: number | null
           lpv_rate: number | null
           market: string | null
           market_mapping_method: string | null
           outbound_clicks: number | null
           outbound_ctr: number | null
           platform: string | null
+          primary_conversions: number | null
           publisher_platform: string | null
           reach: number | null
           roas: number | null
           source_platform: string | null
           spend: number | null
+          upper_funnel_conversions: number | null
           video_p100: number | null
           video_p25: number | null
           video_p50: number | null
@@ -167,6 +172,7 @@ export type Database = {
           ad_id?: string | null
           ad_name?: string | null
           adset_name?: string | null
+          all_conversions?: number | null
           audience_type?: string | null
           campaign_id?: string | null
           campaign_name?: string | null
@@ -196,17 +202,21 @@ export type Database = {
           impressions?: number | null
           is_wasted_spend?: boolean | null
           landing_page_views?: number | null
+          lower_funnel_conversions?: number | null
+          lpv?: number | null
           lpv_rate?: number | null
           market?: string | null
           market_mapping_method?: string | null
           outbound_clicks?: number | null
           outbound_ctr?: number | null
           platform?: string | null
+          primary_conversions?: number | null
           publisher_platform?: string | null
           reach?: number | null
           roas?: number | null
           source_platform?: string | null
           spend?: number | null
+          upper_funnel_conversions?: number | null
           video_p100?: number | null
           video_p25?: number | null
           video_p50?: number | null
@@ -221,6 +231,7 @@ export type Database = {
           ad_id?: string | null
           ad_name?: string | null
           adset_name?: string | null
+          all_conversions?: number | null
           audience_type?: string | null
           campaign_id?: string | null
           campaign_name?: string | null
@@ -250,17 +261,21 @@ export type Database = {
           impressions?: number | null
           is_wasted_spend?: boolean | null
           landing_page_views?: number | null
+          lower_funnel_conversions?: number | null
+          lpv?: number | null
           lpv_rate?: number | null
           market?: string | null
           market_mapping_method?: string | null
           outbound_clicks?: number | null
           outbound_ctr?: number | null
           platform?: string | null
+          primary_conversions?: number | null
           publisher_platform?: string | null
           reach?: number | null
           roas?: number | null
           source_platform?: string | null
           spend?: number | null
+          upper_funnel_conversions?: number | null
           video_p100?: number | null
           video_p25?: number | null
           video_p50?: number | null
