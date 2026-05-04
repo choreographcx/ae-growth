@@ -161,16 +161,18 @@ export function PlatformPageTemplate({ platformKey, title, tabs, extraSections }
       {
         title: 'Conversions',
         icon: 'Target',
-        tooltip: conversionsTooltip,
+        tooltip: 'Lower-funnel conversions are the primary KPI. All-Conversions and Upper-Funnel are shown for context.',
         primary: {
-          label: 'Conversions', value: cur.conversions,
-          formattedValue: formatCompact(cur.conversions),
-          change: pctChange(cur.conversions, prev?.conversions),
+          label: 'Conversions (LF)', value: cur.conversionsLowerFunnel,
+          formattedValue: formatCompact(cur.conversionsLowerFunnel),
+          change: pctChange(cur.conversionsLowerFunnel, prev?.conversionsLowerFunnel),
           trend: convSeries.slice(-7).map(p => p.value),
         },
         supporting: [
-          { label: 'CPA', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.cpa.toFixed(2)}</span>, change: pctChange(cur.cpa, prev?.cpa) },
-          { label: 'Conv. Rate', formattedValue: `${cur.conversionRate.toFixed(2)}%`, change: pctChange(cur.conversionRate, prev?.conversionRate) },
+          { label: 'CPA (LF)', formattedValue: <span className="inline-flex items-baseline"><CurrencySymbol currency={currency} />{cur.cpaLowerFunnel.toFixed(2)}</span>, change: pctChange(cur.cpaLowerFunnel, prev?.cpaLowerFunnel) },
+          { label: 'CVR (LF)', formattedValue: `${cur.cvrLowerFunnel.toFixed(2)}%`, change: pctChange(cur.cvrLowerFunnel, prev?.cvrLowerFunnel) },
+          { label: 'All Conv.', formattedValue: formatCompact(cur.conversionsAll) },
+          { label: 'Upper Funnel', formattedValue: formatCompact(cur.conversionsUpperFunnel) },
         ],
       },
     ];
