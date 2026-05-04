@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      bq_all_platform_deep_dive: {
+        Row: {
+          ad_name: string | null
+          adset_name: string | null
+          campaign_name: string | null
+          channel: string | null
+          clicks: number | null
+          creative_image_url: string | null
+          creative_webview_url: string | null
+          date: string | null
+          final_url: string | null
+          headline: string | null
+          hooks: number | null
+          impressions: number | null
+          landing_page_url: string | null
+          leads: number | null
+          market: string | null
+          native_leads: number | null
+          network: string | null
+          profile_visits: number | null
+          quality_score: number | null
+          quality_video_views: number | null
+          reach: number | null
+          retweets: number | null
+          source_platform: string | null
+          spend: number | null
+          swipes: number | null
+          video_views_15s: number | null
+          viral_rate: number | null
+        }
+        Insert: {
+          ad_name?: string | null
+          adset_name?: string | null
+          campaign_name?: string | null
+          channel?: string | null
+          clicks?: number | null
+          creative_image_url?: string | null
+          creative_webview_url?: string | null
+          date?: string | null
+          final_url?: string | null
+          headline?: string | null
+          hooks?: number | null
+          impressions?: number | null
+          landing_page_url?: string | null
+          leads?: number | null
+          market?: string | null
+          native_leads?: number | null
+          network?: string | null
+          profile_visits?: number | null
+          quality_score?: number | null
+          quality_video_views?: number | null
+          reach?: number | null
+          retweets?: number | null
+          source_platform?: string | null
+          spend?: number | null
+          swipes?: number | null
+          video_views_15s?: number | null
+          viral_rate?: number | null
+        }
+        Update: {
+          ad_name?: string | null
+          adset_name?: string | null
+          campaign_name?: string | null
+          channel?: string | null
+          clicks?: number | null
+          creative_image_url?: string | null
+          creative_webview_url?: string | null
+          date?: string | null
+          final_url?: string | null
+          headline?: string | null
+          hooks?: number | null
+          impressions?: number | null
+          landing_page_url?: string | null
+          leads?: number | null
+          market?: string | null
+          native_leads?: number | null
+          network?: string | null
+          profile_visits?: number | null
+          quality_score?: number | null
+          quality_video_views?: number | null
+          reach?: number | null
+          retweets?: number | null
+          source_platform?: string | null
+          spend?: number | null
+          swipes?: number | null
+          video_views_15s?: number | null
+          viral_rate?: number | null
+        }
+        Relationships: []
+      }
       client_branding: {
         Row: {
           accent_hex: string | null
@@ -533,267 +623,7 @@ export type Database = {
       }
     }
     Views: {
-      dashboard_conversions: {
-        Row: {
-          account_id: string | null
-          account_name: string | null
-          ad_group_id: string | null
-          ad_group_name: string | null
-          ad_id: string | null
-          ad_name: string | null
-          audience_type: string | null
-          campaign_id: string | null
-          campaign_name: string | null
-          campaign_objective: string | null
-          campaign_type: string | null
-          conversion_funnel_group: string | null
-          conversion_name: string | null
-          conversion_name_norm: string | null
-          conversion_type: string | null
-          conversion_value: number | null
-          conversions_all: number | null
-          conversions_lower_funnel: number | null
-          conversions_upper_funnel: number | null
-          data_source_name: string | null
-          date: string | null
-          is_conversion_row: boolean | null
-          market: string | null
-          market_mapping_method: string | null
-          platform: string | null
-          publisher_platform: string | null
-        }
-        Insert: {
-          account_id?: string | null
-          account_name?: string | null
-          ad_group_id?: string | null
-          ad_group_name?: string | null
-          ad_id?: string | null
-          ad_name?: string | null
-          audience_type?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          campaign_objective?: string | null
-          campaign_type?: string | null
-          conversion_funnel_group?: string | null
-          conversion_name?: string | null
-          conversion_name_norm?: string | null
-          conversion_type?: string | null
-          conversion_value?: number | null
-          conversions_all?: number | null
-          conversions_lower_funnel?: number | null
-          conversions_upper_funnel?: number | null
-          data_source_name?: string | null
-          date?: string | null
-          is_conversion_row?: boolean | null
-          market?: string | null
-          market_mapping_method?: string | null
-          platform?: string | null
-          publisher_platform?: string | null
-        }
-        Update: {
-          account_id?: string | null
-          account_name?: string | null
-          ad_group_id?: string | null
-          ad_group_name?: string | null
-          ad_id?: string | null
-          ad_name?: string | null
-          audience_type?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          campaign_objective?: string | null
-          campaign_type?: string | null
-          conversion_funnel_group?: string | null
-          conversion_name?: string | null
-          conversion_name_norm?: string | null
-          conversion_type?: string | null
-          conversion_value?: number | null
-          conversions_all?: number | null
-          conversions_lower_funnel?: number | null
-          conversions_upper_funnel?: number | null
-          data_source_name?: string | null
-          date?: string | null
-          is_conversion_row?: boolean | null
-          market?: string | null
-          market_mapping_method?: string | null
-          platform?: string | null
-          publisher_platform?: string | null
-        }
-        Relationships: []
-      }
-      dashboard_daily: {
-        Row: {
-          account_id: string | null
-          account_name: string | null
-          ad_group_id: string | null
-          ad_group_name: string | null
-          ad_id: string | null
-          ad_name: string | null
-          audience_type: string | null
-          campaign_id: string | null
-          campaign_name: string | null
-          campaign_objective: string | null
-          campaign_type: string | null
-          clicks: number | null
-          conversion_funnel_group: string | null
-          conversion_name: string | null
-          conversion_name_norm: string | null
-          conversion_rate_all: number | null
-          conversion_rate_lower_funnel: number | null
-          conversion_type: string | null
-          conversion_value: number | null
-          conversions: number | null
-          conversions_all: number | null
-          conversions_lower_funnel: number | null
-          conversions_primary: number | null
-          conversions_upper_funnel: number | null
-          cost: number | null
-          cost_per_lpv: number | null
-          cost_per_video_view: number | null
-          cost_usd: number | null
-          cpa_all_conversions: number | null
-          cpa_lower_funnel: number | null
-          cpc: number | null
-          cpm: number | null
-          ctr: number | null
-          cvr_lower_funnel: number | null
-          data_source_name: string | null
-          date: string | null
-          frequency: number | null
-          impressions: number | null
-          is_conversion_row: boolean | null
-          is_wasted_spend: boolean | null
-          landing_page_views: number | null
-          lpv_rate: number | null
-          market: string | null
-          market_mapping_method: string | null
-          outbound_clicks: number | null
-          outbound_ctr: number | null
-          platform: string | null
-          publisher_platform: string | null
-          reach: number | null
-          roas: number | null
-          video_p100: number | null
-          video_p25: number | null
-          video_p50: number | null
-          video_p75: number | null
-          video_views: number | null
-        }
-        Insert: {
-          account_id?: string | null
-          account_name?: string | null
-          ad_group_id?: string | null
-          ad_group_name?: string | null
-          ad_id?: string | null
-          ad_name?: string | null
-          audience_type?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          campaign_objective?: string | null
-          campaign_type?: string | null
-          clicks?: number | null
-          conversion_funnel_group?: string | null
-          conversion_name?: string | null
-          conversion_name_norm?: string | null
-          conversion_rate_all?: number | null
-          conversion_rate_lower_funnel?: number | null
-          conversion_type?: string | null
-          conversion_value?: number | null
-          conversions?: number | null
-          conversions_all?: number | null
-          conversions_lower_funnel?: number | null
-          conversions_primary?: number | null
-          conversions_upper_funnel?: number | null
-          cost?: number | null
-          cost_per_lpv?: number | null
-          cost_per_video_view?: number | null
-          cost_usd?: number | null
-          cpa_all_conversions?: number | null
-          cpa_lower_funnel?: number | null
-          cpc?: number | null
-          cpm?: number | null
-          ctr?: number | null
-          cvr_lower_funnel?: number | null
-          data_source_name?: string | null
-          date?: string | null
-          frequency?: number | null
-          impressions?: number | null
-          is_conversion_row?: boolean | null
-          is_wasted_spend?: boolean | null
-          landing_page_views?: number | null
-          lpv_rate?: number | null
-          market?: string | null
-          market_mapping_method?: string | null
-          outbound_clicks?: number | null
-          outbound_ctr?: number | null
-          platform?: string | null
-          publisher_platform?: string | null
-          reach?: number | null
-          roas?: number | null
-          video_p100?: number | null
-          video_p25?: number | null
-          video_p50?: number | null
-          video_p75?: number | null
-          video_views?: number | null
-        }
-        Update: {
-          account_id?: string | null
-          account_name?: string | null
-          ad_group_id?: string | null
-          ad_group_name?: string | null
-          ad_id?: string | null
-          ad_name?: string | null
-          audience_type?: string | null
-          campaign_id?: string | null
-          campaign_name?: string | null
-          campaign_objective?: string | null
-          campaign_type?: string | null
-          clicks?: number | null
-          conversion_funnel_group?: string | null
-          conversion_name?: string | null
-          conversion_name_norm?: string | null
-          conversion_rate_all?: number | null
-          conversion_rate_lower_funnel?: number | null
-          conversion_type?: string | null
-          conversion_value?: number | null
-          conversions?: number | null
-          conversions_all?: number | null
-          conversions_lower_funnel?: number | null
-          conversions_primary?: number | null
-          conversions_upper_funnel?: number | null
-          cost?: number | null
-          cost_per_lpv?: number | null
-          cost_per_video_view?: number | null
-          cost_usd?: number | null
-          cpa_all_conversions?: number | null
-          cpa_lower_funnel?: number | null
-          cpc?: number | null
-          cpm?: number | null
-          ctr?: number | null
-          cvr_lower_funnel?: number | null
-          data_source_name?: string | null
-          date?: string | null
-          frequency?: number | null
-          impressions?: number | null
-          is_conversion_row?: boolean | null
-          is_wasted_spend?: boolean | null
-          landing_page_views?: number | null
-          lpv_rate?: number | null
-          market?: string | null
-          market_mapping_method?: string | null
-          outbound_clicks?: number | null
-          outbound_ctr?: number | null
-          platform?: string | null
-          publisher_platform?: string | null
-          reach?: number | null
-          roas?: number | null
-          video_p100?: number | null
-          video_p25?: number | null
-          video_p50?: number | null
-          video_p75?: number | null
-          video_views?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       diag_conv_events: {
