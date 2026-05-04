@@ -56,7 +56,7 @@ interface PlatformPageShellProps {
 export function PlatformPageShell({
   platformKey, title, titleAction, emptyOnZeroSpend, buildKpiCards,
   topExtras, midExtras, bottomExtras,
-  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
+  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter, publisherPlatforms,
 }: PlatformPageShellProps) {
   const {
     client, data,
