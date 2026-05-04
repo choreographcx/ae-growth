@@ -436,11 +436,12 @@ Deno.serve(async (req) => {
 
     const failed = responses.find((r) => !r.ok);
     if (failed) {
+      console.error(`GA4 API error for property ${failed.pid} (status ${failed.status}):`, failed.text);
       return respond({
         ok: false,
         error: `GA4 API error for property ${failed.pid}`,
         status: failed.status,
-        detail: failed.text,
+        detail: 'GA4 API returned an error — see server logs',
       });
     }
 
