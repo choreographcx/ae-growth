@@ -45,6 +45,8 @@ interface PlatformPageShellProps {
   warnOnWastedSpend?: boolean;
   /** Optional row-level filter applied AFTER platform scoping (e.g. publisher_platform). */
   extraRowFilter?: (r: import('@/hooks/useDashboardDaily').DashboardDailyRow) => boolean;
+  /** Optional publisher_platform filter forwarded to the conversion breakdown RPC. */
+  publisherPlatforms?: string[];
 }
 
 /**
@@ -54,7 +56,7 @@ interface PlatformPageShellProps {
 export function PlatformPageShell({
   platformKey, title, titleAction, emptyOnZeroSpend, buildKpiCards,
   topExtras, midExtras, bottomExtras,
-  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter,
+  hideConversionBreakdown, warnOnWastedSpend, extraRowFilter, publisherPlatforms,
 }: PlatformPageShellProps) {
   const {
     client, data,
@@ -276,6 +278,7 @@ export function PlatformPageShell({
             start={range.start}
             end={range.end}
             sourceRows={scoped}
+            publisherPlatforms={publisherPlatforms}
           />
         </div>
       )}
