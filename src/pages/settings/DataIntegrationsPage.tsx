@@ -1,11 +1,14 @@
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { SettingsPageShell } from '@/components/settings/SettingsPageShell';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Database, Webhook, KeyRound, Plug, Activity, ArrowUpRight } from 'lucide-react';
+import { Database, Webhook, KeyRound, Plug, BarChart3, FileText, Tags } from 'lucide-react';
+import { MeasurementSetupSection } from '@/components/admin/MeasurementSetupSection';
+import { ReportingRulesSection } from '@/components/admin/ReportingRulesSection';
+import { AlertRulesSection } from '@/components/admin/AlertRulesSection';
 
 export default function DataIntegrationsPage() {
   const { isSuperAdmin } = useAuth();
@@ -15,9 +18,9 @@ export default function DataIntegrationsPage() {
   return (
     <SettingsPageShell
       title="Data & Integrations"
-      subtitle="Technical, high-risk: BigQuery, CRM, CAPI and analytics connections"
+      subtitle="Technical, high-risk: BigQuery, analytics, CRM, CAPI, taxonomy"
     >
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* BigQuery */}
         <Section icon={<Database size={14} />} title="BigQuery Source" description="Where the dashboard reads ad-platform performance data from.">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -32,11 +35,26 @@ export default function DataIntegrationsPage() {
           </div>
         </Section>
 
-        {/* Web analytics */}
-        <Section icon={<Activity size={14} />} title="Web Analytics" description="GA4 properties powering the Web Analytics page.">
-          <p className="text-xs text-muted-foreground">
-            Manage GA4 properties from <Link to="/settings/measurement" className="text-primary hover:underline inline-flex items-center gap-0.5">Measurement Settings <ArrowUpRight size={11} /></Link>.
-          </p>
+        {/* Measurement */}
+        <Section icon={<BarChart3 size={14} />} title="Measurement Settings" description="Analytics, tracking, and conversion configuration (GA4, primary/secondary conversions).">
+          <MeasurementSetupSection client={client} updateClient={updateClient} />
+        </Section>
+
+        {/* Reporting Rules */}
+        <Section icon={<FileText size={14} />} title="Reporting Rules" description="Metric mapping, naming normalization, aliases.">
+          <ReportingRulesSection client={client} updateClient={updateClient} />
+          <div className="mt-6 pt-4 border-t border-border/50">
+            <h4 className="text-xs font-semibold text-card-foreground mb-2">Alert Rules</h4>
+            <AlertRulesSection
+              alertRules={(client as any).alertRules}
+              onChange={rules => updateClient({ alertRules: rules } as any)}
+            />
+          </div>
+        </Section>
+
+        {/* Taxonomy */}
+        <Section icon={<Tags size={14} />} title="Taxonomy" description="Naming conventions and dimension taxonomy. Currently managed inside Reporting Rules above.">
+          <Placeholder text="Standalone taxonomy editor coming soon" />
         </Section>
 
         {/* Placeholders */}
