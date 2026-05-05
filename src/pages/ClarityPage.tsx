@@ -189,6 +189,9 @@ export default function ClarityPage() {
       <SectionHeader
         title="Clarity Analytics"
         subtitle="Microsoft Clarity behavioural insights"
+        showMobileDatePicker
+        showFilters
+        hideFiltersButton
       />
 
       {/* Filters */}
@@ -214,11 +217,6 @@ export default function ClarityPage() {
                 {subdomains.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
-          </div>
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal">
-              {format(start, 'MMM d')} – {format(end, 'MMM d, yyyy')}
-            </Badge>
           </div>
         </CardContent>
       </Card>
