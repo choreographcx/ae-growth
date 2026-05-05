@@ -136,22 +136,19 @@ export default function ClarityPage() {
   const { start, end } = dashData.range;
 
   const [sourceType, setSourceType] = useState<'all' | 'api' | 'dashboard_export'>('all');
-  const [project, setProject] = useState<string>('all');
   const [subdomain, setSubdomain] = useState<string>('all');
 
   const filterOptionsQ = useClarityFilterOptions(start, end);
-  const projects = filterOptionsQ.data?.projects ?? [];
   const subdomains = filterOptionsQ.data?.subdomains ?? [];
 
   const filters: ClarityFilters = useMemo(
     () => ({
       start,
       end,
-      projects: project === 'all' ? undefined : [project],
       subdomains: subdomain === 'all' ? undefined : [subdomain],
       sourceType: sourceType === 'all' ? null : sourceType,
     }),
-    [start, end, project, subdomain, sourceType],
+    [start, end, subdomain, sourceType],
   );
 
   const kpisQ = useClarityKpis(filters);
