@@ -49,18 +49,27 @@ export function DashboardSidebar() {
         </button>
       </div>
       <nav className="flex-1 py-2.5 px-2 space-y-0.5">
-        {navItems.map(item => {
+        {navItems.map((item, idx) => {
           const isActive = location.pathname === item.to;
+          const prev = navItems[idx - 1];
+          const showGroupLabel = !collapsed && item.group && (!prev || prev.group !== item.group);
           return (
-            <NavLink key={item.to} to={item.to} className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
-              isActive
-                ? "bg-sidebar-primary/15 text-sidebar-primary border-l-2 border-sidebar-primary shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.1)] hover:bg-primary/90 hover:text-primary-foreground"
-                : "text-sidebar-muted hover:bg-primary/90 hover:text-primary-foreground border-l-2 border-transparent"
-            )}>
-              <NavIcon entry={item.entry} size={17} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </NavLink>
+            <div key={item.to}>
+              {showGroupLabel && (
+                <div className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted/70">
+                  {item.group}
+                </div>
+              )}
+              <NavLink to={item.to} className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
+                isActive
+                  ? "bg-sidebar-primary/15 text-sidebar-primary border-l-2 border-sidebar-primary shadow-[inset_0_0_0_1px_hsl(var(--sidebar-primary)/0.1)] hover:bg-primary/90 hover:text-primary-foreground"
+                  : "text-sidebar-muted hover:bg-primary/90 hover:text-primary-foreground border-l-2 border-transparent"
+              )}>
+                <NavIcon entry={item.entry} size={17} />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+              </NavLink>
+            </div>
           );
         })}
       </nav>
