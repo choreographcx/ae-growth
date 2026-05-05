@@ -218,11 +218,6 @@ export default function ClarityPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="font-normal">
-              {format(start, 'MMM d')} – {format(end, 'MMM d, yyyy')}
-            </Badge>
-          </div>
         </CardContent>
       </Card>
 
