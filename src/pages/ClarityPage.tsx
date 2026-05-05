@@ -215,16 +215,6 @@ export default function ClarityPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Subdomain</span>
-            <Select value={subdomain} onValueChange={setSubdomain}>
-              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All subdomains</SelectItem>
-                {subdomains.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline" className="font-normal">
               {format(start, 'MMM d')} – {format(end, 'MMM d, yyyy')}
