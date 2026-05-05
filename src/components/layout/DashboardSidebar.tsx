@@ -21,16 +21,18 @@ export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
-    { to: '/', label: 'Overview', entry: { type: 'lucide' as const, icon: LayoutDashboard } },
+    { to: '/', label: 'Overview', entry: { type: 'lucide' as const, icon: LayoutDashboard }, group: null as string | null },
     ...enabledPlatforms.map(p => ({
       to: `/${p}`,
       label: client.platforms[p].label,
       entry: platformIconEntries[p],
+      group: null as string | null,
     })),
-    { to: '/ga4', label: 'Web Analytics', entry: { type: 'lucide' as const, icon: Globe } },
+    { to: '/ga4', label: 'Web Analytics', entry: { type: 'lucide' as const, icon: Globe }, group: 'Web' },
+    { to: '/clarity', label: 'Clarity', entry: { type: 'lucide' as const, icon: MousePointerClick }, group: 'Web' },
     ...(isAdmin
       ? [
-          { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings } },
+          { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings }, group: null as string | null },
         ]
       : []),
   ];
