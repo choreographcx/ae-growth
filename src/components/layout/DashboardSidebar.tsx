@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, Palette, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
