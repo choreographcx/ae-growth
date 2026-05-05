@@ -136,22 +136,19 @@ export default function ClarityPage() {
   const { start, end } = dashData.range;
 
   const [sourceType, setSourceType] = useState<'all' | 'api' | 'dashboard_export'>('all');
-  const [project, setProject] = useState<string>('all');
   const [subdomain, setSubdomain] = useState<string>('all');
 
   const filterOptionsQ = useClarityFilterOptions(start, end);
-  const projects = filterOptionsQ.data?.projects ?? [];
   const subdomains = filterOptionsQ.data?.subdomains ?? [];
 
   const filters: ClarityFilters = useMemo(
     () => ({
       start,
       end,
-      projects: project === 'all' ? undefined : [project],
       subdomains: subdomain === 'all' ? undefined : [subdomain],
       sourceType: sourceType === 'all' ? null : sourceType,
     }),
-    [start, end, project, subdomain, sourceType],
+    [start, end, subdomain, sourceType],
   );
 
   const kpisQ = useClarityKpis(filters);
@@ -205,16 +202,6 @@ export default function ClarityPage() {
                 <SelectItem value="all">All sources</SelectItem>
                 <SelectItem value="api">API (3-day window)</SelectItem>
                 <SelectItem value="dashboard_export">Dashboard export (daily)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Project</span>
-            <Select value={project} onValueChange={setProject}>
-              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All projects</SelectItem>
-                {projects.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
