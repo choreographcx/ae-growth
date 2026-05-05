@@ -27,9 +27,6 @@ const PlatformSetupPage = lazy(() => import("./pages/settings/PlatformSetupPage"
 const UsersAccessPage = lazy(() => import("./pages/settings/UsersAccessPage"));
 const ClientSettingsPage = lazy(() => import("./pages/settings/ClientSettingsPage"));
 
-const MeasurementSettingsPage = lazy(() => import("./pages/settings/MeasurementSettingsPage"));
-const ReportingRulesPage = lazy(() => import("./pages/settings/ReportingRulesPage"));
-const TaxonomyPage = lazy(() => import("./pages/settings/TaxonomyPage"));
 const DataIntegrationsPage = lazy(() => import("./pages/settings/DataIntegrationsPage"));
 const TemplatesPortabilityPage = lazy(() => import("./pages/settings/TemplatesPortabilityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -109,9 +106,9 @@ function ProtectedRoutes() {
             <Route path="/settings/users" element={<UsersAccessPage />} />
             <Route path="/settings/client" element={<ClientSettingsPage />} />
             <Route path="/settings/brand" element={<Navigate to="/settings/client" replace />} />
-            <Route path="/settings/measurement" element={<MeasurementSettingsPage />} />
-            <Route path="/settings/reporting-rules" element={<ReportingRulesPage />} />
-            <Route path="/settings/taxonomy" element={<TaxonomyPage />} />
+            <Route path="/settings/measurement" element={<Navigate to="/settings/data-integrations" replace />} />
+            <Route path="/settings/reporting-rules" element={<Navigate to="/settings/data-integrations" replace />} />
+            <Route path="/settings/taxonomy" element={<Navigate to="/settings/data-integrations" replace />} />
             <Route path="/settings/data-integrations" element={<DataIntegrationsPage />} />
             <Route path="/settings/templates" element={<TemplatesPortabilityPage />} />
             <Route path="/settings" element={<Navigate to="/settings/platforms" replace />} />
