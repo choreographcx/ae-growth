@@ -206,12 +206,12 @@ export default function ClarityPage() {
             </Select>
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Project</span>
-            <Select value={project} onValueChange={setProject}>
+            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Subdomain</span>
+            <Select value={subdomain} onValueChange={setSubdomain}>
               <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All projects</SelectItem>
-                {projects.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                <SelectItem value="all">All subdomains</SelectItem>
+                {subdomains.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
