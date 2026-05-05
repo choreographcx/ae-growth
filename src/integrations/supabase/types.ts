@@ -867,6 +867,57 @@ export type Database = {
         }
         Relationships: []
       }
+      view_clarity_unified: {
+        Row: {
+          clarity_project_key: string | null
+          dimension_name: string | null
+          dimension_value: string | null
+          inserted_at: string | null
+          lookback_days: number | null
+          metric_date: string | null
+          metric_key: string | null
+          metric_name: string | null
+          metric_percentage: number | null
+          metric_value: number | null
+          source_type: string | null
+          subdomain: string | null
+          window_end_date: string | null
+          window_start_date: string | null
+        }
+        Insert: {
+          clarity_project_key?: string | null
+          dimension_name?: string | null
+          dimension_value?: string | null
+          inserted_at?: string | null
+          lookback_days?: number | null
+          metric_date?: string | null
+          metric_key?: string | null
+          metric_name?: string | null
+          metric_percentage?: number | null
+          metric_value?: number | null
+          source_type?: string | null
+          subdomain?: string | null
+          window_end_date?: string | null
+          window_start_date?: string | null
+        }
+        Update: {
+          clarity_project_key?: string | null
+          dimension_name?: string | null
+          dimension_value?: string | null
+          inserted_at?: string | null
+          lookback_days?: number | null
+          metric_date?: string | null
+          metric_key?: string | null
+          metric_name?: string | null
+          metric_percentage?: number | null
+          metric_value?: number | null
+          source_type?: string | null
+          subdomain?: string | null
+          window_end_date?: string | null
+          window_start_date?: string | null
+        }
+        Relationships: []
+      }
       x_oauth_tokens: {
         Row: {
           access_token: string | null
@@ -973,6 +1024,57 @@ export type Database = {
       }
       get_active_ga4_property_id: { Args: never; Returns: string }
       get_active_ga4_property_ids: { Args: never; Returns: string[] }
+      get_clarity_breakdown: {
+        Args: {
+          p_end: string
+          p_limit?: number
+          p_metric_name: string
+          p_projects?: string[]
+          p_source_type?: string
+          p_start: string
+          p_subdomains?: string[]
+        }
+        Returns: {
+          dimension_value: string
+          metric_percentage: number
+          metric_value: number
+        }[]
+      }
+      get_clarity_filters: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          clarity_project_keys: string[]
+          source_types: string[]
+          subdomains: string[]
+        }[]
+      }
+      get_clarity_kpis: {
+        Args: {
+          p_end: string
+          p_projects?: string[]
+          p_source_type?: string
+          p_start: string
+          p_subdomains?: string[]
+        }
+        Returns: {
+          metric_name: string
+          metric_value: number
+        }[]
+      }
+      get_clarity_timeseries: {
+        Args: {
+          p_end: string
+          p_metric_names?: string[]
+          p_projects?: string[]
+          p_source_type?: string
+          p_start: string
+          p_subdomains?: string[]
+        }
+        Returns: {
+          metric_date: string
+          metric_value: number
+        }[]
+      }
       get_dashboard_ad_breakdown: {
         Args: {
           p_end: string
