@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, Database, Package } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
@@ -43,9 +43,6 @@ export function DashboardSidebar() {
     ...(isSuperAdmin ? [
       { to: '/settings/client', label: 'Client Settings', entry: { type: 'lucide' as const, icon: Building2 }, group: 'Settings' },
       
-      { to: '/settings/measurement', label: 'Measurement', entry: { type: 'lucide' as const, icon: BarChart3 }, group: 'Settings' },
-      { to: '/settings/reporting-rules', label: 'Reporting Rules', entry: { type: 'lucide' as const, icon: FileText }, group: 'Settings' },
-      { to: '/settings/taxonomy', label: 'Taxonomy', entry: { type: 'lucide' as const, icon: Tags }, group: 'Settings' },
       { to: '/settings/data-integrations', label: 'Data & Integrations', entry: { type: 'lucide' as const, icon: Database }, group: 'Settings' },
       { to: '/settings/templates', label: 'Templates & Portability', entry: { type: 'lucide' as const, icon: Package }, group: 'Settings' },
     ] : []),
