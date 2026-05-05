@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
+import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 
 const CURRENCY_OPTIONS = ['USD', 'SAR', 'AED'];
 
