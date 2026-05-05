@@ -23,7 +23,15 @@ const XPage = lazy(() => import("./pages/XPage"));
 const ProgrammaticPage = lazy(() => import("./pages/ProgrammaticPage"));
 const Ga4Page = lazy(() => import("./pages/Ga4Page"));
 const ClarityPage = lazy(() => import("./pages/ClarityPage"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
+const PlatformSetupPage = lazy(() => import("./pages/settings/PlatformSetupPage"));
+const UsersAccessPage = lazy(() => import("./pages/settings/UsersAccessPage"));
+const ClientSettingsPage = lazy(() => import("./pages/settings/ClientSettingsPage"));
+const BrandThemePage = lazy(() => import("./pages/settings/BrandThemePage"));
+const MeasurementSettingsPage = lazy(() => import("./pages/settings/MeasurementSettingsPage"));
+const ReportingRulesPage = lazy(() => import("./pages/settings/ReportingRulesPage"));
+const TaxonomyPage = lazy(() => import("./pages/settings/TaxonomyPage"));
+const DataIntegrationsPage = lazy(() => import("./pages/settings/DataIntegrationsPage"));
+const TemplatesPortabilityPage = lazy(() => import("./pages/settings/TemplatesPortabilityPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Tuned for an analytics dashboard backed by BigQuery RPCs:
@@ -44,7 +52,7 @@ const PageFallback = () => null;
 const PageLoading = () => <LoadingOverlay fixed message="Loading…" />;
 
 function ProtectedRoutes() {
-  const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
+  const { user, loading, isApproved, profileLoading } = useAuth();
 
   if (loading || (user && profileLoading)) {
     return <PageFallback />;
@@ -96,7 +104,18 @@ function ProtectedRoutes() {
             <Route path="/programmatic" element={<ProgrammaticPage />} />
             <Route path="/ga4" element={<Ga4Page />} />
             <Route path="/clarity" element={<ClarityPage />} />
-            <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" replace />} />
+            {/* Settings — split from the legacy /admin page */}
+            <Route path="/settings/platforms" element={<PlatformSetupPage />} />
+            <Route path="/settings/users" element={<UsersAccessPage />} />
+            <Route path="/settings/client" element={<ClientSettingsPage />} />
+            <Route path="/settings/brand" element={<BrandThemePage />} />
+            <Route path="/settings/measurement" element={<MeasurementSettingsPage />} />
+            <Route path="/settings/reporting-rules" element={<ReportingRulesPage />} />
+            <Route path="/settings/taxonomy" element={<TaxonomyPage />} />
+            <Route path="/settings/data-integrations" element={<DataIntegrationsPage />} />
+            <Route path="/settings/templates" element={<TemplatesPortabilityPage />} />
+            <Route path="/settings" element={<Navigate to="/settings/platforms" replace />} />
+            <Route path="/admin" element={<Navigate to="/settings/platforms" replace />} />
             <Route path="/tracking-health" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

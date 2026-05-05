@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, Globe, MousePointerClick } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, Palette, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
@@ -16,7 +16,7 @@ function NavIcon({ entry, size = 18 }: { entry: PlatformIconEntry; size?: number
 
 export function DashboardSidebar() {
   const { enabledPlatforms, client } = useDashboard();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -30,11 +30,25 @@ export function DashboardSidebar() {
     })),
     { to: '/ga4', label: 'Web Analytics', entry: { type: 'lucide' as const, icon: Globe }, group: 'Web' },
     { to: '/clarity', label: 'Clarity', entry: { type: 'lucide' as const, icon: MousePointerClick }, group: 'Web' },
-    ...(isAdmin
-      ? [
-          { to: '/admin', label: 'Admin / Settings', entry: { type: 'lucide' as const, icon: Settings }, group: null as string | null },
-        ]
-      : []),
+
+    // Operations — every approved user
+    { to: '/settings/platforms', label: 'Platform Setup', entry: { type: 'lucide' as const, icon: LayoutGrid }, group: 'Settings' },
+
+    // Administration — admins and above
+    ...(isAdmin ? [
+      { to: '/settings/users', label: 'Users & Access', entry: { type: 'lucide' as const, icon: Users }, group: 'Settings' },
+    ] : []),
+
+    // Super-admin only
+    ...(isSuperAdmin ? [
+      { to: '/settings/client', label: 'Client Settings', entry: { type: 'lucide' as const, icon: Building2 }, group: 'Settings' },
+      { to: '/settings/brand', label: 'Brand & Theme', entry: { type: 'lucide' as const, icon: Palette }, group: 'Settings' },
+      { to: '/settings/measurement', label: 'Measurement', entry: { type: 'lucide' as const, icon: BarChart3 }, group: 'Settings' },
+      { to: '/settings/reporting-rules', label: 'Reporting Rules', entry: { type: 'lucide' as const, icon: FileText }, group: 'Settings' },
+      { to: '/settings/taxonomy', label: 'Taxonomy', entry: { type: 'lucide' as const, icon: Tags }, group: 'Settings' },
+      { to: '/settings/data-integrations', label: 'Data & Integrations', entry: { type: 'lucide' as const, icon: Database }, group: 'Settings' },
+      { to: '/settings/templates', label: 'Templates & Portability', entry: { type: 'lucide' as const, icon: Package }, group: 'Settings' },
+    ] : []),
   ];
 
   return (
