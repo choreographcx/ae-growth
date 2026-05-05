@@ -189,6 +189,9 @@ export default function ClarityPage() {
       <SectionHeader
         title="Clarity Analytics"
         subtitle="Microsoft Clarity behavioural insights"
+        showMobileDatePicker
+        showFilters
+        hideFiltersButton
       />
 
       {/* Filters */}
