@@ -52,7 +52,7 @@ const PageFallback = () => null;
 const PageLoading = () => <LoadingOverlay fixed message="Loading…" />;
 
 function ProtectedRoutes() {
-  const { user, loading, isApproved, isAdmin, profileLoading } = useAuth();
+  const { user, loading, isApproved, profileLoading } = useAuth();
 
   if (loading || (user && profileLoading)) {
     return <PageFallback />;
