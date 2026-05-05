@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CurrencySymbol } from '@/lib/currency';
 import { cn } from '@/lib/utils';
+import { BrandingThemeSection } from '@/components/admin/BrandingThemeSection';
 
 const CURRENCY_OPTIONS = ['USD', 'SAR', 'AED'];
 
@@ -54,6 +55,15 @@ export default function ClientSettingsPage() {
         />
         <SelectField label="Week Start Day" value={client.weekStartDay} options={['Monday', 'Sunday']} onChange={v => updateClient({ weekStartDay: v })} />
         <Field label="Primary Website Domain" value={client.websiteDomain} onChange={v => updateClient({ websiteDomain: v })} placeholder="https://www.example.com" />
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-border">
+        <h3 className="text-sm font-semibold text-card-foreground mb-1">Brand & Theme</h3>
+        <p className="text-[11px] text-muted-foreground mb-4">Logo, colors, and visual customization.</p>
+        <BrandingThemeSection
+          branding={(client as any).branding}
+          onChange={b => updateClient({ branding: b } as any)}
+        />
       </div>
     </SettingsPageShell>
   );

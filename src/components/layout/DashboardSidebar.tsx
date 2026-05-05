@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, Palette, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, Globe, MousePointerClick, LayoutGrid, Users, Building2, BarChart3, FileText, Tags, Database, Package } from 'lucide-react';
 import { useDashboard } from '@/context/DashboardContext';
 import { useAuth } from '@/hooks/useAuth';
 import { platformIconEntries, PlatformIconEntry } from '@/lib/platformIcons';
@@ -42,7 +42,7 @@ export function DashboardSidebar() {
     // Super-admin only
     ...(isSuperAdmin ? [
       { to: '/settings/client', label: 'Client Settings', entry: { type: 'lucide' as const, icon: Building2 }, group: 'Settings' },
-      { to: '/settings/brand', label: 'Brand & Theme', entry: { type: 'lucide' as const, icon: Palette }, group: 'Settings' },
+      
       { to: '/settings/measurement', label: 'Measurement', entry: { type: 'lucide' as const, icon: BarChart3 }, group: 'Settings' },
       { to: '/settings/reporting-rules', label: 'Reporting Rules', entry: { type: 'lucide' as const, icon: FileText }, group: 'Settings' },
       { to: '/settings/taxonomy', label: 'Taxonomy', entry: { type: 'lucide' as const, icon: Tags }, group: 'Settings' },

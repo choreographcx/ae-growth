@@ -26,7 +26,7 @@ const ClarityPage = lazy(() => import("./pages/ClarityPage"));
 const PlatformSetupPage = lazy(() => import("./pages/settings/PlatformSetupPage"));
 const UsersAccessPage = lazy(() => import("./pages/settings/UsersAccessPage"));
 const ClientSettingsPage = lazy(() => import("./pages/settings/ClientSettingsPage"));
-const BrandThemePage = lazy(() => import("./pages/settings/BrandThemePage"));
+
 const MeasurementSettingsPage = lazy(() => import("./pages/settings/MeasurementSettingsPage"));
 const ReportingRulesPage = lazy(() => import("./pages/settings/ReportingRulesPage"));
 const TaxonomyPage = lazy(() => import("./pages/settings/TaxonomyPage"));
@@ -108,7 +108,7 @@ function ProtectedRoutes() {
             <Route path="/settings/platforms" element={<PlatformSetupPage />} />
             <Route path="/settings/users" element={<UsersAccessPage />} />
             <Route path="/settings/client" element={<ClientSettingsPage />} />
-            <Route path="/settings/brand" element={<BrandThemePage />} />
+            <Route path="/settings/brand" element={<Navigate to="/settings/client" replace />} />
             <Route path="/settings/measurement" element={<MeasurementSettingsPage />} />
             <Route path="/settings/reporting-rules" element={<ReportingRulesPage />} />
             <Route path="/settings/taxonomy" element={<TaxonomyPage />} />
